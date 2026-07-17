@@ -1,0 +1,21 @@
+{
+  "name": "reality-shop",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "typecheck": "turbo typecheck",
+    "lint": "turbo lint"
+  },
+  "author": "kekekuli",
+  "packageManager": "pnpm@10.19.0",
+  "private": true,
+  "devDependencies": {
+    "prettier": "^3.9.5",
+    "turbo": "^2.10.5",
+    "typescript": "^5.9.2"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "name": "@reality-shop/shared-types",
+  "private": true,
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@reality-shop/config": "workspace:*"
+  },
+  "main": "src/index.ts",
+  "types": "src/index.ts"
+}

@@ -18,6 +18,11 @@ NestJS api showing a product list from PG, deployed via Dokploy.
 M0 design docs are complete under docs/m0/ and govern implementation.
 
 ## Working style
+- The user writes the code and runs the commands. AI assistants align
+  context, plan, present options at decision points, and review — then
+  describe the steps and their intent (no ready-made code or file
+  contents) for the user to implement. Only produce code directly when
+  the user explicitly delegates it.
 - Breadth first: open an end-to-end path before deepening each capability domain.
 - Every milestone must be demoable; avoid long stretches with nothing runnable.
 - Append an entry to DECISIONS.md for every significant decision.
