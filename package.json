@@ -5,7 +5,9 @@
     "dev": "turbo dev",
     "build": "turbo build",
     "typecheck": "turbo typecheck",
-    "lint": "turbo lint"
+    "lint": "turbo lint",
+    "db:up": "docker compose up -d ",
+    "db:init": "sh ./infra/db-init.sh"
   },
   "author": "kekekuli",
   "packageManager": "pnpm@10.19.0",

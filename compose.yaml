@@ -1,0 +1,24 @@
+# Local dev PostgreSQL (Path B: clean disposable instance).
+# The always-on local PG (Path A) works too — see infra/postgres-init.sql.
+#
+#   docker compose up -d          # first start runs the init script
+#   docker compose down -v        # wipe the data volume to re-run init
+#
+# Host port is 5433 to avoid clashing with the always-on PG on 5432.
+services:
+  postgres:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      # Passed through only when set on the host; the init script then
+      # uses it instead of the dev default (see \getenv in the script).
+      APP_DB_PASSWORD:
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres:/var/lib/postgresql
+      - ./infra/postgres-init.sql:/docker-entrypoint-initdb.d/postgres-init.sql:ro
+
+volumes:
+  postgres:
