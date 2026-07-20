@@ -1,0 +1,85 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Category {
+  id        BigInt             @id @default(autoincrement())
+  parentId  BigInt?            @map("parent_id")
+  parent    Category?          @relation("CategoryTree", fields: [parentId], references: [id])
+  children  Category[]         @relation("CategoryTree")
+  slug      String             @unique
+  name      String
+  sortOrder Int                @default(0) @map("sort_order")
+  status    String             @default("visible")
+  createdAt DateTime           @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime           @updatedAt @map("updated_at") @db.Timestamptz(6)
+  template  AttributeTemplate?
+  products  Product[]
+
+  @@map("categories")
+}
+
+model AttributeTemplate {
+  id          BigInt   @id @default(autoincrement())
+  categoryId  BigInt   @unique @map("category_id")
+  category    Category @relation(fields: [categoryId], references: [id])
+  specAttrs   Json     @map("spec_attrs")
+  filterAttrs Json     @map("filter_attrs")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("attribute_templates")
+}
+
+model Product {
+  id         BigInt   @id @default(autoincrement())
+  categoryId BigInt   @map("category_id")
+  category   Category @relation(fields: [categoryId], references: [id])
+  slug       String   @unique
+  title      String
+  brand      String
+  attrs      Json
+  status     String   @default("draft")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  skus       Sku[]
+
+  @@map("products")
+}
+
+model Sku {
+  id         BigInt     @id @default(autoincrement())
+  product    Product    @relation(fields: [productId], references: [id])
+  productId  BigInt     @map("product_id")
+  skuCode    String     @unique @map("sku_code")
+  specValues Json       @map("spec_values")
+  priceCents BigInt     @map("price_cents")
+  status     String     @default("on_sale")
+  createdAt  DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+  inventory  Inventory?
+
+  @@unique([productId, specValues])
+  @@map("skus")
+}
+
+model Inventory {
+  sku       Sku      @relation(fields: [skuId], references: [id])
+  skuId     BigInt   @id @map("sku_id")
+  available Int      @default(0)
+  reserved  Int      @default(0)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@map("inventory")
+}

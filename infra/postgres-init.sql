@@ -42,3 +42,17 @@ WHERE NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'ecommerce_app')
 SELECT 'CREATE DATABASE ecommerce OWNER ecommerce_app'
 WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'ecommerce')
 \gexec
+
+-- ============================================================
+-- LOCAL DEV ONLY — not part of this script on purpose:
+--
+--   ALTER ROLE ecommerce_app CREATEDB;
+--
+-- `prisma migrate dev` needs to create a throwaway "shadow database"
+-- to diff migrations, which requires CREATEDB. Run the line above
+-- manually (as admin) on your local instance.
+--
+-- Production never needs this: it runs `prisma migrate deploy`,
+-- which only applies existing migration files — no shadow database.
+-- Keep the production role without CREATEDB (least privilege).
+-- ============================================================
