@@ -132,3 +132,47 @@ groups and the future service split, so M5 extracts services along
 existing seams instead of refactoring blindly. Microservices before
 there is anything to operate would front-load infrastructure pain that
 ADR-002/003 explicitly defer.
+
+## ADR-015 i18n: the database stores language-neutral keys; user-facing copy lives elsewhere
+Real multi-language users are an assumed requirement, so the boundary is
+drawn once, up front: **the ecommerce database never stores display
+copy.** Every text column holds a language-neutral identifier — slugs,
+English master-data names, spec keys, status enums — and translation
+happens in one of two places above it:
+
+- **Closed-vocabulary values** (category names, spec dimensions and
+  their values, status enums, UI labels) → front-end dictionaries via
+  next-intl. Their value domain is finite and stable, so a dictionary
+  can stay complete; new values are a controlled change.
+- **Open-ended copy** (product titles, descriptions, galleries, spec
+  sheets) → Strapi's i18n plugin. Copy grows with every product and
+  needs non-technical editing — exactly what a CMS is for, extending
+  ADR-007. `products.title` keeps an English master-data name for
+  internal identification and order snapshots; the storefront renders
+  the Strapi translation instead.
+
+Rationale: multi-language text in the database would poison indexes and
+unique constraints — `skus.spec_values` participates in a composite
+unique index (ADR-008), so storing "黑色" instead of `black` would make
+the same variant look like a different one per locale. Keys also keep
+filtering, comparison and order snapshots locale-independent.
+
+Translation-key namespaces follow the data's own structure, so the
+front end can derive keys mechanically rather than maintaining a mapping
+table:
+
+```
+category.<slug>              category.phones
+spec.<key>                   spec.color
+spec.<key>.<value>           spec.color.black
+status.<entity>.<value>      status.product.on_sale
+```
+
+`status` is namespaced per entity because product and SKU share values
+today but may need different wording later; splitting the key now avoids
+restructuring then.
+
+M1 consequence: seed data is written in English identifiers, and
+`apps/web` adopts next-intl (with a `[locale]` route segment) from the
+start — retrofitting the routing structure later is expensive, while
+carrying it from day one costs almost nothing.

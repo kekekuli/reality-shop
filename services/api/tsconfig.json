@@ -1,3 +1,3 @@
 {
-  "extends": "@reality-shop/config/tsconfig/tsconfig.json"
+  "extends": "@reality-shop/config/tsconfig.json"
 }
