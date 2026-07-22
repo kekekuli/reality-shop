@@ -1,3 +1,12 @@
 {
-  "extends": "@reality-shop/config/tsconfig.json"
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "@reality-shop/config/tsconfig.json",
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "skipLibCheck": true
+  }
 }
