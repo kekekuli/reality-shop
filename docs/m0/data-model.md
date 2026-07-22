@@ -16,7 +16,8 @@ so the M5 schema split maps 1:1 onto these groups.
   carry a public `order_no` (string, e.g. date-prefixed random) so
   internal IDs never leak into URLs/receipts.
 - **Money**: integer cents (`*_cents bigint`), single currency (CNY)
-  for now; no floats anywhere.
+  for now; no floats anywhere. How these values are represented at the
+  API boundary is ADR-016.
 - **Time**: `timestamptz`, `created_at`/`updated_at` on every table.
 - **Enums**: `text` + CHECK constraint (simpler migrations than native
   enums).

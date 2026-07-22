@@ -6,6 +6,31 @@ one, add a new entry and mark the old one "Superseded by ADR-XXX" —
 never delete history. Forward references ("to be decided in …") should
 be updated to point at the resolving ADR once it exists.
 
+Every appended entry also gets a line in the index below. The index is
+the entry point: scan it before opening a new decision, so that a
+question already settled is recognized as settled instead of being
+re-decided under a new number.
+
+## Index
+- **ADR-001** — E-commerce is the vehicle; it naturally spans every capability domain.
+- **ADR-002** — Breadth first: open the end-to-end path before deepening any domain.
+- **ADR-003** — Dokploy for M1–M4; migrate to K8s at M5, on a system that already exists.
+- **ADR-004** — Reuse the existing box's Strapi / OpenObserve / PostgreSQL rather than rebuilding.
+- **ADR-005** — K8s experiments live on a separate free-tier machine, never the production box.
+- **ADR-006** — Monorepo (pnpm workspaces + Turborepo); cross-platform type sharing is a hard requirement.
+- **ADR-007** — Strapi holds pure content only; SPU/SKU/price/inventory master data is ours.
+- **ADR-008** — One vertical (3C), modelled multi-category-extensible: category tree + attribute templates + JSONB.
+- **ADR-009** — Reserve inventory on order submission; payment timeout cancels via a delayed task, not polling.
+- **ADR-010** — Full-stack TypeScript: NestJS backend, Next.js web, Expo/React Native mobile.
+- **ADR-011** — GraphQL (code-first) exists only at the BFF edge; service-to-service stays REST/direct.
+- **ADR-012** — BullMQ on Redis for delayed tasks (resolves ADR-009's open choice).
+- **ADR-013** — Short-lived access JWT + rotating refresh tokens in Redis; cookies on web, SecureStore on mobile.
+- **ADR-014** — `services/api` stays a modular monolith until M5: domain modules plus the GraphQL BFF layer.
+- **ADR-015** — The database stores language-neutral keys; closed vocabularies translate in next-intl, open copy in Strapi.
+- **ADR-016** — Money crosses GraphQL as a string-carried BigInt scalar; primary keys surface as `ID`.
+- **ADR-017** — Collections paginate Relay-style with opaque `(sortKey, id)` keyset cursors.
+- **ADR-018** — M1 GraphQL layer: Apollo driver, explicit field decorators, hand-rolled money scalar, per-request DataLoader.
+
 ## ADR-001 E-commerce as the vehicle for exploring all capability domains
 E-commerce naturally covers content display, transaction processing,
 payment, inventory, promotions, and back-office operations — enough
@@ -176,3 +201,76 @@ M1 consequence: seed data is written in English identifiers, and
 `apps/web` adopts next-intl (with a `[locale]` route segment) from the
 start — retrofitting the routing structure later is expensive, while
 carrying it from day one costs almost nothing.
+
+## ADR-016 Money crosses the GraphQL boundary as a BigInt scalar; identity uses `ID`
+Extending ADR-011. `*_cents` fields are exposed through a custom BigInt
+scalar (`graphql-scalars`), carried as strings and parsed back to native
+`bigint` on the client; the shared `Cents` type becomes a branded
+`bigint`. Primary keys stay `bigint` in the database and surface as
+`ID`, which is a string already and never takes part in arithmetic.
+
+Prisma returns `bigint` and JSON cannot carry that type, so some
+representation must be chosen regardless. GraphQL's `Int` is 32-bit — a
+ceiling of ~21.47M CNY that no single price or order total reaches, but
+M3's aggregate amounts can. Strings have no ceiling, and the cost is
+paid now, while one price field exists and there is no front end; after
+M3 the same change would ripple through codegen output and every
+component that reads money.
+
+Rounding stays out of scope: integer cents keep addition and
+multiplication exact, and division — percentage discounts, coupon
+proration — arrives with M3 and needs a rounding policy of its own.
+
+## ADR-017 List queries paginate Relay-style with composite keyset cursors
+Collection fields follow the Relay connection spec — `Connection` /
+`Edge` / `PageInfo`, arguments `first` / `after`. The cursor is an
+opaque base64 string encoding `(sortKey, id)`, decoded server-side into
+a row-value comparison served by a composite index. Pagination state
+lives entirely in that cursor; the server holds none.
+
+The `id` component is mandatory because sort keys are not unique — two
+products at the same price would leave the boundary ambiguous and
+silently drop or repeat rows. The Relay shape is chosen over a simpler
+`items` + `nextCursor` because Apollo Client's `relayStylePagination`
+cache policy applies only to it. The accepted trade-off is that clients
+cannot jump to an arbitrary page.
+
+`totalCount` is omitted until a filter-result count actually appears in
+the UI — adding a field to a connection is backward compatible, so
+deferring it costs nothing.
+
+## ADR-018 The M1 GraphQL layer: how ADR-011/016/017 land
+Build decisions, plus the constraints found while verifying them —
+several were discovered rather than chosen, and re-deriving them later
+is wasted work.
+
+- **`@nestjs/apollo`**, not Mercurius: that needs Fastify, and the
+  bottleneck is PostgreSQL. `schema.gql` sorted and committed (web
+  codegen reads it; API changes become diffs); introspection off in
+  production.
+- **Explicit `@Field()`**, not the CLI plugin — the swc builder runs
+  with `typeCheck: false`, where the plugin needs extra setup.
+- **A mapper layer is mandatory**: graphql-js's `ID` rejects `bigint`,
+  so Prisma models never reach a resolver's return value. That seam is
+  where ADR-016 is enforced.
+- **Hand-rolled money scalar**: `graphql-scalars`' `GraphQLBigInt`
+  returns a number for safe integers and a string only beyond, so wire
+  type varies by magnitude — the client-side branching ADR-016 exists
+  to prevent.
+- **DataLoader from M1, built per request in the GraphQL context
+  factory.** Not for speed, but because batch functions force
+  `findSkusByProductIds(ids)` onto domain services — the signature a
+  remote call wants at the M5 split, an addition now and a refactor
+  after M2. A singleton loader is a cache that leaks rows across users.
+- **Keyset predicate in expanded `OR` form** (Prisma has no row-value
+  expression; `$queryRaw` is the fallback), with ADR-017's index
+  `(status, created_at, id)` shipping in the same change.
+- **M1 surface**: `products(first, after, categorySlug)` and
+  `product(slug)`. `attrs` and inventory wait for M2's cart;
+  `spec_values` crosses as typed pairs, since a JSON scalar makes
+  codegen emit `any`.
+
+Verification is counting statements in the Prisma query log, because the
+failures are silent: batch functions returning rows in database order
+(`IN (…)` neither preserves order nor pads misses), and resolvers that
+await before `.load()`, missing the batch tick and reverting to N+1.
