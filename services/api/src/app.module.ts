@@ -4,11 +4,10 @@ import { PrismaModule } from "./prisma/prisma.module";
 import { GraphQLModule } from "@nestjs/graphql";
 import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
 import { join } from "node:path";
-import { AppResolver } from "./app.resolver";
+import { CatalogBffModule } from "./bff/catalog/catalog-bff.module";
 
 @Module({
   controllers: [AppController],
-  providers: [AppResolver],
   imports: [
     PrismaModule,
     GraphQLModule.forRoot<ApolloDriverConfig>({
@@ -17,6 +16,7 @@ import { AppResolver } from "./app.resolver";
       sortSchema: true,
       introspection: process.env.NODE_ENV !== "production",
     }),
+    CatalogBffModule,
   ],
 })
 export class AppModule {}

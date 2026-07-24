@@ -54,6 +54,7 @@ model Product {
   updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
   skus       Sku[]
 
+  @@index([status, createdAt, id])
   @@map("products")
 }
 
