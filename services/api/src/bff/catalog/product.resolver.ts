@@ -1,10 +1,22 @@
-import { Resolver, Query, Args, Int } from "@nestjs/graphql";
+import {
+  Resolver,
+  Query,
+  Args,
+  Int,
+  ResolveField,
+  Parent,
+  Context,
+} from "@nestjs/graphql";
+import type DataLoader from "dataloader";
 import { ProductService } from "../../modules/catalog/product.service";
-import { ProductConnection } from "./product.type";
+import { ProductConnection, Product } from "./product.type";
+import { Sku } from "./sku.type";
 import { decodeCursor, encodeCursor } from "../../common/graphql/cursor";
 import { toProduct } from "./product.mapper";
+import { toSku } from "./sku.mapper";
+import type { Sku as PrismaSku } from "../../generated/prisma/client";
 
-@Resolver()
+@Resolver(() => Product)
 export class ProductResolver {
   constructor(private readonly productService: ProductService) {}
 
@@ -47,5 +59,14 @@ export class ProductResolver {
         endCursor,
       },
     };
+  }
+
+  @ResolveField(() => [Sku])
+  async skus(
+    @Parent() product: Product,
+    @Context("skusLoader") skusLoader: DataLoader<bigint, PrismaSku[]>,
+  ): Promise<Sku[]> {
+    const rows = await skusLoader.load(BigInt(product.id));
+    return rows.map(toSku);
   }
 }

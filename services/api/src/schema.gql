@@ -2,6 +2,9 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+"""Cents scalar type"""
+scalar Cents
+
 type PageInfo {
   endCursor: String
   hasNextPage: Boolean!
@@ -10,6 +13,7 @@ type PageInfo {
 type Product {
   brand: String!
   id: ID!
+  skus: [Sku!]!
   slug: String!
   status: String!
   title: String!
@@ -27,4 +31,9 @@ type ProductEdge {
 
 type Query {
   products(after: String, first: Int! = 20): ProductConnection!
+}
+
+type Sku {
+  price: Cents!
+  skuCode: String!
 }
