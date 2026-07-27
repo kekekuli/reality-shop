@@ -2,6 +2,11 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type PageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+}
+
 type Product {
   brand: String!
   id: ID!
@@ -10,6 +15,16 @@ type Product {
   title: String!
 }
 
+type ProductConnection {
+  edges: [ProductEdge!]!
+  pageInfo: PageInfo!
+}
+
+type ProductEdge {
+  cursor: String!
+  node: Product!
+}
+
 type Query {
-  products: [Product!]!
+  products(after: String, first: Int! = 20): ProductConnection!
 }

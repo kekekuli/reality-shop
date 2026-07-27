@@ -6,7 +6,9 @@
     "db:studio": "prisma studio",
     "db:seed": "prisma db seed",
     "dev": "nest start --watch -b swc",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "devDependencies": {
     "@nestjs/cli": "^11.0.24",
@@ -17,7 +19,8 @@
     "@types/pg": "^8.20.0",
     "dotenv": "^17.4.2",
     "prisma": "^7.8.0",
-    "tsx": "^4.23.1"
+    "tsx": "^4.23.1",
+    "vitest": "^4.1.10"
   },
   "dependencies": {
     "@apollo/server": "^5.5.1",

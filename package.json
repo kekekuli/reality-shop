@@ -7,7 +7,8 @@
     "typecheck": "turbo typecheck",
     "lint": "turbo lint",
     "db:up": "docker compose up -d ",
-    "db:init": "sh ./infra/db-init.sh"
+    "db:init": "sh ./infra/db-init.sh",
+    "test": "vitest"
   },
   "author": "kekekuli",
   "packageManager": "pnpm@10.19.0",

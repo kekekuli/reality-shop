@@ -30,6 +30,7 @@ re-decided under a new number.
 - **ADR-016** — Money crosses GraphQL as a string-carried BigInt scalar; primary keys surface as `ID`.
 - **ADR-017** — Collections paginate Relay-style with opaque `(sortKey, id)` keyset cursors.
 - **ADR-018** — M1 GraphQL layer: Apollo driver, explicit field decorators, hand-rolled money scalar, per-request DataLoader.
+- **ADR-019** — Tests: pure logic gets unit tests now; DB-dependent logic gets integration tests against a test database, built in M4.
 
 ## ADR-001 E-commerce as the vehicle for exploring all capability domains
 E-commerce naturally covers content display, transaction processing,
@@ -274,3 +275,28 @@ Verification is counting statements in the Prisma query log, because the
 failures are silent: batch functions returning rows in database order
 (`IN (…)` neither preserves order nor pads misses), and resolvers that
 await before `.load()`, missing the batch tick and reverting to N+1.
+
+## ADR-019 Testing strategy: unit-test pure logic; integration-test DB logic in M4
+What is worth testing is logic that fails *silently* — returns wrong data
+without erroring. Pure functions with such logic (cursor codec, the money
+scalar) get unit tests now; they touch no database and are cheap. Logic
+that lives in SQL (keyset pagination — a mis-written `OR` branch silently
+drops or repeats rows) needs an integration test against a real database,
+since mocking Prisma would test the mock, not Postgres. Plain CRUD
+pass-throughs are not tested — that only tests Prisma.
+
+The integration harness lands in M4 (PRODUCT_PLAN puts testing there), not
+now, so M1 stays breadth-first; keyset is verified once by hand
+(colliding `created_at` rows, paged one at a time) until then. When built,
+the strategy is: reuse the existing Postgres via a dedicated `_test`
+database (mirroring the Strapi/ecommerce isolation of ADR-004), run
+migrations once per suite, isolate each test with a transaction rollback,
+and guard the connection string so tests can never hit the dev database.
+Testcontainers was rejected as heavier than needed (Docker-in-test) and
+in-memory SQLite as wrong (its `timestamptz`/ordering behavior differs
+from Postgres — exactly the behavior keyset depends on).
+
+Layout: unit tests sit next to their source (`cursor.test.ts` beside
+`cursor.ts`), matching the repo's one-concern-per-file style; the M4
+integration suite gets its own `test/` directory, since those tests
+belong to no single file and share setup (test DB, transaction rollback).
