@@ -1,5 +1,14 @@
 {
+  "meta": {
+    "title": "商品 — Reality Shop",
+    "description": "浏览最新的消费电子产品。"
+  },
   "home": {
     "hello": "你好，世界"
+  },
+  "catalog": {
+    "title": "商品",
+    "priceFrom": "{price} 起",
+    "noPrice": "暂无报价"
   }
 }

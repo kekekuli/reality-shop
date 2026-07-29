@@ -1,0 +1,4 @@
+schema: "services/api/src/schema.gql"
+documents:
+  - "apps/web/app/**/*.{ts,tsx}"
+  - "apps/web/lib/**/*.{ts,tsx}"

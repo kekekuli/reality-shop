@@ -1,5 +1,14 @@
 {
+  "meta": {
+    "title": "Products — Reality Shop",
+    "description": "Browse the latest consumer electronics."
+  },
   "home": {
     "hello": "Hello World"
+  },
+  "catalog": {
+    "title": "Products",
+    "priceFrom": "From {price}",
+    "noPrice": "Unavailable"
   }
 }
