@@ -1,0 +1,43 @@
+# Mirrors the routing table settled in DECISIONS.md ADR-020, so the
+# same-origin split (and the /api strip-prefix behavior specifically)
+# gets exercised locally before it's ever configured in Dokploy.
+#
+# web and api are NOT containers here — they're the host-run dev
+# servers (`pnpm dev`), reached via host.docker.internal. Priorities are
+# explicit rather than relying on Traefik's rule-length heuristic, since
+# routing priority was flagged as something to verify, not assume.
+http:
+  routers:
+    web:
+      rule: "PathPrefix(`/`)"
+      service: web
+      priority: 1
+
+    api-rest:
+      rule: "PathPrefix(`/api`)"
+      service: api
+      middlewares:
+        - strip-api-prefix
+      priority: 10
+
+    graphql:
+      rule: "Path(`/graphql`)"
+      service: api
+      priority: 10
+
+  middlewares:
+    strip-api-prefix:
+      stripPrefix:
+        prefixes:
+          - "/api"
+
+  services:
+    web:
+      loadBalancer:
+        servers:
+          - url: "http://host.docker.internal:6767"
+
+    api:
+      loadBalancer:
+        servers:
+          - url: "http://host.docker.internal:7676"

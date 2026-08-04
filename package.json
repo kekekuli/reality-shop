@@ -2,12 +2,11 @@
   "name": "reality-shop",
   "version": "1.0.0",
   "scripts": {
-    "dev": "turbo dev",
+    "dev": "node scripts/dev.mjs",
     "build": "turbo build",
     "typecheck": "turbo typecheck",
     "lint": "turbo lint",
-    "db:up": "docker compose up -d ",
-    "db:init": "sh ./infra/db-init.sh",
+    "db:init": "node scripts/db-init.mjs",
     "test": "vitest"
   },
   "author": "kekekuli",

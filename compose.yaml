@@ -8,6 +8,7 @@
 services:
   postgres:
     image: postgres:18
+    container_name: reality-shop-postgres
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
@@ -19,6 +20,33 @@ services:
     volumes:
       - postgres:/var/lib/postgresql
       - ./infra/postgres-init.sql:/docker-entrypoint-initdb.d/postgres-init.sql:ro
+
+  # Rehearses the prod same-origin routing (ADR-020) against the
+  # host-run dev servers, so /api and /graphql behave the same locally
+  # as they will behind Dokploy before that config is ever written there.
+  #
+  #   pnpm dev                # web on :6767, api on :7676 (native, hot reload)
+  #   docker compose up traefik -d
+  #   open http://localhost:8000        # same-origin view: /, /api/*, /graphql
+  #   open http://localhost:8081        # dashboard — inspect routers/priority
+  traefik:
+    image: traefik:v3.3
+    container_name: reality-shop-traefik
+    command:
+      - "--providers.file.filename=/etc/traefik/dynamic.yml"
+      - "--providers.file.watch=true"
+      - "--entrypoints.web.address=:80"
+      - "--api.dashboard=true"
+      - "--api.insecure=true" # dev-only: dashboard has no auth, never do this in prod
+    ports:
+      - "8000:80"
+      - "8081:8080" # dashboard
+    volumes:
+      - ./infra/traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro
+    extra_hosts:
+      # Linux Docker doesn't resolve host.docker.internal by default
+      # (Docker Desktop on Mac does); this makes it resolve everywhere.
+      - "host.docker.internal:host-gateway"
 
 volumes:
   postgres:

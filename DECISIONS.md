@@ -31,6 +31,7 @@ re-decided under a new number.
 - **ADR-017** — Collections paginate Relay-style with opaque `(sortKey, id)` keyset cursors.
 - **ADR-018** — M1 GraphQL layer: Apollo driver, explicit field decorators, hand-rolled money scalar, per-request DataLoader.
 - **ADR-019** — Tests: pure logic gets unit tests now; DB-dependent logic gets integration tests against a test database, built in M4.
+- **ADR-020** — BFF same-origin boundary is enforced by Dokploy's reverse proxy, not app code; `services/api` stays route-prefix-agnostic.
 
 ## ADR-001 E-commerce as the vehicle for exploring all capability domains
 E-commerce naturally covers content display, transaction processing,
@@ -300,3 +301,17 @@ Layout: unit tests sit next to their source (`cursor.test.ts` beside
 `cursor.ts`), matching the repo's one-concern-per-file style; the M4
 integration suite gets its own `test/` directory, since those tests
 belong to no single file and share setup (test DB, transaction rollback).
+
+## ADR-020 BFF same-origin boundary lives in Dokploy's reverse proxy; `services/api` stays route-prefix-agnostic
+ADR-011 established that the browser only ever talks to the BFF edge, but
+left open *how* that same-origin boundary gets implemented. Settled: at
+the infra layer (Dokploy's Traefik-based reverse proxy), not in
+application code. One public domain (`domain.com`) carries three routing
+rules onto two containers:
+
+| Public path        | Middleware              | Forwards to (api container) | Backs           |
+|---------------------|--------------------------|------------------------------|-----------------|
+| `/` (catch-all)     | none                     | —                            | web app (Next.js) |
+| `/api/*path`        | strip-prefix `/api`      | `/*path`                     | future REST endpoints (today: only `/health`) |
+| `/graphql`          | none (exact passthrough) | `/graphql`                   | GraphQL BFF     |
+
