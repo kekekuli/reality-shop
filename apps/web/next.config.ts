@@ -14,7 +14,10 @@ const nextConfig: NextConfig = {
   // DNS-rebinding guard. Only needed when reaching the dev server by
   // something other than localhost (e.g. a Tailscale IP) — optional and
   // machine-specific, so it comes from .env.local, never hardcoded here.
-  allowedDevOrigins: process.env.ALLOWED_DEV_ORIGINS?.split(",").map((s) => s.trim()),
+  allowedDevOrigins: process.env.ALLOWED_DEV_ORIGINS?.split(",").map((s) =>
+    s.trim(),
+  ),
+  output: "standalone",
 };
 
 export default nextIntlPlugin(nextConfig);

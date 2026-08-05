@@ -119,6 +119,9 @@ importers:
       dataloader:
         specifier: ^2.2.3
         version: 2.2.3
+      dotenv:
+        specifier: ^17.4.2
+        version: 17.4.2
       graphql:
         specifier: ^16.14.2
         version: 16.14.2
@@ -150,9 +153,6 @@ importers:
       '@types/pg':
         specifier: ^8.20.0
         version: 8.20.0
-      dotenv:
-        specifier: ^17.4.2
-        version: 17.4.2
       prisma:
         specifier: ^7.8.0
         version: 7.8.0(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@5.9.3)

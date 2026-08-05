@@ -1,0 +1,23 @@
+# Host build artifacts and local-only files — never belong in a build
+# context. Verified: unlike .gitignore, a bare pattern here only matches
+# at the build-context root, not at any depth — every entry needs an
+# explicit **/ to also catch apps/*, services/*, packages/* copies.
+node_modules
+**/node_modules
+.turbo
+**/.turbo
+.next
+**/.next
+dist
+**/dist
+out
+**/out
+.env
+**/.env
+.env.*
+**/.env.*
+!.env.example
+!**/.env.example
+!.env.local.example
+!**/.env.local.example
+.git

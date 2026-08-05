@@ -16,4 +16,10 @@ export const env = createEnv({
     API_URL: process.env.API_URL,
     SITE_URL: process.env.SITE_URL,
   },
+  // Docker builds don't have real runtime values yet (see Dockerfile) —
+  // official t3-env pattern: https://create.t3.gg/en/deployment/docker.
+  // Only ever set during that build stage, never in the running
+  // container, so the real check still runs — and fails loudly — at
+  // actual startup if Dokploy misconfigures the env.
+  skipValidation: !!process.env.SKIP_ENV_VALIDATION,
 });
