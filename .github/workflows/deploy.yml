@@ -1,0 +1,107 @@
+name: Deploy reality-shop
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  REGISTRY: ghcr.io
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    env:
+      RUN_MIGRATIONS: ${{ secrets.RUN_MIGRATIONS }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Locally this happens via services/api's `predev` hook, but that's
+      # tied to the `dev` script specifically — CI never runs `dev`, and
+      # turbo's typecheck task only depends on ^build (upstream workspace
+      # packages), never api's own build, so nothing else triggers this.
+      # Same inert placeholder as the Dockerfile's builder stage:
+      # prisma.config.ts needs DATABASE_URL set, never connects for generate.
+      - name: Generate Prisma Client
+        run: pnpm --filter @reality-shop/api generate
+        env:
+          DATABASE_URL: postgresql://build:build@localhost:5432/build
+
+      - name: Lint
+        run: pnpm run lint
+
+      - name: typecheck
+        run: pnpm run typecheck
+
+      - name: Test
+        run: pnpm run test
+
+      # Production-only: applies committed migration files, never
+      # generates or diffs anything (unlike `migrate dev`, which is
+      # local-dev-only — see docs/getting-started.md). Gated by a
+      # dashboard-set secret rather than a job-level condition, so the
+      # toggle is a one-click GitHub Settings change, not a code change.
+      - name: Run database migrations
+        if: ${{ env.RUN_MIGRATIONS == 'true' }}
+        run: pnpm --filter @reality-shop/api exec prisma migrate deploy
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+
+  build-and-push-images:
+    needs: lint-and-test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        include:
+          - image: web
+            dockerfile: apps/web/Dockerfile
+          - image: api
+            dockerfile: services/api/Dockerfile
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log in to ${{ env.REGISTRY }}
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ${{ matrix.dockerfile }}
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ github.repository }}-${{ matrix.image }}:latest
+            ${{ env.REGISTRY }}/${{ github.repository }}-${{ matrix.image }}:${{ github.sha }}
+          cache-from: type=gha,scope=${{ matrix.image }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.image }}
+
+  deploy:
+    needs: [lint-and-test, build-and-push-images]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Dokploy deploy
+        run: curl -f -X POST "${{ secrets.DOKPLOY_WEBHOOK_URL }}"

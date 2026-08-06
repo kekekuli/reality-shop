@@ -41,7 +41,7 @@ async function waitForPostgres(timeoutMs = 15000) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     const result = spawnSync("docker", [
-      "compose", "exec", "-T", "postgres", "pg_isready", "-U", "postgres",
+      "compose", "-f", "compose.dev.yaml", "exec", "-T", "postgres", "pg_isready", "-U", "postgres",
     ]);
     if (result.status === 0) return true;
     await sleep(500);
@@ -55,7 +55,7 @@ if (hasDatabaseUrl()) {
 }
 
 console.log("No DATABASE_URL configured — starting local Postgres via docker compose...");
-const upCode = await run("docker", ["compose", "up", "-d", "postgres"]);
+const upCode = await run("docker", ["compose", "-f", "compose.dev.yaml", "up", "-d", "postgres"]);
 if (upCode !== 0) process.exit(upCode);
 
 console.log("Waiting for Postgres to accept connections...");
@@ -72,7 +72,7 @@ async function confirm(question) {
 
 if (await confirm("Grant CREATEDB to ecommerce_app (needed for `prisma migrate dev`'s shadow database)?")) {
   await run("docker", [
-    "compose", "exec", "-T", "postgres", "psql", "-U", "postgres",
+    "compose", "-f", "compose.dev.yaml", "exec", "-T", "postgres", "psql", "-U", "postgres",
     "-c", "ALTER ROLE ecommerce_app CREATEDB;",
   ]);
 }

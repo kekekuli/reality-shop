@@ -1,0 +1,33 @@
+# What Dokploy actually deploys — pulls the images CI builds and pushes
+# to ghcr.io, never builds from source here (see .github/workflows/deploy.yml).
+#
+# No postgres service: production reuses an existing PostgreSQL instance
+# rather than provisioning a fresh one (DECISIONS.md ADR-004) — apply
+# infra/postgres-init.sql there once, manually, before the first deploy
+# (see docs/getting-started.md).
+#
+# No traefik/reverse-proxy service either: Dokploy has its own built-in
+# routing. Configure the /, /api/*, /graphql split (ADR-020) directly in
+# Dokploy's domain settings for this project, not here.
+#
+# DATABASE_URL and SITE_URL are set through Dokploy's own environment
+# variables UI for this project, never committed here — ${VAR} below is
+# resolved from whatever Dokploy injects at deploy time.
+services:
+  reality-shop-web:
+    image: ghcr.io/kekekuli/reality-shop-web:latest
+    restart: unless-stopped
+    environment:
+      # The api service's own key below — structural, not a secret, so
+      # it's fine hardcoded (mirrors the internal container-to-container
+      # path verified in the local e2e test). Compose resolves services
+      # by their service key, so this must match that key exactly.
+      API_URL: http://reality-shop-api:7676
+      SITE_URL: ${SITE_URL}
+
+  reality-shop-api:
+    image: ghcr.io/kekekuli/reality-shop-api:latest
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: ${DATABASE_URL}
+      PORT: 7676

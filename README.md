@@ -35,6 +35,7 @@ are complete; first code lands in M1.
 | [docs/m0/business-flows.md](docs/m0/business-flows.md) | Order state machine, payment/logistics flows, task reliability |
 | [docs/m0/data-model.md](docs/m0/data-model.md) | ER model, table definitions, conventions |
 | [docs/m0/tech-stack.md](docs/m0/tech-stack.md) | Finalized multi-platform tech plan & topology |
+| [docs/getting-started.md](docs/getting-started.md) | Local dev setup and deployment — kept clearly separate |
 
 ## Stack at a glance
 
@@ -55,5 +56,7 @@ docs/       design documentation
 
 ## Getting started
 
-Arrives with M1 (local dev setup, environment variables, deployment
-notes).
+See [docs/getting-started.md](docs/getting-started.md) — local dev
+setup and deployment are kept as clearly separate sections there, since
+they use different databases, different env handling, and different
+tooling end to end.

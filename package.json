@@ -7,7 +7,7 @@
     "typecheck": "turbo typecheck",
     "lint": "turbo lint",
     "db:init": "node scripts/db-init.mjs",
-    "test": "vitest"
+    "test": "turbo test"
   },
   "author": "kekekuli",
   "packageManager": "pnpm@10.19.0",
