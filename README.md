@@ -10,13 +10,15 @@ support, growth & feedback.
 
 ## Status
 
-**Current milestone: M1 (minimal end-to-end path).** M0 design docs
-are complete; first code lands in M1.
+**Current milestone: M2 (business loop).** M0 design docs and M1's
+end-to-end path are both complete: web + api deployed via Dokploy, CI/CD
+through GitHub Actions (lint/typecheck/test → build+push images →
+gated migrations → deploy webhook), live and serving real seeded data.
 
 | Milestone | Theme | Status |
 |-----------|-------|--------|
 | M0 | Product & design docs | ✅ done |
-| M1 | Minimal end-to-end path (web → API → PG, deployed) | ⏳ |
+| M1 | Minimal end-to-end path (web → API → PG, deployed) | ✅ done |
 | M2 | Business loop: cart → order → mock payment → mock logistics + auth | ⏳ |
 | M3 | Operations console | ⏳ |
 | M4 | Quality & observability | ⏳ |
