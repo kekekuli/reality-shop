@@ -161,146 +161,109 @@ there is anything to operate would front-load infrastructure pain that
 ADR-002/003 explicitly defer.
 
 ## ADR-015 i18n: the database stores language-neutral keys; user-facing copy lives elsewhere
-Real multi-language users are an assumed requirement, so the boundary is
-drawn once, up front: **the ecommerce database never stores display
-copy.** Every text column holds a language-neutral identifier — slugs,
-English master-data names, spec keys, status enums — and translation
-happens in one of two places above it:
+The database never stores display copy: every text column holds a slug,
+English master-data name, spec key or status enum. Multi-language text
+would poison indexes and unique constraints — `skus.spec_values` sits in a
+composite unique index (ADR-008), so "黑色" instead of `black` makes one
+variant look like several — and keys keep filtering and order snapshots
+locale-independent.
 
-- **Closed-vocabulary values** (category names, spec dimensions and
-  their values, status enums, UI labels) → front-end dictionaries via
-  next-intl. Their value domain is finite and stable, so a dictionary
-  can stay complete; new values are a controlled change.
-- **Open-ended copy** (product titles, descriptions, galleries, spec
-  sheets) → Strapi's i18n plugin. Copy grows with every product and
-  needs non-technical editing — exactly what a CMS is for, extending
-  ADR-007. `products.title` keeps an English master-data name for
-  internal identification and order snapshots; the storefront renders
-  the Strapi translation instead.
+Translation sits above, split by vocabulary: closed sets (category names,
+spec dimensions and values, status enums, UI labels) in next-intl
+dictionaries, which stay complete because the domain is finite;
+open-ended copy (titles, descriptions, spec sheets) in Strapi's i18n
+plugin, since it grows per product and needs non-technical editing
+(extends ADR-007). `products.title` keeps its English name for internal
+identification and order snapshots.
 
-Rationale: multi-language text in the database would poison indexes and
-unique constraints — `skus.spec_values` participates in a composite
-unique index (ADR-008), so storing "黑色" instead of `black` would make
-the same variant look like a different one per locale. Keys also keep
-filtering, comparison and order snapshots locale-independent.
-
-Translation-key namespaces follow the data's own structure, so the
-front end can derive keys mechanically rather than maintaining a mapping
-table:
-
-```
-category.<slug>              category.phones
-spec.<key>                   spec.color
-spec.<key>.<value>           spec.color.black
-status.<entity>.<value>      status.product.on_sale
-```
-
-`status` is namespaced per entity because product and SKU share values
-today but may need different wording later; splitting the key now avoids
-restructuring then.
-
-M1 consequence: seed data is written in English identifiers, and
-`apps/web` adopts next-intl (with a `[locale]` route segment) from the
-start — retrofitting the routing structure later is expensive, while
-carrying it from day one costs almost nothing.
+Keys mirror the data's structure so the front end derives them
+mechanically: `category.<slug>`, `spec.<key>`, `spec.<key>.<value>`,
+`status.<entity>.<value>` — namespaced per entity because product and SKU
+share values today but may diverge. M1 consequence: seed data uses English
+identifiers and `apps/web` adopts next-intl with a `[locale]` segment from
+the start, since retrofitting routing later is expensive.
 
 ## ADR-016 Money crosses the GraphQL boundary as a BigInt scalar; identity uses `ID`
-Extending ADR-011. `*_cents` fields are exposed through a custom BigInt
-scalar (`graphql-scalars`), carried as strings and parsed back to native
-`bigint` on the client; the shared `Cents` type becomes a branded
-`bigint`. Primary keys stay `bigint` in the database and surface as
-`ID`, which is a string already and never takes part in arithmetic.
+Extending ADR-011. `*_cents` fields cross through a custom BigInt scalar,
+carried as strings and parsed back to native `bigint` on the client; the
+shared `Cents` type becomes a branded `bigint`. Primary keys stay `bigint`
+in the database and surface as `ID` — already a string, never used in
+arithmetic.
 
-Prisma returns `bigint` and JSON cannot carry that type, so some
-representation must be chosen regardless. GraphQL's `Int` is 32-bit — a
-ceiling of ~21.47M CNY that no single price or order total reaches, but
-M3's aggregate amounts can. Strings have no ceiling, and the cost is
-paid now, while one price field exists and there is no front end; after
-M3 the same change would ripple through codegen output and every
-component that reads money.
-
-Rounding stays out of scope: integer cents keep addition and
-multiplication exact, and division — percentage discounts, coupon
-proration — arrives with M3 and needs a rounding policy of its own.
+Prisma returns `bigint` and JSON cannot carry it, so some representation
+must be chosen regardless. GraphQL's `Int` is 32-bit — a ~21.47M CNY
+ceiling that no single price reaches but M3's aggregates can; strings have
+none. Paying the cost now, with one price field and no front end, beats
+paying it after M3, when it would ripple through codegen output and every
+component reading money. Rounding stays out of scope: integer cents keep
+addition and multiplication exact, and division — discounts, coupon
+proration — arrives with M3 and needs a policy of its own.
 
 ## ADR-017 List queries paginate Relay-style with composite keyset cursors
 Collection fields follow the Relay connection spec — `Connection` /
-`Edge` / `PageInfo`, arguments `first` / `after`. The cursor is an
-opaque base64 string encoding `(sortKey, id)`, decoded server-side into
-a row-value comparison served by a composite index. Pagination state
-lives entirely in that cursor; the server holds none.
+`Edge` / `PageInfo`, arguments `first` / `after`. The cursor is an opaque
+base64 `(sortKey, id)`, decoded server-side into a row-value comparison
+served by a composite index; all pagination state lives there, none on
+the server.
 
 The `id` component is mandatory because sort keys are not unique — two
 products at the same price would leave the boundary ambiguous and
-silently drop or repeat rows. The Relay shape is chosen over a simpler
-`items` + `nextCursor` because Apollo Client's `relayStylePagination`
-cache policy applies only to it. The accepted trade-off is that clients
-cannot jump to an arbitrary page.
-
-`totalCount` is omitted until a filter-result count actually appears in
-the UI — adding a field to a connection is backward compatible, so
-deferring it costs nothing.
+silently drop or repeat rows. Relay is chosen over a simpler `items` +
+`nextCursor` because Apollo Client's `relayStylePagination` cache policy
+applies only to it; the accepted trade-off is no jumping to an arbitrary
+page. `totalCount` waits until a filter-result count appears in the UI —
+adding a connection field is backward compatible.
 
 ## ADR-018 The M1 GraphQL layer: how ADR-011/016/017 land
-Build decisions, plus the constraints found while verifying them —
-several were discovered rather than chosen, and re-deriving them later
-is wasted work.
+Build decisions, several discovered while verifying rather than chosen.
 
 - **`@nestjs/apollo`**, not Mercurius: that needs Fastify, and the
-  bottleneck is PostgreSQL. `schema.gql` sorted and committed (web
-  codegen reads it; API changes become diffs); introspection off in
+  bottleneck is PostgreSQL. `schema.gql` sorted and committed so web
+  codegen reads it and API changes become diffs; introspection off in
   production.
-- **Explicit `@Field()`**, not the CLI plugin — the swc builder runs
-  with `typeCheck: false`, where the plugin needs extra setup.
-- **A mapper layer is mandatory**: graphql-js's `ID` rejects `bigint`,
-  so Prisma models never reach a resolver's return value. That seam is
-  where ADR-016 is enforced.
-- **Hand-rolled money scalar**: `graphql-scalars`' `GraphQLBigInt`
-  returns a number for safe integers and a string only beyond, so wire
-  type varies by magnitude — the client-side branching ADR-016 exists
-  to prevent.
-- **DataLoader from M1, built per request in the GraphQL context
-  factory.** Not for speed, but because batch functions force
-  `findSkusByProductIds(ids)` onto domain services — the signature a
-  remote call wants at the M5 split, an addition now and a refactor
-  after M2. A singleton loader is a cache that leaks rows across users.
+- **Explicit `@Field()`**, not the CLI plugin, which needs extra setup
+  under the swc builder's `typeCheck: false`.
+- **A mapper layer is mandatory**: graphql-js's `ID` rejects `bigint`, so
+  Prisma models never reach a resolver's return value. That seam enforces
+  ADR-016.
+- **Hand-rolled money scalar**: `graphql-scalars`' `GraphQLBigInt` returns
+  a number for safe integers and a string beyond, varying wire type by
+  magnitude — the branching ADR-016 exists to prevent.
+- **DataLoader from M1**, per request in the context factory. Not for
+  speed: batching forces `findSkusByProductIds(ids)` onto domain services,
+  the signature a remote call wants at the M5 split — an addition now, a
+  refactor after M2. A singleton loader leaks rows across users.
 - **Keyset predicate in expanded `OR` form** (Prisma has no row-value
-  expression; `$queryRaw` is the fallback), with ADR-017's index
-  `(status, created_at, id)` shipping in the same change.
+  expression), shipping with ADR-017's `(status, created_at, id)` index.
 - **M1 surface**: `products(first, after, categorySlug)` and
-  `product(slug)`. `attrs` and inventory wait for M2's cart;
-  `spec_values` crosses as typed pairs, since a JSON scalar makes
-  codegen emit `any`.
+  `product(slug)`. `attrs` and inventory wait for M2's cart; `spec_values`
+  crosses as typed pairs, since a JSON scalar makes codegen emit `any`.
 
-Verification is counting statements in the Prisma query log, because the
-failures are silent: batch functions returning rows in database order
-(`IN (…)` neither preserves order nor pads misses), and resolvers that
-await before `.load()`, missing the batch tick and reverting to N+1.
+Verify by counting statements in the Prisma query log — the failures are
+silent: batch functions returning rows in database order (`IN (…)` neither
+preserves order nor pads misses), and resolvers that await before
+`.load()`, missing the batch tick and reverting to N+1.
 
 ## ADR-019 Testing strategy: unit-test pure logic; integration-test DB logic in M4
-What is worth testing is logic that fails *silently* — returns wrong data
-without erroring. Pure functions with such logic (cursor codec, the money
-scalar) get unit tests now; they touch no database and are cheap. Logic
-that lives in SQL (keyset pagination — a mis-written `OR` branch silently
-drops or repeats rows) needs an integration test against a real database,
-since mocking Prisma would test the mock, not Postgres. Plain CRUD
-pass-throughs are not tested — that only tests Prisma.
+What is worth testing is logic that fails *silently* — wrong data, no
+error. Pure functions with such logic (cursor codec, money scalar) get
+unit tests now; they are cheap and touch no database. Logic living in SQL
+(keyset pagination, where a mis-written `OR` branch drops or repeats rows)
+needs a real database, since mocking Prisma tests the mock. CRUD
+pass-throughs are not tested — that tests Prisma.
 
-The integration harness lands in M4 (PRODUCT_PLAN puts testing there), not
-now, so M1 stays breadth-first; keyset is verified once by hand
-(colliding `created_at` rows, paged one at a time) until then. When built,
-the strategy is: reuse the existing Postgres via a dedicated `_test`
-database (mirroring the Strapi/ecommerce isolation of ADR-004), run
-migrations once per suite, isolate each test with a transaction rollback,
-and guard the connection string so tests can never hit the dev database.
-Testcontainers was rejected as heavier than needed (Docker-in-test) and
-in-memory SQLite as wrong (its `timestamptz`/ordering behavior differs
-from Postgres — exactly the behavior keyset depends on).
+The integration harness lands in M4, where PRODUCT_PLAN puts testing, so
+M1 stays breadth-first; until then keyset is verified by hand (colliding
+`created_at` rows, paged one at a time). Its shape: a dedicated `_test`
+database on the existing Postgres (mirroring ADR-004's isolation),
+migrations once per suite, transaction rollback per test, and a guarded
+connection string so tests can never hit the dev database. Testcontainers
+is heavier than needed; SQLite's `timestamptz`/ordering differs from
+Postgres — exactly what keyset depends on.
 
-Layout: unit tests sit next to their source (`cursor.test.ts` beside
-`cursor.ts`), matching the repo's one-concern-per-file style; the M4
-integration suite gets its own `test/` directory, since those tests
-belong to no single file and share setup (test DB, transaction rollback).
+Unit tests sit beside their source, matching the repo's
+one-concern-per-file style; the M4 suite gets its own `test/` directory,
+since those tests belong to no single file and share setup.
 
 ## ADR-020 BFF same-origin boundary lives in Dokploy's reverse proxy; `services/api` stays route-prefix-agnostic
 ADR-011 established that the browser only ever talks to the BFF edge, but
