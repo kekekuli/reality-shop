@@ -8,8 +8,8 @@
 // migrate dev` can use its shadow database (deliberately left out of
 // that SQL script since it also runs against production-track
 // instances, which must stay least-privilege — see the comment there),
-// write DATABASE_URL, then offer to run migrations, since a freshly
-// created database has no schema yet.
+// write DATABASE_URL, then offer the three steps that turn a freshly
+// created database into a usable one: migrate, generate the client, seed.
 //
 // Every step that runs while a readline prompt is still pending uses
 // async `spawn`, not `spawnSync` — spawnSync blocks Node's entire event
@@ -22,17 +22,26 @@ import { createInterface } from "node:readline/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const repoRoot = path.resolve(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "..",
+);
 const envPath = path.join(repoRoot, "services", "api", ".env");
 
 function hasDatabaseUrl() {
   if (process.env.DATABASE_URL) return true;
-  return existsSync(envPath) && /^DATABASE_URL=.+/m.test(readFileSync(envPath, "utf8"));
+  return (
+    existsSync(envPath) &&
+    /^DATABASE_URL=.+/m.test(readFileSync(envPath, "utf8"))
+  );
 }
 
 function run(cmd, args, opts = {}) {
   return new Promise((resolve) => {
-    const child = spawn(cmd, args, { stdio: ["ignore", "inherit", "inherit"], ...opts });
+    const child = spawn(cmd, args, {
+      stdio: ["ignore", "inherit", "inherit"],
+      ...opts,
+    });
     child.on("exit", (code) => resolve(code ?? 0));
   });
 }
@@ -41,7 +50,15 @@ async function waitForPostgres(timeoutMs = 15000) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
     const result = spawnSync("docker", [
-      "compose", "-f", "compose.dev.yaml", "exec", "-T", "postgres", "pg_isready", "-U", "postgres",
+      "compose",
+      "-f",
+      "compose.dev.yaml",
+      "exec",
+      "-T",
+      "postgres",
+      "pg_isready",
+      "-U",
+      "postgres",
     ]);
     if (result.status === 0) return true;
     await sleep(500);
@@ -54,8 +71,17 @@ if (hasDatabaseUrl()) {
   process.exit(0);
 }
 
-console.log("No DATABASE_URL configured — starting local Postgres via docker compose...");
-const upCode = await run("docker", ["compose", "-f", "compose.dev.yaml", "up", "-d", "postgres"]);
+console.log(
+  "No DATABASE_URL configured — starting local Postgres via docker compose...",
+);
+const upCode = await run("docker", [
+  "compose",
+  "-f",
+  "compose.dev.yaml",
+  "up",
+  "-d",
+  "postgres",
+]);
 if (upCode !== 0) process.exit(upCode);
 
 console.log("Waiting for Postgres to accept connections...");
@@ -70,10 +96,23 @@ async function confirm(question) {
   return !/^n/i.test(answer.trim());
 }
 
-if (await confirm("Grant CREATEDB to ecommerce_app (needed for `prisma migrate dev`'s shadow database)?")) {
+if (
+  await confirm(
+    "Grant CREATEDB to ecommerce_app (needed for `prisma migrate dev`'s shadow database)?",
+  )
+) {
   await run("docker", [
-    "compose", "-f", "compose.dev.yaml", "exec", "-T", "postgres", "psql", "-U", "postgres",
-    "-c", "ALTER ROLE ecommerce_app CREATEDB;",
+    "compose",
+    "-f",
+    "compose.dev.yaml",
+    "exec",
+    "-T",
+    "postgres",
+    "psql",
+    "-U",
+    "postgres",
+    "-c",
+    "ALTER ROLE ecommerce_app CREATEDB;",
   ]);
 }
 
@@ -82,13 +121,21 @@ const databaseUrl = `postgresql://ecommerce_app:${appPassword}@localhost:5432/ec
 appendFileSync(envPath, `DATABASE_URL=${databaseUrl}\n`);
 console.log(`Wrote DATABASE_URL to ${envPath}`);
 
-const runMigrate = await confirm("Run `prisma migrate dev` now to set up the schema?");
+const steps = [
+  [
+    "db:migrate",
+    await confirm("Run `prisma migrate dev` now to set up the schema?"),
+  ],
+  ["generate", await confirm("Generate the Prisma client?")],
+  ["db:seed", await confirm("Seed the database with sample data?")],
+];
 rl.close();
 
-if (runMigrate) {
-  const migrateCode = await run("pnpm", ["--filter", "@reality-shop/api", "db:migrate"], {
+for (const [script, wanted] of steps) {
+  if (!wanted) continue;
+  const code = await run("pnpm", ["--filter", "@reality-shop/api", script], {
     stdio: "inherit",
     env: { ...process.env, DATABASE_URL: databaseUrl },
   });
-  process.exit(migrateCode);
+  if (code !== 0) process.exit(code);
 }
