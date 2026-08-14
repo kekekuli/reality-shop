@@ -12,5 +12,6 @@ This settles `products.title`'s role: it is a **master-data name for
 internal identification** (admin lists, logs, debugging), never a
 display string. The storefront always renders Strapi content. M1 is a
 known temporary exception — with no Strapi yet, the product list renders
-`products.title` directly; M2 moves the display layer to Strapi and
-`title` recedes.
+`products.title` directly; M2 moves the product detail page and
+checkout lines to Strapi, and `title` recedes as M3 finishes the
+content side.

@@ -57,7 +57,7 @@ model's domain groups so the M5 split follows existing seams (ADR-014).
 ```
 apps/
   web/          Next.js storefront
-  mobile/       Expo React Native app (joins in M2)
+  mobile/       Expo React Native app (joins in M3.5)
 services/
   api/          NestJS modular monolith (BFF + domain modules)
   mock-data/    data generator (M2; writes Strapi via API, PG directly)
@@ -118,8 +118,10 @@ replay) is noted for M6; M2 ships plain rotation.
 - **M1**: `apps/web` + `services/api` (product module + a products
   GraphQL query, no auth) + PG schema subset (product domain) + Dokploy
   deploy. Mobile is deliberately absent — M1 proves the pipeline.
-- **M2**: `apps/mobile` joins; user/order/payment-mock/logistics-mock
-  modules; Redis + BullMQ go live; full auth.
+- **M2**: user/order/payment-mock/logistics-mock modules; Redis +
+  BullMQ go live; full auth. Web only.
+- **M3.5**: `apps/mobile` joins, replaying the finished business loop
+  on a second platform; codegen moves to `packages/api-client`.
 - **M4**: OTel SDK in `services/api`, export to OpenObserve.
 - **M5**: split `services/api` into product/order/user services + BFF
   along module seams; Helm charts in `infra/`.

@@ -42,6 +42,8 @@ the only main line.
 - M3  Operations console: product/order/promotion management. Reuse
       Strapi for the content side; self-build transactional consoles
       (orders/inventory).
+- M3.5 Mobile client: Expo/RN app replaying the M2 business loop on a
+      second platform; codegen moves to packages/api-client.
 - M4  Quality & observability: tests for core flows + OpenTelemetry
       into the existing OpenObserve; tracing and monitoring dashboards.
 - M5  Infrastructure deepening: migrate/refactor the working system to
@@ -56,7 +58,8 @@ the only main line.
 - [x] Project direction settled
 - [x] Tech architecture & repo organization settled
 - [x] M0 product design (delivered: docs/m0/* + README + ADR-007…014)
-- [ ] M1 onward
+- [x] M1 end-to-end path (web + api + PG, deployed via Dokploy)
+- [ ] M2 business loop (scope: docs/m2/scope.md)
 
 ## Handoff notes for the M0 planning AI
 Based on this file plus ARCHITECTURE.md and DECISIONS.md, help complete

@@ -21,6 +21,7 @@ gated migrations → deploy webhook), live and serving real seeded data.
 | M1 | Minimal end-to-end path (web → API → PG, deployed) | ✅ done |
 | M2 | Business loop: cart → order → mock payment → mock logistics + auth | ⏳ |
 | M3 | Operations console | ⏳ |
+| M3.5 | Mobile client (Expo/RN) | ⏳ |
 | M4 | Quality & observability | ⏳ |
 | M5 | K8s migration & microservice split | ⏳ |
 | M6 | Security & productionization | ⏳ |

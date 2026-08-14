@@ -2,9 +2,10 @@
 # The always-on local PG (Path A) works too — see infra/postgres-init.sql.
 #
 #   docker compose up -d          # first start runs the init script
-#   docker compose down -v        # wipe the data volume to re-run init
+#   docker compose down -v        # wipe the data volumes to re-run init
 #
-# Host port is 5433 to avoid clashing with the always-on PG on 5432.
+# Published on the standard 5432, so stop an always-on local PG (Path A)
+# before starting this one.
 services:
   postgres:
     image: postgres:18
@@ -12,8 +13,6 @@ services:
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      # Passed through only when set on the host; the init script then
-      # uses it instead of the dev default (see \getenv in the script).
       APP_DB_PASSWORD:
     ports:
       - "5432:5432"
@@ -21,14 +20,6 @@ services:
       - postgres:/var/lib/postgresql
       - ./infra/postgres-init.sql:/docker-entrypoint-initdb.d/postgres-init.sql:ro
 
-  # Rehearses the prod same-origin routing (ADR-020) against the
-  # host-run dev servers, so /api and /graphql behave the same locally
-  # as they will behind Dokploy before that config is ever written there.
-  #
-  #   pnpm dev                # web on :6767, api on :7676 (native, hot reload)
-  #   docker compose up traefik -d
-  #   open http://localhost:8000        # same-origin view: /, /api/*, /graphql
-  #   open http://localhost:8081        # dashboard — inspect routers/priority
   traefik:
     image: traefik:v3.3
     container_name: reality-shop-traefik
@@ -44,9 +35,17 @@ services:
     volumes:
       - ./infra/traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro
     extra_hosts:
-      # Linux Docker doesn't resolve host.docker.internal by default
-      # (Docker Desktop on Mac does); this makes it resolve everywhere.
       - "host.docker.internal:host-gateway"
+
+  redis:
+    image: redis:8.10-alpine
+    container_name: reality-shop-redis
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory-policy", "noeviction"]
+    volumes:
+      - redis:/data
 
 volumes:
   postgres:
+  redis:

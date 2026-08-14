@@ -32,8 +32,10 @@ Once running:
 | `:8000` | Traefik — same-origin view rehearsing the production routing (ADR-020) |
 | `:8081` | Traefik dashboard |
 
-`compose.dev.yaml` (Postgres + this local Traefik) exists purely for
-local convenience and rehearsal — it is not what gets deployed.
+`compose.dev.yaml` (Postgres, this local Traefik, and Redis) exists
+purely for local convenience and rehearsal — it is not what gets
+deployed. Redis backs BullMQ and refresh tokens from M2 onward and is
+outside `db:init`'s scope: start it with `docker compose up redis -d`.
 
 ## Deployment
 
