@@ -20,7 +20,9 @@ so the M5 schema split maps 1:1 onto these groups.
   API boundary is ADR-016.
 - **Time**: `timestamptz`, `created_at`/`updated_at` on every table.
 - **Enums**: `text` + CHECK constraint (simpler migrations than native
-  enums).
+  enums, whose `ALTER TYPE ADD VALUE` cannot be used in the transaction
+  that adds it). The matching TS unions live in `packages/shared-types`
+  and are kept in sync by hand.
 - **Deletion**: catalog entities use a `status` field (no hard
   deletes); orders and ledgers are append-only and never deleted.
 

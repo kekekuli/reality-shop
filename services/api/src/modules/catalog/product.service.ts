@@ -1,6 +1,7 @@
 import { PrismaService } from "../../prisma/prisma.service";
 import { Injectable } from "@nestjs/common";
 import { Prisma } from "../../generated/prisma/client";
+import type { ProductStatus } from "@reality-shop/shared-types";
 
 @Injectable()
 export class ProductService {
@@ -17,7 +18,9 @@ export class ProductService {
     };
   }) {
     const where: Prisma.ProductWhereInput = {
-      status: "on_sale",
+      // Prisma types this as plain `string` (status is text + CHECK, not a
+      // native enum), so the literal is pinned against the union by hand.
+      status: "on_sale" satisfies ProductStatus,
     };
     if (cursor) {
       where.OR = [

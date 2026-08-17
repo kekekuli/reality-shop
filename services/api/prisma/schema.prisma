@@ -84,3 +84,33 @@ model Inventory {
 
   @@map("inventory")
 }
+
+model User {
+  id           BigInt    @id @default(autoincrement())
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  displayName  String    @map("display_name")
+  status       String    @default("active")
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  addresses    Address[]
+
+  @@map("users")
+}
+
+model Address {
+  id           BigInt   @id @default(autoincrement())
+  user         User     @relation(fields: [userId], references: [id])
+  userId       BigInt   @map("user_id")
+  receiverName String   @map("receiver_name")
+  phone        String
+  province     String
+  city         String
+  district     String
+  detail       String
+  isDefault    Boolean  @default(false) @map("is_default")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("addresses")
+}

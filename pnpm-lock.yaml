@@ -116,6 +116,9 @@ importers:
       '@reality-shop/config':
         specifier: workspace:*
         version: link:../../packages/config
+      '@reality-shop/shared-types':
+        specifier: workspace:*
+        version: link:../../packages/shared-types
       dataloader:
         specifier: ^2.2.3
         version: 2.2.3
