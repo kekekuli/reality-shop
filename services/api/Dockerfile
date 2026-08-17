@@ -59,6 +59,8 @@ COPY --from=runtime-deps --chown=node:node /app/ ./
 COPY --from=builder --chown=node:node /app/services/api/dist ./services/api/dist
 
 WORKDIR /app/services/api
+# Runtime stage only — set earlier it would strip the build's devDependencies.
+ENV NODE_ENV=production
 ENV PORT=7676
 EXPOSE 7676
 

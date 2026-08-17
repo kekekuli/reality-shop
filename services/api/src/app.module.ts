@@ -5,6 +5,7 @@ import { GraphQLModule } from "@nestjs/graphql";
 import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
 import { join } from "node:path";
 import { CatalogBffModule } from "./bff/catalog/catalog-bff.module";
+import { UserBffModule } from "./bff/user/user-bff.module";
 import { CatalogModule } from "./modules/catalog/catalog.module";
 import { SkuService } from "./modules/catalog/sku.service";
 import { createSkusLoader } from "./bff/catalog/sku.loader";
@@ -21,12 +22,15 @@ import { createSkusLoader } from "./bff/catalog/sku.loader";
         autoSchemaFile: join(process.cwd(), "src/schema.gql"),
         sortSchema: true,
         introspection: process.env.NODE_ENV !== "production",
+        includeStacktraceInErrorResponses:
+          process.env.NODE_ENV !== "production",
         context: () => ({
           skusLoader: createSkusLoader(skuService),
         }),
       }),
     }),
     CatalogBffModule,
+    UserBffModule,
   ],
 })
 export class AppModule {}

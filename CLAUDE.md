@@ -15,14 +15,20 @@ a decision does not require its reasoning. Open an individual ADR body
 only when the work touches that decision, or when you mean to challenge
 it — disagreeing with a decision requires reading its argument first.
 
+Keep this reading silent. Do not cite ADR numbers, milestone names, or
+roadmap reasoning in ordinary answers — it adds mental load the user
+does not want to carry. Raise them only on a genuine conflict: a
+proposal contradicts a recorded decision, or a recorded decision blocks
+something worth suggesting. Then say so in one sentence and move on.
+
 Other project documentation is not read on a schedule. The user supplies
 what a given task needs. Where a document and shipped code overlap, the
 code is authoritative on *what*, the document on *why*.
 
 ## Current phase
-M1 (minimal end-to-end path): monorepo scaffold, web storefront +
-NestJS api showing a product list from PG, deployed via Dokploy.
-M0 design work is complete.
+M2 (business loop): auth, cart, order submission with inventory
+reservation, Stripe sandbox payment, mock logistics. Web only.
+M0 design and M1's deployed end-to-end path are complete.
 
 ## Working style
 - The user writes the code and runs the commands. AI assistants align

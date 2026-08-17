@@ -2,8 +2,28 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type AuthType {
+  user: User!
+}
+
+type BusinessError {
+  code: ErrorCode!
+  message: String!
+}
+
 """Cents scalar type"""
 scalar Cents
+
+"""Cause of an expected failure; clients render `error.<code>`."""
+enum ErrorCode {
+  EMAIL_ALREADY_TAKEN
+  INVALID_CREDENTIALS
+  INVALID_REFRESH_TOKEN
+}
+
+type Mutation {
+  register(input: RegisterInput!): RegisterPayload!
+}
 
 type PageInfo {
   endCursor: String
@@ -33,7 +53,24 @@ type Query {
   products(after: String, first: Int! = 20): ProductConnection!
 }
 
+input RegisterInput {
+  displayName: String!
+  email: String!
+  password: String!
+}
+
+type RegisterPayload {
+  data: AuthType
+  errors: [BusinessError!]!
+}
+
 type Sku {
   price: Cents!
   skuCode: String!
+}
+
+type User {
+  displayName: String!
+  email: String!
+  id: ID!
 }
