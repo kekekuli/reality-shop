@@ -1,6 +1,6 @@
 # M0 · Core User Journeys
 
-Category: consumer electronics / 3C (ADR-008). Touchpoints: web +
+Category: consumer electronics / 3C. Touchpoints: web +
 mobile; journeys are identical on both, only the interaction form
 differs.
 
@@ -35,7 +35,7 @@ Discover → product detail / pick specs → add to cart → checkout (login gat
 | # | User action | System behavior | Notes / dependencies |
 |---|-------------|-----------------|----------------------|
 | A1 | Open home page | Show banners, promotion slots, featured product list | Banner/promotion assets come from Strapi (ADR-007); M1 may ship a product list only |
-| A2 | Click a category (e.g. "Phones") | Show the category's product list with filters (price range/brand/specs) and sorting | Categories form a tree; filters are driven by attribute templates (ADR-008) |
+| A2 | Click a category (e.g. "Phones") | Show the category's product list with filters (price range/brand/specs) and sorting | Categories form a tree; filters are driven by attribute templates |
 | A3 | Search by keyword | Return matching product list | M2, simple keyword search |
 | A4 | Click a product card | Open the product detail page | — |
 
@@ -44,7 +44,7 @@ Discover → product detail / pick specs → add to cart → checkout (login gat
 | # | User action | System behavior | Notes / dependencies |
 |---|-------------|-----------------|----------------------|
 | B1 | View product detail | Show SPU info: title, price range, editorial content, spec sheet | Editorial content/spec sheet from Strapi, price/stock from the product service, aggregated by the BFF (ADR-007) |
-| B2 | Pick specs (color × storage, …) | Resolve to a concrete SKU; show its price and stock status | SPU+SKU model (ADR-008); out-of-stock SKUs greyed out |
+| B2 | Pick specs (color × storage, …) | Resolve to a concrete SKU; show its price and stock status | SPU+SKU model; out-of-stock SKUs greyed out |
 | B3 | Add to cart | Guest: write to local storage; logged-in user: write to server-side cart | Default quantity 1, adjustable |
 | B4 | View cart | Show line items (SKU level), unit price, subtotal, total; quantity editable, items removable | Prices resolve to current values (simplification: always use latest price) |
 

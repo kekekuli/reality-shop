@@ -4,7 +4,7 @@ Scope: core entities and relations for the ecommerce database
 (PostgreSQL, database `ecommerce`, ADR in ARCHITECTURE.md). Governing
 decisions: product master data owned here, Strapi holds pure content
 (ADR-007); tree categories + attribute templates + JSONB specs,
-SPU/SKU split (ADR-008); two-phase inventory with reserve/deduct
+SPU/SKU split; two-phase inventory with reserve/deduct
 (ADR-009).
 
 Tables are grouped by future service boundary (user / product / order),
@@ -17,7 +17,7 @@ so the M5 schema split maps 1:1 onto these groups.
   internal IDs never leak into URLs/receipts.
 - **Money**: integer cents (`*_cents bigint`), single currency (CNY)
   for now; no floats anywhere. How these values are represented at the
-  API boundary is ADR-016.
+  API boundary is in ALTERNATIVES.md.
 - **Time**: `timestamptz`, `created_at`/`updated_at` on every table.
 - **Enums**: `text` + CHECK constraint (simpler migrations than native
   enums, whose `ALTER TYPE ADD VALUE` cannot be used in the transaction
@@ -78,15 +78,15 @@ erDiagram
 | Column | Type | Notes |
 |--------|------|-------|
 | id | bigint PK | |
-| parent_id | bigint FK→categories, nullable | tree (ADR-008 ①) |
-| slug | text UNIQUE | appears in URLs/API (ADR-008 ③) |
+| parent_id | bigint FK→categories, nullable | tree |
+| slug | text UNIQUE | appears in URLs/API |
 | name | text | |
 | sort_order | int | |
 | status | text | `visible` / `hidden` |
 
 ### attribute_templates
 One template per (leaf) category; drives SKU spec dimensions and list
-filters (ADR-008 ②).
+filters.
 
 | Column | Type | Notes |
 |--------|------|-------|
@@ -116,7 +116,7 @@ Strapi content type keyed by `products.slug` — see "Strapi side" below.
 | product_id | bigint FK→products | |
 | sku_code | text UNIQUE | |
 | spec_values | jsonb | e.g. `{"color":"Black","storage":"256GB"}`; unique per product (unique index on `(product_id, spec_values)`) |
-| price_cents | bigint | selling price lives on SKU (ADR-008) |
+| price_cents | bigint | selling price lives on SKU |
 | status | text | `on_sale` / `off_shelf` |
 
 ### inventory

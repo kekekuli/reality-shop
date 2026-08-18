@@ -7,7 +7,7 @@
 # (see docs/getting-started.md).
 #
 # No traefik/reverse-proxy service either: Dokploy has its own built-in
-# routing. Configure the /, /api/*, /graphql split (ADR-020) directly in
+# routing. Configure the /, /api/*, /graphql split (ARCHITECTURE.md) in
 # Dokploy's domain settings for this project, not here.
 #
 # DATABASE_URL and SITE_URL are set through Dokploy's own environment

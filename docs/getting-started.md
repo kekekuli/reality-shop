@@ -29,7 +29,7 @@ Once running:
 |------|------|
 | `:6767` | web app directly |
 | `:7676` | api directly |
-| `:8000` | Traefik — same-origin view rehearsing the production routing (ADR-020) |
+| `:8000` | Traefik — same-origin view rehearsing the production routing (ARCHITECTURE.md) |
 | `:8081` | Traefik dashboard |
 
 `compose.dev.yaml` (Postgres, this local Traefik, and Redis) exists
@@ -56,7 +56,7 @@ to a dev password otherwise.
 turbo-prune-based builds, published to `ghcr.io`. Dokploy deploys from
 those built images (a compose-mode project pulling both), not by
 building from source on the server. Domain/path routing (`/`, `/api/*`,
-`/graphql`) is configured directly in Dokploy per ADR-020, not in this
-repo. Database migrations (`prisma migrate deploy`) run as an
+`/graphql`) is configured directly in Dokploy per ARCHITECTURE.md's
+routing table, not in this repo. Database migrations (`prisma migrate deploy`) run as an
 independent, gated CI step before Dokploy is triggered to deploy the
-new images — see `DECISIONS.md` for the settled design.
+new images — see `.github/workflows/deploy.yml`.

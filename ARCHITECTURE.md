@@ -1,15 +1,16 @@
 # Architecture
 
-## Tech stack (decided in M0 — see ADR-010…014 and docs/m0/tech-stack.md)
-- Full-stack TypeScript (ADR-010); Go remains acceptable for an
-  individual service later if a concrete reason appears.
+## Tech stack (decided in M0 — see ADR-011…014 and docs/m0/tech-stack.md)
+- Full-stack TypeScript, so types are shared across web, mobile and
+  backend in one commit; Go remains acceptable for an individual
+  service later if a concrete reason appears.
 - Frontend: Next.js (web) + Expo/React Native (mobile); Tauri only if
   a desktop app is ever built.
 - Backend: NestJS, structured as a modular monolith (`services/api`)
   until the M5 microservice split (ADR-014).
 - API style: GraphQL as the BFF-to-client protocol; internal
   service-to-service communication stays REST/direct (ADR-011).
-- Delayed/async tasks: BullMQ on Redis (ADR-012). Redis is a new
+- Delayed/async tasks: BullMQ on Redis (ADR-009). Redis is a new
   runtime dependency, deployed as a Dokploy container.
 - Auth: short-lived JWT + rotating refresh tokens in Redis (ADR-013).
 
@@ -26,7 +27,8 @@ Directory layout:
 - packages/   cross-platform shared code (shared-types / api-client / ui)
 - infra/      deployment & infrastructure (Helm / K8s / CI config)
 - docs/       documentation (decision docs may live at repo root)
-- Root: PRODUCT_PLAN.md / ARCHITECTURE.md / DECISIONS.md / CLAUDE.md
+- Root: PRODUCT_PLAN.md / ARCHITECTURE.md / DECISIONS.md /
+  ALTERNATIVES.md / CLAUDE.md
 
 During M0 the root contains docs only; the subdirectories appear from
 M1 onward. Polyrepo is deferred until scale/multi-team needs arise.
@@ -76,3 +78,19 @@ On the existing PG, create a dedicated database for e-commerce:
 - M1–M4: deploy with Dokploy (results first).
 - M5: migrate to K8s (k3s on the Oracle free machine); feel the
   PaaS vs K8s difference.
+
+## Public routing (the same-origin boundary)
+The browser only ever talks to the BFF edge (ADR-011), and that boundary
+is enforced at the infra layer — never in application code, so
+`services/api` stays route-prefix-agnostic. One public domain carries
+three rules onto two containers:
+
+| Public path      | Middleware               | Forwards to (api container) | Backs |
+|------------------|--------------------------|-----------------------------|-------|
+| `/` (catch-all)  | none                     | —                           | web app (Next.js) |
+| `/api/*path`     | strip-prefix `/api`      | `/*path`                    | REST endpoints (`/health`, Stripe webhook from M2) |
+| `/graphql`       | none (exact passthrough) | `/graphql`                  | GraphQL BFF |
+
+In production this lives in Dokploy's own domain settings and exists
+nowhere in this repo; `infra/traefik/dynamic.yml` mirrors it locally so
+the split is rehearsed before it is configured for real.

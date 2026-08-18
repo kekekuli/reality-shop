@@ -16,7 +16,7 @@ the only main line.
 ## Product shape
 - A simplified e-commerce site. Category decided: single vertical —
   consumer electronics (3C), with the data model designed to be
-  multi-category extensible (see ADR-008).
+  multi-category extensible (see ALTERNATIVES.md).
 - Must support web and mobile (possibly desktop); approach in ARCHITECTURE.md.
 
 ## The eight capability domains (everything a user-facing service needs)

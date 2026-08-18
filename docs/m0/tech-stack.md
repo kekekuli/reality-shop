@@ -1,19 +1,19 @@
 # M0 · Multi-Platform Tech Plan
 
 Deliverable ⑤. Finalizes the "leanings" in ARCHITECTURE.md into
-decisions; rationale lives in ADR-010…014.
+decisions; rationale lives in ADR-011…014.
 
 ## Stack summary
 
 | Layer | Choice | Decision |
 |-------|--------|----------|
-| Web app | Next.js (App Router) | ADR-010 |
-| Mobile app | Expo / React Native | ADR-010 |
-| Desktop | Tauri — only if ever needed, no M0 commitment | ADR-010 |
-| Backend | NestJS, modular monolith until M5 | ADR-010 / ADR-014 |
+| Web app | Next.js (App Router) | M0 (this doc) |
+| Mobile app | Expo / React Native | M0 (this doc) |
+| Desktop | Tauri — only if ever needed, no M0 commitment | M0 (this doc) |
+| Backend | NestJS, modular monolith until M5 | ADR-014 |
 | Client API | GraphQL at the BFF edge only | ADR-011 |
 | Database | PostgreSQL (`ecommerce`, isolated from Strapi) | ARCHITECTURE |
-| Delayed tasks | BullMQ + Redis | ADR-009 / ADR-012 |
+| Delayed tasks | BullMQ + Redis | ADR-009 |
 | Auth | JWT (15 min) + rotating refresh tokens in Redis | ADR-013 |
 | Content | Strapi (editorial content / banners / promo assets) | ADR-007 |
 | Observability | OpenTelemetry → existing OpenObserve | ADR-004, M4 |
@@ -104,7 +104,7 @@ logout / revoke: delete refresh-token hash in Redis
 Refresh-token **reuse detection** (invalidate the whole family on
 replay) is noted for M6; M2 ships plain rotation.
 
-## Delayed-task setup (ADR-009 / ADR-012)
+## Delayed-task setup (ADR-009)
 
 - Queues: `order-timeout`, `mock-shipment`, `logistics-trace`
   (+ reserved `auto-confirm`).

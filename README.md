@@ -33,7 +33,8 @@ gated migrations → deploy webhook), live and serving real seeded data.
 |-----|--------------|
 | [PRODUCT_PLAN.md](PRODUCT_PLAN.md) | Goals, capability domains, milestone roadmap |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Stack, repo layout, existing environment, isolation strategy |
-| [DECISIONS.md](DECISIONS.md) | ADRs — every significant decision and its why |
+| [DECISIONS.md](DECISIONS.md) | Decisions not yet built, and questions still open |
+| [ALTERNATIVES.md](ALTERNATIVES.md) | Options weighed and turned down — consulted only when reopening a settled choice |
 | [docs/m0/user-journey.md](docs/m0/user-journey.md) | Core user journeys, journey→milestone mapping |
 | [docs/m0/business-flows.md](docs/m0/business-flows.md) | Order state machine, payment/logistics flows, task reliability |
 | [docs/m0/data-model.md](docs/m0/data-model.md) | ER model, table definitions, conventions |

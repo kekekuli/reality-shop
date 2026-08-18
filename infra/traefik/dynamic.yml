@@ -1,4 +1,4 @@
-# Mirrors the routing table settled in DECISIONS.md ADR-020, so the
+# Mirrors the routing table in ARCHITECTURE.md, so the
 # same-origin split (and the /api strip-prefix behavior specifically)
 # gets exercised locally before it's ever configured in Dokploy.
 #
