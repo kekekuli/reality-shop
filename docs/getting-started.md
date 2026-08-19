@@ -23,6 +23,12 @@ Copy `services/api/.env.example` → `.env` and
 `apps/web/.env.local.example` → `.env.local` if you need to override
 anything `db:init` doesn't set for you.
 
+The api validates its environment at boot (`services/api/src/env.ts`)
+and will not start without `DATABASE_URL`, `REDIS_URL` and a
+`JWT_SECRET` of at least 32 characters — `db:init` only provides the
+first. Generate the secret with `openssl rand -base64 48`. Everything
+else has a default.
+
 Once running:
 
 | Port | What |

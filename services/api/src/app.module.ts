@@ -2,6 +2,7 @@ import { Module } from "@nestjs/common";
 import { AppController } from "./app.controller";
 import { PrismaModule } from "./prisma/prisma.module";
 import { GraphQLModule } from "@nestjs/graphql";
+import { env } from "./env";
 import { ApolloDriver, ApolloDriverConfig } from "@nestjs/apollo";
 import { join } from "node:path";
 import { CatalogBffModule } from "./bff/catalog/catalog-bff.module";
@@ -21,9 +22,8 @@ import { createSkusLoader } from "./bff/catalog/sku.loader";
       useFactory: (skuService: SkuService) => ({
         autoSchemaFile: join(process.cwd(), "src/schema.gql"),
         sortSchema: true,
-        introspection: process.env.NODE_ENV !== "production",
-        includeStacktraceInErrorResponses:
-          process.env.NODE_ENV !== "production",
+        introspection: env.NODE_ENV !== "production",
+        includeStacktraceInErrorResponses: env.NODE_ENV !== "production",
         context: () => ({
           skusLoader: createSkusLoader(skuService),
         }),
