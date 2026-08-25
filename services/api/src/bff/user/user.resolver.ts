@@ -1,13 +1,14 @@
 import { Resolver, Mutation, Args } from "@nestjs/graphql";
 import { User } from "./user.type";
-import { LoginPayload, RegisterPayload } from "./auth.type";
+import { LoginPayload, RefreshPayload, RegisterPayload } from "./auth.type";
 import { RegisterInput, LoginInput } from "./auth.input";
 import { UserService } from "../../modules/user/user.service";
 import { SessionService } from "../../modules/auth/session.service";
 import { toUser } from "./user.mapper";
 import { Context } from "@nestjs/graphql";
-import { setAuthCookies } from "./auth-cookie";
-import type { Response } from "express";
+import { clearAuthCookies, REFRESH_KEY, setAuthCookies } from "./auth-cookie";
+import type { Request, Response } from "express";
+import { ErrorCode } from "../../common/errors/error-code";
 
 @Resolver(() => User)
 export class UserResolver {
@@ -66,5 +67,44 @@ export class UserResolver {
     return {
       errors: [{ code: res.code, message: "Invalid credentials" }],
     };
+  }
+
+  @Mutation(() => RefreshPayload)
+  async refresh(
+    @Context("res") response: Response,
+    @Context("req") request: Request,
+  ): Promise<RefreshPayload> {
+    const refreshToken = request.cookies?.[REFRESH_KEY];
+
+    const failedPath = () => {
+      clearAuthCookies(response);
+      return {
+        errors: [
+          {
+            code: ErrorCode.INVALID_REFRESH_TOKEN,
+            message: "Invalid refresh token",
+          },
+        ],
+      };
+    };
+
+    if (typeof refreshToken !== "string" || !refreshToken) {
+      return failedPath();
+    }
+
+    const res = await this.sessionService.rotateRefreshToken(refreshToken);
+
+    if (res) {
+      setAuthCookies(response, res);
+
+      return {
+        data: {
+          refreshed: true,
+        },
+        errors: [],
+      };
+    }
+
+    return failedPath();
   }
 }

@@ -33,6 +33,7 @@ type LoginPayload {
 
 type Mutation {
   login(input: LoginInput!): LoginPayload!
+  refresh: RefreshPayload!
   register(input: RegisterInput!): RegisterPayload!
 }
 
@@ -62,6 +63,15 @@ type ProductEdge {
 
 type Query {
   products(after: String, first: Int! = 20): ProductConnection!
+}
+
+type RefreshPayload {
+  data: RefreshType
+  errors: [BusinessError!]!
+}
+
+type RefreshType {
+  refreshed: Boolean!
 }
 
 input RegisterInput {
