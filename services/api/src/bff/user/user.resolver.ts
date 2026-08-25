@@ -1,7 +1,7 @@
 import { Resolver, Mutation, Args } from "@nestjs/graphql";
 import { User } from "./user.type";
-import { RegisterPayload } from "./auth.type";
-import { RegisterInput } from "./auth.input";
+import { LoginPayload, RegisterPayload } from "./auth.type";
+import { RegisterInput, LoginInput } from "./auth.input";
 import { UserService } from "../../modules/user/user.service";
 import { SessionService } from "../../modules/auth/session.service";
 import { toUser } from "./user.mapper";
@@ -41,6 +41,30 @@ export class UserResolver {
 
     return {
       errors: [{ code: res.code, message: "Email is already registered" }],
+    };
+  }
+
+  @Mutation(() => LoginPayload)
+  async login(
+    @Args("input") input: LoginInput,
+    @Context("res") response: Response,
+  ): Promise<LoginPayload> {
+    const res = await this.userService.login(input.email, input.password);
+
+    if (res.ok) {
+      const pair = await this.sessionService.createTokenPair(res.user.id);
+      setAuthCookies(response, pair);
+
+      return {
+        data: {
+          user: toUser(res.user),
+        },
+        errors: [],
+      };
+    }
+
+    return {
+      errors: [{ code: res.code, message: "Invalid credentials" }],
     };
   }
 }

@@ -16,3 +16,15 @@ export class RegisterInput {
   @MinLength(1)
   displayName!: string;
 }
+
+@InputType()
+export class LoginInput {
+  @Field(() => String)
+  @IsEmail()
+  email!: string;
+
+  @Field(() => String)
+  @MinLength(8)
+  @MaxLength(32)
+  password!: string;
+}

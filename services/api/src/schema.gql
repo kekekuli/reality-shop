@@ -21,7 +21,18 @@ enum ErrorCode {
   INVALID_REFRESH_TOKEN
 }
 
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+type LoginPayload {
+  data: AuthType
+  errors: [BusinessError!]!
+}
+
 type Mutation {
+  login(input: LoginInput!): LoginPayload!
   register(input: RegisterInput!): RegisterPayload!
 }
 
