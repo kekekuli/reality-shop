@@ -10,6 +10,7 @@ import { UserBffModule } from "./bff/user/user-bff.module";
 import { CatalogModule } from "./modules/catalog/catalog.module";
 import { SkuService } from "./modules/catalog/sku.service";
 import { createSkusLoader } from "./bff/catalog/sku.loader";
+import type { Response, Request } from "express";
 
 @Module({
   controllers: [AppController],
@@ -24,7 +25,9 @@ import { createSkusLoader } from "./bff/catalog/sku.loader";
         sortSchema: true,
         introspection: env.NODE_ENV !== "production",
         includeStacktraceInErrorResponses: env.NODE_ENV !== "production",
-        context: () => ({
+        context: ({ req, res }: { req: Request; res: Response }) => ({
+          req,
+          res,
           skusLoader: createSkusLoader(skuService),
         }),
       }),
