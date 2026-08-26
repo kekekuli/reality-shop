@@ -100,6 +100,23 @@ export class SessionService {
 
     return { userId: BigInt(userId) };
   }
+
+  async verifyAccessToken(accessToken: string): Promise<bigint | null> {
+    try {
+      const payload = await this.jwt.verifyAsync(accessToken);
+
+      if (
+        typeof payload.sub !== "string" ||
+        !/^[1-9]\d*$/.test(payload.sub)
+      ) {
+        return null;
+      }
+
+      return BigInt(payload.sub);
+    } catch {
+      return null;
+    }
+  }
 }
 
 type RefreshSession = {

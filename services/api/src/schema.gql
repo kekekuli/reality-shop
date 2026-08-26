@@ -72,6 +72,7 @@ type ProductEdge {
 }
 
 type Query {
+  me: User!
   products(after: String, first: Int! = 20): ProductConnection!
 }
 

@@ -1,4 +1,4 @@
-import { Resolver, Mutation, Args } from "@nestjs/graphql";
+import { Resolver, Mutation, Args, Query } from "@nestjs/graphql";
 import { User } from "./user.type";
 import {
   LoginPayload,
@@ -14,6 +14,8 @@ import { Context } from "@nestjs/graphql";
 import { clearAuthCookies, REFRESH_KEY, setAuthCookies } from "./auth-cookie";
 import type { Request, Response } from "express";
 import { ErrorCode } from "../../common/errors/error-code";
+import { UnauthorizedException, UseGuards } from "@nestjs/common";
+import { AuthenticatedRequest, GqlAuthGuard } from "./gql-auth.guard";
 
 @Resolver(() => User)
 export class UserResolver {
@@ -134,5 +136,17 @@ export class UserResolver {
       },
       errors: [],
     };
+  }
+
+  @Query(() => User)
+  @UseGuards(GqlAuthGuard)
+  async me(@Context("req") request: AuthenticatedRequest): Promise<User> {
+    const userId = request.auth!.userId;
+
+    const user = await this.userService.findActiveById(userId);
+
+    if (!user) throw new UnauthorizedException();
+
+    return toUser(user);
   }
 }

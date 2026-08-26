@@ -14,8 +14,7 @@ type SafeUser = {
 };
 
 export type RegisterResult =
-  | { ok: true; user: SafeUser }
-  | { ok: false; code: ErrorCode };
+  { ok: true; user: SafeUser } | { ok: false; code: ErrorCode };
 
 export type LoginResult =
   | { ok: true; user: SafeUser }
@@ -103,5 +102,19 @@ export class UserService {
         displayName: user.displayName,
       },
     };
+  }
+
+  async findActiveById(id: bigint): Promise<SafeUser | null> {
+    return this.prisma.user.findFirst({
+      where: {
+        id,
+        status: ACTIVE_STATUS,
+      },
+      select: {
+        id: true,
+        email: true,
+        displayName: true,
+      },
+    });
   }
 }
