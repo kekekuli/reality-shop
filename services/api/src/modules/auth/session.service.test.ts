@@ -30,7 +30,9 @@ describe("SessionService.rotateRefreshToken", () => {
       {} as JwtService,
     );
 
-    await expect(service.rotateRefreshToken("token-id.wrong-secret")).resolves.toBeNull();
+    await expect(
+      service.rotateRefreshToken("token-id.wrong-secret"),
+    ).resolves.toBeNull();
     expect(redis.getDel).not.toHaveBeenCalled();
   });
 
@@ -45,8 +47,50 @@ describe("SessionService.rotateRefreshToken", () => {
       {} as JwtService,
     );
 
-    await expect(service.rotateRefreshToken("token-id.valid-secret")).resolves.toBeNull();
+    await expect(
+      service.rotateRefreshToken("token-id.valid-secret"),
+    ).resolves.toBeNull();
     expect(redis.getDel).toHaveBeenCalledWith("auth:refresh:token-id");
+  });
+});
+
+describe("SessionService.verifyAccessToken", () => {
+  function createService(verifyAsync: ReturnType<typeof vi.fn>) {
+    return new SessionService({} as RedisService, {
+      verifyAsync,
+    } as unknown as JwtService);
+  }
+
+  it("returns the bigint user id from a valid subject", async () => {
+    const verifyAsync = vi.fn().mockResolvedValue({ sub: "42" });
+
+    await expect(
+      createService(verifyAsync).verifyAccessToken("valid-token"),
+    ).resolves.toBe(42n);
+  });
+
+  it("returns null when JWT verification fails", async () => {
+    const verifyAsync = vi.fn().mockRejectedValue(new Error("expired"));
+
+    await expect(
+      createService(verifyAsync).verifyAccessToken("expired-token"),
+    ).resolves.toBeNull();
+  });
+
+  it.each([
+    ["missing", undefined],
+    ["numeric", 42],
+    ["empty", ""],
+    ["zero", "0"],
+    ["negative", "-1"],
+    ["decimal", "1.5"],
+    ["non-numeric", "user-42"],
+  ])("returns null for a %s subject", async (_case, sub) => {
+    const verifyAsync = vi.fn().mockResolvedValue({ sub });
+
+    await expect(
+      createService(verifyAsync).verifyAccessToken("invalid-token"),
+    ).resolves.toBeNull();
   });
 });
 
