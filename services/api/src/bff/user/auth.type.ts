@@ -29,3 +29,11 @@ export class RefreshType {
 
 @ObjectType()
 export class RefreshPayload extends MutationPayload(RefreshType) {}
+
+@ObjectType()
+export class LogoutType {
+  @Field(() => Boolean)
+  loggedOut!: boolean;
+}
+@ObjectType()
+export class LogoutPayload extends MutationPayload(LogoutType) {}

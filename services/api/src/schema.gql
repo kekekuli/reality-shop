@@ -31,8 +31,18 @@ type LoginPayload {
   errors: [BusinessError!]!
 }
 
+type LogoutPayload {
+  data: LogoutType
+  errors: [BusinessError!]!
+}
+
+type LogoutType {
+  loggedOut: Boolean!
+}
+
 type Mutation {
   login(input: LoginInput!): LoginPayload!
+  logout: LogoutPayload!
   refresh: RefreshPayload!
   register(input: RegisterInput!): RegisterPayload!
 }

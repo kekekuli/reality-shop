@@ -1,6 +1,11 @@
 import { Resolver, Mutation, Args } from "@nestjs/graphql";
 import { User } from "./user.type";
-import { LoginPayload, RefreshPayload, RegisterPayload } from "./auth.type";
+import {
+  LoginPayload,
+  LogoutPayload,
+  RefreshPayload,
+  RegisterPayload,
+} from "./auth.type";
 import { RegisterInput, LoginInput } from "./auth.input";
 import { UserService } from "../../modules/user/user.service";
 import { SessionService } from "../../modules/auth/session.service";
@@ -106,5 +111,28 @@ export class UserResolver {
     }
 
     return failedPath();
+  }
+
+  @Mutation(() => LogoutPayload)
+  async logout(
+    @Context("req") request: Request,
+    @Context("res") response: Response,
+  ): Promise<LogoutPayload> {
+    const refreshToken = request.cookies?.[REFRESH_KEY];
+
+    try {
+      if (typeof refreshToken === "string" && refreshToken) {
+        await this.sessionService.revokeRefreshToken(refreshToken);
+      }
+    } finally {
+      clearAuthCookies(response);
+    }
+
+    return {
+      data: {
+        loggedOut: true,
+      },
+      errors: [],
+    };
   }
 }
