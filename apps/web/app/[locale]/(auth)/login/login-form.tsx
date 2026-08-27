@@ -20,7 +20,6 @@ export function LoginForm() {
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    // TODO: Execute LoginMutation and handle its result.
   }
 
   return (
@@ -57,7 +56,7 @@ export function LoginForm() {
       </CardContent>
 
       <CardFooter className="justify-center text-sm text-muted-foreground">
-        {t("noAccount")} {" "}
+        {t("noAccount")}{" "}
         <Link
           className="ml-1 font-medium text-foreground underline-offset-4 hover:underline"
           href="/register"
