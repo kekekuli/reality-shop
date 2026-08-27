@@ -10,5 +10,26 @@
     "title": "Products",
     "priceFrom": "From {price}",
     "noPrice": "Unavailable"
+  },
+  "auth": {
+    "login": {
+      "title": "Welcome back",
+      "description": "Sign in to continue to Reality Shop.",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign in",
+      "noAccount": "New to Reality Shop?",
+      "register": "Create an account"
+    },
+    "register": {
+      "title": "Create your account",
+      "description": "Join Reality Shop to start shopping.",
+      "displayName": "Display name",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Create account",
+      "hasAccount": "Already have an account?",
+      "login": "Sign in"
+    }
   }
 }
