@@ -20,3 +20,20 @@ export class RegisterPayload extends MutationPayload(AuthType) {}
 
 @ObjectType()
 export class LoginPayload extends MutationPayload(AuthType) {}
+
+@ObjectType()
+export class RefreshType {
+  @Field(() => Boolean)
+  refreshed!: boolean;
+}
+
+@ObjectType()
+export class RefreshPayload extends MutationPayload(RefreshType) {}
+
+@ObjectType()
+export class LogoutType {
+  @Field(() => Boolean)
+  loggedOut!: boolean;
+}
+@ObjectType()
+export class LogoutPayload extends MutationPayload(LogoutType) {}

@@ -21,7 +21,29 @@ enum ErrorCode {
   INVALID_REFRESH_TOKEN
 }
 
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+type LoginPayload {
+  data: AuthType
+  errors: [BusinessError!]!
+}
+
+type LogoutPayload {
+  data: LogoutType
+  errors: [BusinessError!]!
+}
+
+type LogoutType {
+  loggedOut: Boolean!
+}
+
 type Mutation {
+  login(input: LoginInput!): LoginPayload!
+  logout: LogoutPayload!
+  refresh: RefreshPayload!
   register(input: RegisterInput!): RegisterPayload!
 }
 
@@ -50,7 +72,17 @@ type ProductEdge {
 }
 
 type Query {
+  me: User!
   products(after: String, first: Int! = 20): ProductConnection!
+}
+
+type RefreshPayload {
+  data: RefreshType
+  errors: [BusinessError!]!
+}
+
+type RefreshType {
+  refreshed: Boolean!
 }
 
 input RegisterInput {

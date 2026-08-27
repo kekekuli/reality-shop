@@ -8,7 +8,7 @@ Prerequisites: Node (see `.nvmrc`), pnpm (version pinned via
 ```
 pnpm install
 pnpm db:init   # bootstraps a disposable local Postgres and applies migrations
-pnpm dev       # starts web + api + a local Traefik rehearsing prod routing
+pnpm dev       # starts web + api + local Traefik + Redis
 ```
 
 `pnpm db:init` (`scripts/db-init.mjs`) is dev-only: if `DATABASE_URL`
@@ -40,8 +40,9 @@ Once running:
 
 `compose.dev.yaml` (Postgres, this local Traefik, and Redis) exists
 purely for local convenience and rehearsal — it is not what gets
-deployed. Redis backs BullMQ and refresh tokens from M2 onward and is
-outside `db:init`'s scope: start it with `docker compose up redis -d`.
+deployed. `pnpm dev` owns the Traefik and Redis container lifecycle;
+both containers stop with the dev session, while Redis data survives in
+its named volume. Redis remains outside `db:init`'s scope.
 
 ## Deployment
 
