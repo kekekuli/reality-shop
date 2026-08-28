@@ -7,12 +7,15 @@
     "codegen": "graphql-codegen",
     "build": "next build",
     "start": "next start -p 6767",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@apollo/client": "^4.2.12",
     "@base-ui/react": "^1.7.0",
     "@graphql-typed-document-node/core": "^3.2.0",
+    "@hookform/resolvers": "^5.9.1",
     "@t3-oss/env-nextjs": "^0.13.11",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -22,6 +25,7 @@
     "next-intl": "^4.13.4",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "react-hook-form": "^7.86.0",
     "rxjs": "^7.8.2",
     "shadcn": "^4.19.0",
     "tailwind-merge": "^3.6.0",
@@ -32,12 +36,17 @@
     "@graphql-codegen/cli": "^7.2.0",
     "@graphql-codegen/client-preset": "^6.1.0",
     "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.6",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.12",
+    "jsdom": "^30.0.1",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.10"
   }
 }

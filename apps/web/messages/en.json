@@ -12,12 +12,27 @@
     "noPrice": "Unavailable"
   },
   "auth": {
+    "validation": {
+      "invalidEmail": "Enter a valid email address.",
+      "passwordRequired": "Enter your password.",
+      "passwordInputTooLong": "Password input is too long.",
+      "passwordTooShort": "Password must be at least 8 characters.",
+      "passwordTooLong": "Password must be 32 characters or fewer.",
+      "displayNameRequired": "Enter a display name.",
+      "displayNameTooLong": "Display name must be 50 characters or fewer."
+    },
+    "error": {
+      "INVALID_CREDENTIALS": "Invalid email or password.",
+      "network": "Unable to connect. Please try again.",
+      "unexpected": "Something went wrong. Please try again."
+    },
     "login": {
       "title": "Welcome back",
       "description": "Sign in to continue to Reality Shop.",
       "email": "Email",
       "password": "Password",
       "submit": "Sign in",
+      "submitting": "Signing in…",
       "noAccount": "New to Reality Shop?",
       "register": "Create an account"
     },
