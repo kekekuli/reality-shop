@@ -67,7 +67,7 @@ export function RegisterForm() {
       }
 
       if (payload?.data) {
-        router.replace("/");
+        router.replace("/account");
         return;
       }
 

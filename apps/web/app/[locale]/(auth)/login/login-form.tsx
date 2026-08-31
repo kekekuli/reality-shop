@@ -68,7 +68,7 @@ export function LoginForm() {
       }
 
       if (payload?.data) {
-        router.replace("/");
+        router.replace("/account");
         return;
       }
 

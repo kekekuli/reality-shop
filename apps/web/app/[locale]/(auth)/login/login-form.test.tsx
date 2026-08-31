@@ -197,6 +197,6 @@ describe("LoginForm", () => {
 
     await submitCredentials(user);
 
-    expect(replace).toHaveBeenCalledWith("/");
+    expect(replace).toHaveBeenCalledWith("/account");
   });
 });

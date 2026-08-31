@@ -8,8 +8,17 @@
   },
   "catalog": {
     "title": "Products",
+    "account": "My account",
     "priceFrom": "From {price}",
     "noPrice": "Unavailable"
+  },
+  "account": {
+    "title": "Your account",
+    "displayName": "Display name",
+    "email": "Email",
+    "backToShop": "Back to products",
+    "logout": "Sign out",
+    "loggingOut": "Signing out…"
   },
   "auth": {
     "validation": {

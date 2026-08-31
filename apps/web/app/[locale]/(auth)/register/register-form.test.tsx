@@ -208,6 +208,6 @@ describe("RegisterForm", () => {
 
     await submitAccount(user);
 
-    expect(replace).toHaveBeenCalledWith("/");
+    expect(replace).toHaveBeenCalledWith("/account");
   });
 });

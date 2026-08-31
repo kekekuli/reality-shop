@@ -8,8 +8,17 @@
   },
   "catalog": {
     "title": "商品",
+    "account": "我的账号",
     "priceFrom": "{price} 起",
     "noPrice": "暂无报价"
+  },
+  "account": {
+    "title": "你的账号",
+    "displayName": "显示名称",
+    "email": "邮箱",
+    "backToShop": "返回商品列表",
+    "logout": "退出登录",
+    "loggingOut": "正在退出…"
   },
   "auth": {
     "validation": {
