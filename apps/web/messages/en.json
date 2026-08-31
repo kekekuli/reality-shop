@@ -22,6 +22,7 @@
       "displayNameTooLong": "Display name must be 50 characters or fewer."
     },
     "error": {
+      "EMAIL_ALREADY_TAKEN": "An account with this email already exists.",
       "INVALID_CREDENTIALS": "Invalid email or password.",
       "network": "Unable to connect. Please try again.",
       "unexpected": "Something went wrong. Please try again."
@@ -43,6 +44,7 @@
       "email": "Email",
       "password": "Password",
       "submit": "Create account",
+      "submitting": "Creating account…",
       "hasAccount": "Already have an account?",
       "login": "Sign in"
     }
