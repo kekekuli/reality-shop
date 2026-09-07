@@ -10,12 +10,13 @@
 # routing. Configure the /, /api/*, /graphql split (ARCHITECTURE.md) in
 # Dokploy's domain settings for this project, not here.
 #
-# DATABASE_URL and SITE_URL are set through Dokploy's own environment
-# variables UI for this project, never committed here — ${VAR} below is
-# resolved from whatever Dokploy injects at deploy time.
+# DATABASE_URL, JWT_SECRET, and SITE_URL are set through Dokploy's own
+# environment variables UI for this project, never committed here — ${VAR}
+# below is resolved from whatever Dokploy injects at deploy time.
 services:
   reality-shop-web:
     image: ghcr.io/kekekuli/reality-shop-web:latest
+    pull_policy: always
     restart: unless-stopped
     environment:
       # The api service's own key below — structural, not a secret, so
@@ -27,7 +28,29 @@ services:
 
   reality-shop-api:
     image: ghcr.io/kekekuli/reality-shop-api:latest
+    pull_policy: always
     restart: unless-stopped
+    depends_on:
+      reality-shop-redis:
+        condition: service_healthy
     environment:
       DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: redis://reality-shop-redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+      NODE_ENV: production
       PORT: 7676
+
+  reality-shop-redis:
+    image: redis:8.10-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory-policy", "noeviction"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    volumes:
+      - redis:/data
+
+volumes:
+  redis:
