@@ -1,8 +1,8 @@
 # Build context must be the repo root, e.g.:
 #   docker build -f services/api/Dockerfile .
-# Unlike @reality-shop/web, @reality-shop/api has a real workspace-package
-# dependency (@reality-shop/config), so turbo prune's output legitimately
-# includes packages/config alongside services/api this time.
+# Unlike @reality-shop/web, @reality-shop/api has workspace-package
+# dependencies, so turbo prune's output legitimately includes packages/config
+# and packages/shared-types alongside services/api.
 
 FROM node:22-slim AS base
 WORKDIR /app
@@ -50,6 +50,12 @@ USER node
 # keeps those symlinks valid, rather than trying to cherry-pick
 # individual node_modules subpaths and risking a broken link target.
 COPY --from=runtime-deps --chown=node:node /app/ ./
+
+# @reality-shop/shared-types now exports a runtime value (AUTH_COOKIE), so the
+# API's compiled CommonJS output requires its built JavaScript at startup. The
+# runtime-deps stage contains the pnpm workspace symlink and package manifest;
+# complete that package with the build artifact from the builder stage.
+COPY --from=builder --chown=node:node /app/packages/shared-types/dist ./packages/shared-types/dist
 
 # dist/ already contains the compiled generated Prisma client
 # (dist/generated/prisma) as part of the normal build output — verified
