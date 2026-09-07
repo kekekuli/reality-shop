@@ -6,3 +6,8 @@ export type ProductStatus = "draft" | "on_sale" | "off_shelf";
 export type SkuStatus = "on_sale" | "off_shelf";
 export type CategoryStatus = "visible" | "hidden";
 export type UserStatus = "active" | "disabled";
+
+export const AUTH_COOKIE = {
+  access: "access_token",
+  refresh: "refresh_token",
+} as const;

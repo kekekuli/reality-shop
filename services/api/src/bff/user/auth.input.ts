@@ -14,6 +14,7 @@ export class RegisterInput {
 
   @Field(() => String)
   @MinLength(1)
+  @MaxLength(50)
   displayName!: string;
 }
 
@@ -24,7 +25,7 @@ export class LoginInput {
   email!: string;
 
   @Field(() => String)
-  @MinLength(8)
-  @MaxLength(32)
+  @MinLength(1)
+  @MaxLength(256)
   password!: string;
 }

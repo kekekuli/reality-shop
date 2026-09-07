@@ -11,7 +11,8 @@ import { UserService } from "../../modules/user/user.service";
 import { SessionService } from "../../modules/auth/session.service";
 import { toUser } from "./user.mapper";
 import { Context } from "@nestjs/graphql";
-import { clearAuthCookies, REFRESH_KEY, setAuthCookies } from "./auth-cookie";
+import { AUTH_COOKIE } from "@reality-shop/shared-types";
+import { clearAuthCookies, setAuthCookies } from "./auth-cookie";
 import type { Request, Response } from "express";
 import { ErrorCode } from "../../common/errors/error-code";
 import { UnauthorizedException, UseGuards } from "@nestjs/common";
@@ -81,7 +82,7 @@ export class UserResolver {
     @Context("res") response: Response,
     @Context("req") request: Request,
   ): Promise<RefreshPayload> {
-    const refreshToken = request.cookies?.[REFRESH_KEY];
+    const refreshToken = request.cookies?.[AUTH_COOKIE.refresh];
 
     const failedPath = () => {
       clearAuthCookies(response);
@@ -99,10 +100,11 @@ export class UserResolver {
       return failedPath();
     }
 
-    const res = await this.sessionService.rotateRefreshToken(refreshToken);
+    const tokenPair =
+      await this.sessionService.rotateRefreshToken(refreshToken);
 
-    if (res) {
-      setAuthCookies(response, res);
+    if (tokenPair) {
+      setAuthCookies(response, tokenPair);
 
       return {
         data: {
@@ -120,7 +122,7 @@ export class UserResolver {
     @Context("req") request: Request,
     @Context("res") response: Response,
   ): Promise<LogoutPayload> {
-    const refreshToken = request.cookies?.[REFRESH_KEY];
+    const refreshToken = request.cookies?.[AUTH_COOKIE.refresh];
 
     try {
       if (typeof refreshToken === "string" && refreshToken) {

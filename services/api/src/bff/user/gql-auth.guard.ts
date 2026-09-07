@@ -5,8 +5,8 @@ import {
   UnauthorizedException,
 } from "@nestjs/common";
 import { GqlExecutionContext } from "@nestjs/graphql";
+import { AUTH_COOKIE } from "@reality-shop/shared-types";
 import type { Request } from "express";
-import { ACCESS_KEY } from "./auth-cookie";
 import { SessionService } from "../../modules/auth/session.service";
 
 export type AuthenticatedRequest = Request & {
@@ -42,7 +42,7 @@ export class GqlAuthGuard implements CanActivate {
       return match?.[1] ?? null;
     }
 
-    const cookieToken = request.cookies?.[ACCESS_KEY];
+    const cookieToken = request.cookies?.[AUTH_COOKIE.access];
 
     return typeof cookieToken === "string" && cookieToken.length > 0
       ? cookieToken

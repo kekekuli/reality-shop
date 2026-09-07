@@ -8,7 +8,54 @@
   },
   "catalog": {
     "title": "商品",
+    "account": "我的账号",
     "priceFrom": "{price} 起",
     "noPrice": "暂无报价"
+  },
+  "account": {
+    "title": "你的账号",
+    "displayName": "显示名称",
+    "email": "邮箱",
+    "backToShop": "返回商品列表",
+    "logout": "退出登录",
+    "loggingOut": "正在退出…"
+  },
+  "auth": {
+    "validation": {
+      "invalidEmail": "请输入有效的邮箱地址。",
+      "passwordRequired": "请输入密码。",
+      "passwordInputTooLong": "输入的密码过长。",
+      "passwordTooShort": "密码至少需要 8 个字符。",
+      "passwordTooLong": "密码不能超过 32 个字符。",
+      "displayNameRequired": "请输入显示名称。",
+      "displayNameTooLong": "显示名称不能超过 50 个字符。"
+    },
+    "error": {
+      "EMAIL_ALREADY_TAKEN": "该邮箱已注册账号。",
+      "INVALID_CREDENTIALS": "邮箱或密码错误。",
+      "network": "无法连接服务器，请重试。",
+      "unexpected": "出现错误，请重试。"
+    },
+    "login": {
+      "title": "欢迎回来",
+      "description": "登录后继续访问 Reality Shop。",
+      "email": "邮箱",
+      "password": "密码",
+      "submit": "登录",
+      "submitting": "正在登录…",
+      "noAccount": "还没有 Reality Shop 账号？",
+      "register": "创建账号"
+    },
+    "register": {
+      "title": "创建账号",
+      "description": "加入 Reality Shop，开始购物。",
+      "displayName": "显示名称",
+      "email": "邮箱",
+      "password": "密码",
+      "submit": "创建账号",
+      "submitting": "正在创建账号…",
+      "hasAccount": "已经有账号？",
+      "login": "登录"
+    }
   }
 }

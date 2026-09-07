@@ -1,8 +1,8 @@
 import { ExecutionContext, UnauthorizedException } from "@nestjs/common";
 import { GqlExecutionContext } from "@nestjs/graphql";
+import { AUTH_COOKIE } from "@reality-shop/shared-types";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { SessionService } from "../../modules/auth/session.service";
-import { ACCESS_KEY } from "./auth-cookie";
 import {
   AuthenticatedRequest,
   GqlAuthGuard,
@@ -23,7 +23,7 @@ function requestWith({
 }): AuthenticatedRequest {
   return {
     get: vi.fn().mockReturnValue(authorization),
-    cookies: cookie === undefined ? {} : { [ACCESS_KEY]: cookie },
+    cookies: cookie === undefined ? {} : { [AUTH_COOKIE.access]: cookie },
   } as unknown as AuthenticatedRequest;
 }
 

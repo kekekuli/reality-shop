@@ -10,11 +10,14 @@ import { spawn, spawnSync } from "node:child_process";
 
 const devServices = ["traefik", "redis"];
 
-spawnSync(
+const infrastructure = spawnSync(
   "docker",
   ["compose", "-f", "compose.dev.yaml", "up", "-d", ...devServices],
   { stdio: "inherit" },
 );
+
+if (infrastructure.error) throw infrastructure.error;
+if (infrastructure.status !== 0) process.exit(infrastructure.status ?? 1);
 
 const child = spawn("turbo", ["dev"], { stdio: "inherit" });
 

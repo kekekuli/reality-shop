@@ -9,3 +9,6 @@ dist/
 .next/
 .env
 
+# Playwright
+playwright-report/
+test-results/

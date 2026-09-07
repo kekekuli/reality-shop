@@ -1,17 +1,31 @@
 import { getTranslations } from "next-intl/server";
+import Link from "next/link";
+import { getPathname } from "@/i18n/navigation";
+import { buttonVariants } from "@/components/ui/button";
 import { gqlFetch } from "@/lib/graphql/client";
 import { ProductsQuery } from "@/lib/graphql/queries";
 import { lowestPrice } from "@/lib/format";
 
-export default async function Home() {
+export default async function Home({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
   const t = await getTranslations("catalog");
   const data = await gqlFetch(ProductsQuery);
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
-      <h1 className="mb-6 text-2xl font-semibold tracking-tight">
-        {t("title")}
-      </h1>
+      <header className="mb-6 flex items-center justify-between gap-4">
+        <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
+        <Link
+          className={buttonVariants({ variant: "outline" })}
+          href={getPathname({ href: "/account", locale })}
+        >
+          {t("account")}
+        </Link>
+      </header>
 
       <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {data.products.edges.map(({ node }) => {
