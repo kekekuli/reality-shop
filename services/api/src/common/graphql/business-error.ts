@@ -10,7 +10,4 @@ registerEnumType(ErrorCode, {
 export class BusinessError {
   @Field(() => ErrorCode)
   code!: ErrorCode;
-
-  @Field(() => String)
-  message!: string;
 }

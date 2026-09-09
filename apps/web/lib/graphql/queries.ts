@@ -40,7 +40,6 @@ export const LoginMutation = graphql(`
       }
       errors {
         code
-        message
       }
     }
   }
@@ -58,7 +57,6 @@ export const RegisterMutation = graphql(`
       }
       errors {
         code
-        message
       }
     }
   }
@@ -72,7 +70,6 @@ export const RefreshMutation = graphql(`
       }
       errors {
         code
-        message
       }
     }
   }
@@ -86,7 +83,6 @@ export const LogoutMutation = graphql(`
       }
       errors {
         code
-        message
       }
     }
   }

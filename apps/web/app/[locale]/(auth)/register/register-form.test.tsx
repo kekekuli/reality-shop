@@ -168,7 +168,6 @@ describe("RegisterForm", () => {
         errors: [
           {
             code: "EMAIL_ALREADY_TAKEN",
-            message: "Server message must not be displayed",
           },
         ],
       }),
@@ -179,9 +178,6 @@ describe("RegisterForm", () => {
     expect(
       await screen.findByText(copy.error.EMAIL_ALREADY_TAKEN),
     ).toBeVisible();
-    expect(
-      screen.queryByText("Server message must not be displayed"),
-    ).not.toBeInTheDocument();
   });
 
   it("shows a localized network error", async () => {

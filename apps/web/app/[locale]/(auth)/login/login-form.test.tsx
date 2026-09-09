@@ -155,7 +155,6 @@ describe("LoginForm", () => {
         errors: [
           {
             code: "INVALID_CREDENTIALS",
-            message: "Server message must not be displayed",
           },
         ],
       }),
@@ -166,9 +165,6 @@ describe("LoginForm", () => {
     expect(
       await screen.findByText(copy.error.INVALID_CREDENTIALS),
     ).toBeVisible();
-    expect(
-      screen.queryByText("Server message must not be displayed"),
-    ).not.toBeInTheDocument();
   });
 
   it("shows a localized network error", async () => {

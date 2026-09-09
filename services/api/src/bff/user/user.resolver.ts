@@ -49,7 +49,7 @@ export class UserResolver {
     }
 
     return {
-      errors: [{ code: res.code, message: "Email is already registered" }],
+      errors: [{ code: res.code }],
     };
   }
 
@@ -73,7 +73,7 @@ export class UserResolver {
     }
 
     return {
-      errors: [{ code: res.code, message: "Invalid credentials" }],
+      errors: [{ code: res.code }],
     };
   }
 
@@ -90,7 +90,6 @@ export class UserResolver {
         errors: [
           {
             code: ErrorCode.INVALID_REFRESH_TOKEN,
-            message: "Invalid refresh token",
           },
         ],
       };

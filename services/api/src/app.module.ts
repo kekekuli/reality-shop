@@ -11,6 +11,7 @@ import { CatalogModule } from "./modules/catalog/catalog.module";
 import { SkuService } from "./modules/catalog/sku.service";
 import { createSkusLoader } from "./bff/catalog/sku.loader";
 import type { Response, Request } from "express";
+import { CartBffModule } from "./bff/cart/cart-bff.module";
 
 @Module({
   controllers: [AppController],
@@ -34,6 +35,7 @@ import type { Response, Request } from "express";
     }),
     CatalogBffModule,
     UserBffModule,
+    CartBffModule,
   ],
 })
 export class AppModule {}

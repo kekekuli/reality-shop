@@ -2,13 +2,27 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input AddCartItemInput {
+  quantity: Int!
+  skuId: String!
+}
+
+type AddCartItemPayload {
+  data: CartItemType
+  errors: [BusinessError!]!
+}
+
 type AuthType {
   user: User!
 }
 
 type BusinessError {
   code: ErrorCode!
-  message: String!
+}
+
+type CartItemType {
+  quantity: Int!
+  skuId: String!
 }
 
 """Cents scalar type"""
@@ -16,9 +30,12 @@ scalar Cents
 
 """Cause of an expected failure; clients render `error.<code>`."""
 enum ErrorCode {
+  CART_QUANTITY_LIMIT_EXCEED
   EMAIL_ALREADY_TAKEN
   INVALID_CREDENTIALS
+  INVALID_QUANTITY
   INVALID_REFRESH_TOKEN
+  SKU_NOT_FOUND
 }
 
 input LoginInput {
@@ -41,6 +58,7 @@ type LogoutType {
 }
 
 type Mutation {
+  addCartItem(input: AddCartItemInput!): AddCartItemPayload!
   login(input: LoginInput!): LoginPayload!
   logout: LogoutPayload!
   refresh: RefreshPayload!
