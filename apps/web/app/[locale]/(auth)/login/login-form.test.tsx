@@ -1,4 +1,9 @@
-import { ApolloClient, ApolloLink, InMemoryCache, Observable } from "@apollo/client";
+import {
+  ApolloClient,
+  ApolloLink,
+  InMemoryCache,
+  Observable,
+} from "@apollo/client";
 import { ApolloProvider } from "@apollo/client/react";
 import { MockLink } from "@apollo/client/testing";
 import { NextIntlClientProvider } from "next-intl";
@@ -27,7 +32,7 @@ const credentials = {
   email: "user@example.com",
   password: "correct-password",
 };
-const copy = messages.auth;
+const copy = { ...messages.auth, error: messages.error };
 
 function renderLogin(mocks: ReadonlyArray<MockLink.MockedResponse> = []) {
   const client = new ApolloClient({
@@ -37,7 +42,10 @@ function renderLogin(mocks: ReadonlyArray<MockLink.MockedResponse> = []) {
   const clearStore = vi.fn(client.clearStore.bind(client));
   client.clearStore = clearStore;
   const view = render(
-    <NextIntlClientProvider locale="en" messages={{ auth: messages.auth }}>
+    <NextIntlClientProvider
+      locale="en"
+      messages={{ auth: messages.auth, error: messages.error }}
+    >
       <ApolloProvider client={client}>
         <LoginForm />
       </ApolloProvider>
@@ -53,9 +61,7 @@ async function submitCredentials(user: ReturnType<typeof userEvent.setup>) {
     screen.getByLabelText(copy.login.password),
     credentials.password,
   );
-  await user.click(
-    screen.getByRole("button", { name: copy.login.submit }),
-  );
+  await user.click(screen.getByRole("button", { name: copy.login.submit }));
 }
 
 function loginMock(result: Record<string, unknown>, delay?: number) {
@@ -77,17 +83,10 @@ describe("LoginForm", () => {
     const user = userEvent.setup();
     renderLogin();
 
-    await user.type(
-      screen.getByLabelText(copy.login.email),
-      "invalid-email",
-    );
-    await user.click(
-      screen.getByRole("button", { name: copy.login.submit }),
-    );
+    await user.type(screen.getByLabelText(copy.login.email), "invalid-email");
+    await user.click(screen.getByRole("button", { name: copy.login.submit }));
 
-    expect(
-      await screen.findByText(copy.validation.invalidEmail),
-    ).toBeVisible();
+    expect(await screen.findByText(copy.validation.invalidEmail)).toBeVisible();
     expect(screen.getByText(copy.validation.passwordRequired)).toBeVisible();
   });
 
@@ -123,7 +122,10 @@ describe("LoginForm", () => {
     });
 
     render(
-      <NextIntlClientProvider locale="en" messages={{ auth: messages.auth }}>
+      <NextIntlClientProvider
+        locale="en"
+        messages={{ auth: messages.auth, error: messages.error }}
+      >
         <ApolloProvider client={client}>
           <LoginForm />
         </ApolloProvider>
@@ -181,10 +183,10 @@ describe("LoginForm", () => {
 
     await submitCredentials(user);
 
+    expect(await screen.findByText(copy.error.network)).toBeVisible();
     expect(
-      await screen.findByText(copy.error.network),
-    ).toBeVisible();
-    expect(screen.queryByText("private network detail")).not.toBeInTheDocument();
+      screen.queryByText("private network detail"),
+    ).not.toBeInTheDocument();
   });
 
   it("clears the cache before redirecting after successful login", async () => {
@@ -214,7 +216,9 @@ describe("LoginForm", () => {
   it("still redirects when cache clearing fails after login", async () => {
     const user = userEvent.setup();
     const cacheError = new Error("cache failure");
-    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+    const consoleError = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
     const { clearStore } = renderLogin([
       loginMock({
         data: {

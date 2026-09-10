@@ -33,11 +33,9 @@ const account = {
   email: "new-user@example.com",
   password: "correct-password",
 };
-const copy = messages.auth;
+const copy = { ...messages.auth, error: messages.error };
 
-function renderRegister(
-  mocks: ReadonlyArray<MockLink.MockedResponse> = [],
-) {
+function renderRegister(mocks: ReadonlyArray<MockLink.MockedResponse> = []) {
   const client = new ApolloClient({
     cache: new InMemoryCache(),
     link: new MockLink(mocks),
@@ -45,7 +43,10 @@ function renderRegister(
   const clearStore = vi.fn(client.clearStore.bind(client));
   client.clearStore = clearStore;
   const view = render(
-    <NextIntlClientProvider locale="en" messages={{ auth: messages.auth }}>
+    <NextIntlClientProvider
+      locale="en"
+      messages={{ auth: messages.auth, error: messages.error }}
+    >
       <ApolloProvider client={client}>
         <RegisterForm />
       </ApolloProvider>
@@ -65,9 +66,7 @@ async function submitAccount(user: ReturnType<typeof userEvent.setup>) {
     screen.getByLabelText(copy.register.password),
     account.password,
   );
-  await user.click(
-    screen.getByRole("button", { name: copy.register.submit }),
-  );
+  await user.click(screen.getByRole("button", { name: copy.register.submit }));
 }
 
 function registerMock(result: Record<string, unknown>) {
@@ -135,7 +134,10 @@ describe("RegisterForm", () => {
     });
 
     render(
-      <NextIntlClientProvider locale="en" messages={{ auth: messages.auth }}>
+      <NextIntlClientProvider
+        locale="en"
+        messages={{ auth: messages.auth, error: messages.error }}
+      >
         <ApolloProvider client={client}>
           <RegisterForm />
         </ApolloProvider>
@@ -195,7 +197,9 @@ describe("RegisterForm", () => {
     await submitAccount(user);
 
     expect(await screen.findByText(copy.error.network)).toBeVisible();
-    expect(screen.queryByText("private network detail")).not.toBeInTheDocument();
+    expect(
+      screen.queryByText("private network detail"),
+    ).not.toBeInTheDocument();
   });
 
   it("clears the cache before redirecting after successful registration", async () => {
@@ -225,7 +229,9 @@ describe("RegisterForm", () => {
   it("still redirects when cache clearing fails after registration", async () => {
     const user = userEvent.setup();
     const cacheError = new Error("cache failure");
-    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+    const consoleError = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
     const { clearStore } = renderRegister([
       registerMock({
         data: {

@@ -24,7 +24,7 @@ export function RegisterForm() {
   const router = useRouter();
   const t = useTranslations("auth.register");
   const validationT = useTranslations("auth.validation");
-  const errorT = useTranslations("auth.error");
+  const errorT = useTranslations("error");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const client = useApolloClient();
 
@@ -68,7 +68,10 @@ export function RegisterForm() {
         try {
           await client.clearStore();
         } catch (error) {
-          console.error("Failed to clear Apollo cache after registration", error);
+          console.error(
+            "Failed to clear Apollo cache after registration",
+            error,
+          );
         }
 
         router.replace("/account");
@@ -91,7 +94,11 @@ export function RegisterForm() {
       </CardHeader>
 
       <CardContent>
-        <form noValidate onSubmit={handleSubmit(onSubmit)}>
+        <form
+          noValidate
+          aria-busy={isSubmitting}
+          onSubmit={handleSubmit(onSubmit)}
+        >
           <FieldGroup>
             <TextField
               disabled={isSubmitting}

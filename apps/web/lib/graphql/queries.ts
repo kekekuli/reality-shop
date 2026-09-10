@@ -105,3 +105,17 @@ export const LogoutMutation = graphql(`
     }
   }
 `);
+
+export const AddCartItemMutation = graphql(`
+  mutation AddCartItem($input: AddCartItemInput!) {
+    addCartItem(input: $input) {
+      data {
+        quantity
+        skuId
+      }
+      errors {
+        code
+      }
+    }
+  }
+`);

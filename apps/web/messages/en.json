@@ -24,14 +24,23 @@
     "logout": "Sign out",
     "loggingOut": "Signing out…"
   },
+  "error": {
+    "EMAIL_ALREADY_TAKEN": "An account with this email already exists.",
+    "INVALID_CREDENTIALS": "Invalid email or password.",
+    "UNAUTHENTICATED": "Sign in to add items to your cart.",
+    "INVALID_QUANTITY": "Choose a valid quantity.",
+    "SKU_NOT_FOUND": "This product option is no longer available.",
+    "CART_QUANTITY_LIMIT_EXCEED": "You can add up to 99 of this item.",
+    "network": "Unable to connect. Please try again.",
+    "unexpected": "Something went wrong. Please try again."
+  },
   "cart": {
     "addItem": "Add to cart",
     "addingItem": "Adding…",
-    "error": {
-      "INVALID_QUANTITY": "Choose a valid quantity.",
-      "SKU_NOT_FOUND": "This product option is no longer available.",
-      "CART_QUANTITY_LIMIT_EXCEED": "You can add up to 99 of this item."
-    }
+    "addedItem": "Added {quantity} × {sku} to your cart.",
+    "quantity": "Quantity",
+    "decreaseQuantity": "Decrease quantity",
+    "increaseQuantity": "Increase quantity"
   },
   "auth": {
     "validation": {
@@ -42,12 +51,6 @@
       "passwordTooLong": "Password must be 32 characters or fewer.",
       "displayNameRequired": "Enter a display name.",
       "displayNameTooLong": "Display name must be 50 characters or fewer."
-    },
-    "error": {
-      "EMAIL_ALREADY_TAKEN": "An account with this email already exists.",
-      "INVALID_CREDENTIALS": "Invalid email or password.",
-      "network": "Unable to connect. Please try again.",
-      "unexpected": "Something went wrong. Please try again."
     },
     "login": {
       "title": "Welcome back",

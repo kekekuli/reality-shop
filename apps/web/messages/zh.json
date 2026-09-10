@@ -24,14 +24,23 @@
     "logout": "退出登录",
     "loggingOut": "正在退出…"
   },
+  "error": {
+    "EMAIL_ALREADY_TAKEN": "该邮箱已注册账号。",
+    "INVALID_CREDENTIALS": "邮箱或密码错误。",
+    "UNAUTHENTICATED": "请先登录，再将商品加入购物车。",
+    "INVALID_QUANTITY": "请选择有效的数量。",
+    "SKU_NOT_FOUND": "该商品选项已不可用。",
+    "CART_QUANTITY_LIMIT_EXCEED": "该商品最多可添加 99 件。",
+    "network": "无法连接服务器，请重试。",
+    "unexpected": "出现错误，请重试。"
+  },
   "cart": {
     "addItem": "加入购物车",
     "addingItem": "正在添加…",
-    "error": {
-      "INVALID_QUANTITY": "请选择有效的数量。",
-      "SKU_NOT_FOUND": "该商品选项已不可用。",
-      "CART_QUANTITY_LIMIT_EXCEED": "该商品最多可添加 99 件。"
-    }
+    "addedItem": "已将 {quantity} 件 {sku} 加入购物车。",
+    "quantity": "数量",
+    "decreaseQuantity": "减少数量",
+    "increaseQuantity": "增加数量"
   },
   "auth": {
     "validation": {
@@ -42,12 +51,6 @@
       "passwordTooLong": "密码不能超过 32 个字符。",
       "displayNameRequired": "请输入显示名称。",
       "displayNameTooLong": "显示名称不能超过 50 个字符。"
-    },
-    "error": {
-      "EMAIL_ALREADY_TAKEN": "该邮箱已注册账号。",
-      "INVALID_CREDENTIALS": "邮箱或密码错误。",
-      "network": "无法连接服务器，请重试。",
-      "unexpected": "出现错误，请重试。"
     },
     "login": {
       "title": "欢迎回来",

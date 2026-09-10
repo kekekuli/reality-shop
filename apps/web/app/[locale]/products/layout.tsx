@@ -2,7 +2,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { GraphQLProvider } from "@/lib/graphql/apollo-provider";
 
-export default async function AccountLayout({
+export default async function ProductsLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -11,10 +11,7 @@ export default async function AccountLayout({
 
   return (
     <NextIntlClientProvider
-      messages={{
-        account: messages.account,
-        error: messages.error,
-      }}
+      messages={{ cart: messages.cart, error: messages.error }}
     >
       <GraphQLProvider>{children}</GraphQLProvider>
     </NextIntlClientProvider>

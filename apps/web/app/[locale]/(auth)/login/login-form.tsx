@@ -25,7 +25,7 @@ export function LoginForm() {
   const router = useRouter();
   const t = useTranslations("auth.login");
   const validationT = useTranslations("auth.validation");
-  const errorT = useTranslations("auth.error");
+  const errorT = useTranslations("error");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const client = useApolloClient();
 
@@ -94,7 +94,11 @@ export function LoginForm() {
       </CardHeader>
 
       <CardContent>
-        <form noValidate onSubmit={handleSubmit(onSubmit)}>
+        <form
+          noValidate
+          aria-busy={isSubmitting}
+          onSubmit={handleSubmit(onSubmit)}
+        >
           <FieldGroup>
             <TextField
               disabled={isSubmitting}

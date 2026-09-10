@@ -14,9 +14,8 @@ export default async function ProductPage({
   params: Promise<{ locale: string; slug: string }>;
 }) {
   const { locale, slug } = await params;
-  const [catalogT, cartT, data] = await Promise.all([
+  const [catalogT, data] = await Promise.all([
     getTranslations("catalog"),
-    getTranslations("cart"),
     gqlFetch(ProductQuery, { slug }),
   ]);
   const product = data.product;
@@ -53,20 +52,16 @@ export default async function ProductPage({
             {product.skus.map((sku) => (
               <li
                 key={sku.skuId}
-                className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between"
+                className="grid gap-4 p-4 sm:grid-cols-[minmax(0,1fr)_14rem] sm:items-center"
               >
-                <div>
+                <div className="min-w-0">
                   <p className="font-medium">{formatPrice(sku.price)}</p>
                   <p className="mt-1 text-sm text-muted-foreground">
                     {catalogT("skuCode", { code: sku.skuCode })}
                   </p>
                 </div>
 
-                <AddCartItemButton
-                  skuId={sku.skuId}
-                  label={cartT("addItem")}
-                  pendingLabel={cartT("addingItem")}
-                />
+                <AddCartItemButton sku={sku} />
               </li>
             ))}
           </ul>

@@ -1,9 +1,9 @@
-import { Field, Int, ObjectType } from "@nestjs/graphql";
+import { Field, ID, Int, ObjectType } from "@nestjs/graphql";
 import { MutationPayload } from "../../common/graphql/mutation-payload";
 
 @ObjectType()
 export class CartItemType {
-  @Field(() => String)
+  @Field(() => ID)
   skuId!: string;
 
   @Field(() => Int)

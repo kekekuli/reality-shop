@@ -4,7 +4,7 @@
 
 input AddCartItemInput {
   quantity: Int!
-  skuId: String!
+  skuId: ID!
 }
 
 type AddCartItemPayload {
@@ -22,7 +22,7 @@ type BusinessError {
 
 type CartItemType {
   quantity: Int!
-  skuId: String!
+  skuId: ID!
 }
 
 """Cents scalar type"""
