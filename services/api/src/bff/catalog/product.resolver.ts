@@ -61,6 +61,15 @@ export class ProductResolver {
     };
   }
 
+  @Query(() => Product, { nullable: true })
+  async product(
+    @Args("slug", { type: () => String }) slug: string,
+  ): Promise<Product | null> {
+    const row = await this.productService.findBySlug(slug);
+
+    return row ? toProduct(row) : null;
+  }
+
   @ResolveField(() => [Sku])
   async skus(
     @Parent() product: Product,

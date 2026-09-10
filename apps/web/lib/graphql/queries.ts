@@ -20,6 +20,22 @@ export const ProductsQuery = graphql(`
   }
 `);
 
+export const ProductQuery = graphql(`
+  query Product($slug: String!) {
+    product(slug: $slug) {
+      id
+      slug
+      title
+      brand
+      skus {
+        skuId
+        skuCode
+        price
+      }
+    }
+  }
+`);
+
 export const MeQuery = graphql(`
   query Me {
     me {

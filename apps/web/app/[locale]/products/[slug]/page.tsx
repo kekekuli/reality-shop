@@ -6,7 +6,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { getPathname } from "@/i18n/navigation";
 import { formatPrice } from "@/lib/format";
 import { gqlFetch } from "@/lib/graphql/client";
-import { ProductsQuery } from "@/lib/graphql/queries";
+import { ProductQuery } from "@/lib/graphql/queries";
 
 export default async function ProductPage({
   params,
@@ -17,11 +17,9 @@ export default async function ProductPage({
   const [catalogT, cartT, data] = await Promise.all([
     getTranslations("catalog"),
     getTranslations("cart"),
-    gqlFetch(ProductsQuery),
+    gqlFetch(ProductQuery, { slug }),
   ]);
-  const product = data.products.edges.find(
-    (edge) => edge.node.slug === slug,
-  )?.node;
+  const product = data.product;
 
   if (!product) notFound();
 

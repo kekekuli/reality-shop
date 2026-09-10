@@ -44,4 +44,13 @@ export class ProductService {
       take: first + 1,
     });
   }
+
+  async findBySlug(slug: string) {
+    return this.prisma.product.findUnique({
+      where: {
+        slug,
+        status: "on_sale" satisfies ProductStatus,
+      },
+    });
+  }
 }
