@@ -10,7 +10,11 @@
     "title": "商品",
     "account": "我的账号",
     "priceFrom": "{price} 起",
-    "noPrice": "暂无报价"
+    "noPrice": "暂无报价",
+    "backToProducts": "返回商品列表",
+    "availableOptions": "可选规格",
+    "skuCode": "SKU {code}",
+    "noSkus": "暂无可用规格。"
   },
   "account": {
     "title": "你的账号",
@@ -19,6 +23,15 @@
     "backToShop": "返回商品列表",
     "logout": "退出登录",
     "loggingOut": "正在退出…"
+  },
+  "cart": {
+    "addItem": "加入购物车",
+    "addingItem": "正在添加…",
+    "error": {
+      "INVALID_QUANTITY": "请选择有效的数量。",
+      "SKU_NOT_FOUND": "该商品选项已不可用。",
+      "CART_QUANTITY_LIMIT_EXCEED": "该商品最多可添加 99 件。"
+    }
   },
   "auth": {
     "validation": {

@@ -10,7 +10,11 @@
     "title": "Products",
     "account": "My account",
     "priceFrom": "From {price}",
-    "noPrice": "Unavailable"
+    "noPrice": "Unavailable",
+    "backToProducts": "Back to products",
+    "availableOptions": "Available options",
+    "skuCode": "SKU {code}",
+    "noSkus": "No options are currently available."
   },
   "account": {
     "title": "Your account",
@@ -19,6 +23,15 @@
     "backToShop": "Back to products",
     "logout": "Sign out",
     "loggingOut": "Signing out…"
+  },
+  "cart": {
+    "addItem": "Add to cart",
+    "addingItem": "Adding…",
+    "error": {
+      "INVALID_QUANTITY": "Choose a valid quantity.",
+      "SKU_NOT_FOUND": "This product option is no longer available.",
+      "CART_QUANTITY_LIMIT_EXCEED": "You can add up to 99 of this item."
+    }
   },
   "auth": {
     "validation": {

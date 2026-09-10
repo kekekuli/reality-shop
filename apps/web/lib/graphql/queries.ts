@@ -6,9 +6,11 @@ export const ProductsQuery = graphql(`
       edges {
         node {
           id
+          slug
           title
           brand
           skus {
+            skuId
             skuCode
             price
           }

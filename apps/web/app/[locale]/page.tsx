@@ -34,15 +34,23 @@ export default async function Home({
           return (
             <li
               key={node.id}
-              className="rounded-lg border border-black/10 p-4 transition-shadow hover:shadow-md dark:border-white/15"
+              className="rounded-lg border border-black/10 transition-shadow hover:shadow-md dark:border-white/15"
             >
-              <p className="text-xs uppercase tracking-wide text-black/50 dark:text-white/50">
-                {node.brand}
-              </p>
-              <h2 className="mt-1 font-medium">{node.title}</h2>
-              <p className="mt-3 text-lg font-semibold text-red-600 dark:text-red-400">
-                {price ? t("priceFrom", { price }) : t("noPrice")}
-              </p>
+              <Link
+                href={getPathname({
+                  href: `/products/${node.slug}`,
+                  locale,
+                })}
+                className="block rounded-lg p-4 outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
+              >
+                <p className="text-xs uppercase tracking-wide text-black/50 dark:text-white/50">
+                  {node.brand}
+                </p>
+                <h2 className="mt-1 font-medium">{node.title}</h2>
+                <p className="mt-3 text-lg font-semibold text-red-600 dark:text-red-400">
+                  {price ? t("priceFrom", { price }) : t("noPrice")}
+                </p>
+              </Link>
             </li>
           );
         })}

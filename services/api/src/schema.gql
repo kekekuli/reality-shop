@@ -117,6 +117,7 @@ type RegisterPayload {
 type Sku {
   price: Cents!
   skuCode: String!
+  skuId: ID!
 }
 
 type User {
