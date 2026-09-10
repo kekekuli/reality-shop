@@ -7,7 +7,7 @@ const MAX_CART_ITEM_QUANTITY = 99;
 
 class CartQuantityLimitExceededError extends Error {}
 
-export type AddCartItemResult =
+export type AddItemResult =
   | {
       ok: false;
       errCode:
@@ -24,11 +24,11 @@ export type AddCartItemResult =
 export class CartService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async addUserItem(
+  async addItem(
     userId: bigint,
     skuId: bigint,
     quantity: number,
-  ): Promise<AddCartItemResult> {
+  ): Promise<AddItemResult> {
     if (
       !Number.isInteger(quantity) ||
       quantity <= 0 ||
@@ -86,5 +86,12 @@ export class CartService {
         errCode: ErrorCode.CART_QUANTITY_LIMIT_EXCEED,
       };
     }
+  }
+
+  async listItems(userId: bigint): Promise<CartItem[]> {
+    return this.prisma.cartItem.findMany({
+      where: { userId },
+      orderBy: [{ createdAt: "asc" }, { skuId: "asc" }],
+    });
   }
 }

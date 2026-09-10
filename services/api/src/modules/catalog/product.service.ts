@@ -53,4 +53,14 @@ export class ProductService {
       },
     });
   }
+
+  async findByIds(ids: bigint[]) {
+    if (ids.length === 0) return [];
+
+    return this.prisma.product.findMany({
+      where: {
+        id: { in: ids },
+      },
+    });
+  }
 }

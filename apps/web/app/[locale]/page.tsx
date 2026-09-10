@@ -19,12 +19,20 @@ export default async function Home({
     <main className="mx-auto max-w-5xl px-4 py-8">
       <header className="mb-6 flex items-center justify-between gap-4">
         <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-        <Link
-          className={buttonVariants({ variant: "outline" })}
-          href={getPathname({ href: "/account", locale })}
-        >
-          {t("account")}
-        </Link>
+        <nav className="flex items-center gap-2" aria-label={t("navigation")}>
+          <Link
+            className={buttonVariants({ variant: "outline" })}
+            href={getPathname({ href: "/cart", locale })}
+          >
+            {t("cart")}
+          </Link>
+          <Link
+            className={buttonVariants({ variant: "outline" })}
+            href={getPathname({ href: "/account", locale })}
+          >
+            {t("account")}
+          </Link>
+        </nav>
       </header>
 
       <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">

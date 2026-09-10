@@ -9,7 +9,12 @@ import { CatalogBffModule } from "./bff/catalog/catalog-bff.module";
 import { UserBffModule } from "./bff/user/user-bff.module";
 import { CatalogModule } from "./modules/catalog/catalog.module";
 import { SkuService } from "./modules/catalog/sku.service";
-import { createSkusLoader } from "./bff/catalog/sku.loader";
+import { ProductService } from "./modules/catalog/product.service";
+import {
+  createSkuByIdLoader,
+  createSkusByProductIdLoader,
+} from "./bff/catalog/sku.loader";
+import { createProductByIdLoader } from "./bff/catalog/product.loader";
 import type { Response, Request } from "express";
 import { CartBffModule } from "./bff/cart/cart-bff.module";
 
@@ -20,8 +25,8 @@ import { CartBffModule } from "./bff/cart/cart-bff.module";
     GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
       imports: [CatalogModule],
-      inject: [SkuService],
-      useFactory: (skuService: SkuService) => ({
+      inject: [SkuService, ProductService],
+      useFactory: (skuService: SkuService, productService: ProductService) => ({
         autoSchemaFile: join(process.cwd(), "src/schema.gql"),
         sortSchema: true,
         introspection: env.NODE_ENV !== "production",
@@ -29,7 +34,9 @@ import { CartBffModule } from "./bff/cart/cart-bff.module";
         context: ({ req, res }: { req: Request; res: Response }) => ({
           req,
           res,
-          skusLoader: createSkusLoader(skuService),
+          skusByProductIdLoader: createSkusByProductIdLoader(skuService),
+          skuByIdLoader: createSkuByIdLoader(skuService),
+          productByIdLoader: createProductByIdLoader(productService),
         }),
       }),
     }),

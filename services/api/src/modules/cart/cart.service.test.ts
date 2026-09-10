@@ -53,15 +53,13 @@ function createService(options?: {
   };
 }
 
-describe("CartService.addUserItem", () => {
+describe("CartService.addItem", () => {
   it.each([0, -1, 100, 1.5, Number.NaN])(
     "rejects invalid quantity %s before accessing the database",
     async (quantity) => {
       const { service, findUnique, transaction } = createService();
 
-      await expect(
-        service.addUserItem(userId, skuId, quantity),
-      ).resolves.toEqual({
+      await expect(service.addItem(userId, skuId, quantity)).resolves.toEqual({
         ok: false,
         errCode: ErrorCode.INVALID_QUANTITY,
       });
@@ -73,7 +71,7 @@ describe("CartService.addUserItem", () => {
   it("returns SKU_NOT_FOUND when the SKU does not exist", async () => {
     const { service, transaction } = createService({ sku: null });
 
-    await expect(service.addUserItem(userId, skuId, 1)).resolves.toEqual({
+    await expect(service.addItem(userId, skuId, 1)).resolves.toEqual({
       ok: false,
       errCode: ErrorCode.SKU_NOT_FOUND,
     });
@@ -84,7 +82,7 @@ describe("CartService.addUserItem", () => {
     const item = cartItem(3);
     const { service, upsert } = createService({ upsertResult: item });
 
-    await expect(service.addUserItem(userId, skuId, 2)).resolves.toEqual({
+    await expect(service.addItem(userId, skuId, 2)).resolves.toEqual({
       ok: true,
       cartItem: item,
     });
@@ -98,7 +96,7 @@ describe("CartService.addUserItem", () => {
   it("rolls back and returns a business error when the total exceeds 99", async () => {
     const { service } = createService({ upsertResult: cartItem(100) });
 
-    await expect(service.addUserItem(userId, skuId, 2)).resolves.toEqual({
+    await expect(service.addItem(userId, skuId, 2)).resolves.toEqual({
       ok: false,
       errCode: ErrorCode.CART_QUANTITY_LIMIT_EXCEED,
     });
@@ -108,8 +106,6 @@ describe("CartService.addUserItem", () => {
     const databaseError = new Error("database unavailable");
     const { service } = createService({ upsertError: databaseError });
 
-    await expect(service.addUserItem(userId, skuId, 1)).rejects.toBe(
-      databaseError,
-    );
+    await expect(service.addItem(userId, skuId, 1)).rejects.toBe(databaseError);
   });
 });

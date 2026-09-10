@@ -73,9 +73,10 @@ export class ProductResolver {
   @ResolveField(() => [Sku])
   async skus(
     @Parent() product: Product,
-    @Context("skusLoader") skusLoader: DataLoader<bigint, PrismaSku[]>,
+    @Context("skusByProductIdLoader")
+    skusByProductIdLoader: DataLoader<bigint, PrismaSku[]>,
   ): Promise<Sku[]> {
-    const rows = await skusLoader.load(BigInt(product.id));
+    const rows = await skusByProductIdLoader.load(BigInt(product.id));
     return rows.map(toSku);
   }
 }

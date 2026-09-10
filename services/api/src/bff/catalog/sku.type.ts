@@ -11,4 +11,9 @@ export class Sku {
 
   @Field(() => ID)
   skuId!: string;
+
+  @Field(() => String)
+  status!: string;
+
+  productId!: string;
 }

@@ -12,3 +12,9 @@ export class CartItemType {
 
 @ObjectType()
 export class AddCartItemPayload extends MutationPayload(CartItemType) {}
+
+@ObjectType()
+export class CartType {
+  @Field(() => [CartItemType])
+  items!: CartItemType[];
+}

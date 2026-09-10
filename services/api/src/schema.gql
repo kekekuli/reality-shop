@@ -22,7 +22,12 @@ type BusinessError {
 
 type CartItemType {
   quantity: Int!
+  sku: Sku!
   skuId: ID!
+}
+
+type CartType {
+  items: [CartItemType!]!
 }
 
 """Cents scalar type"""
@@ -90,6 +95,7 @@ type ProductEdge {
 }
 
 type Query {
+  cart: CartType!
   me: User!
   product(slug: String!): Product
   products(after: String, first: Int! = 20): ProductConnection!
@@ -117,8 +123,10 @@ type RegisterPayload {
 
 type Sku {
   price: Cents!
+  product: Product!
   skuCode: String!
   skuId: ID!
+  status: String!
 }
 
 type User {

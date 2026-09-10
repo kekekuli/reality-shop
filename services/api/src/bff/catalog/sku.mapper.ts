@@ -6,5 +6,7 @@ export function toSku(s: PrismaSku): Sku {
     skuId: s.id.toString(),
     skuCode: s.skuCode,
     price: s.priceCents,
+    status: s.status,
+    productId: s.productId.toString(),
   };
 }

@@ -24,12 +24,20 @@ export default async function ProductPage({
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-8">
-      <Link
-        href={getPathname({ href: "/", locale })}
-        className={buttonVariants({ variant: "ghost" })}
-      >
-        ← {catalogT("backToProducts")}
-      </Link>
+      <nav className="flex items-center justify-between gap-4">
+        <Link
+          href={getPathname({ href: "/", locale })}
+          className={buttonVariants({ variant: "ghost" })}
+        >
+          ← {catalogT("backToProducts")}
+        </Link>
+        <Link
+          href={getPathname({ href: "/cart", locale })}
+          className={buttonVariants({ variant: "outline" })}
+        >
+          {catalogT("cart")}
+        </Link>
+      </nav>
 
       <header className="mt-6 border-b pb-6">
         <p className="text-sm uppercase tracking-wide text-muted-foreground">
