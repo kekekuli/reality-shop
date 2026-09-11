@@ -14,6 +14,22 @@ export class CartItemType {
 export class AddCartItemPayload extends MutationPayload(CartItemType) {}
 
 @ObjectType()
+export class UpdateCartItemQuantityPayload extends MutationPayload(
+  CartItemType,
+) {}
+
+@ObjectType()
+export class RemovedCartItemType {
+  @Field(() => ID)
+  skuId!: string;
+}
+
+@ObjectType()
+export class RemoveCartItemPayload extends MutationPayload(
+  RemovedCartItemType,
+) {}
+
+@ObjectType()
 export class CartType {
   @Field(() => [CartItemType])
   items!: CartItemType[];

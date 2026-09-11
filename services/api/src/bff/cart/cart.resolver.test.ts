@@ -123,3 +123,87 @@ describe("CartResolver.cart", () => {
     );
   });
 });
+
+describe("CartResolver.removeCartItem", () => {
+  it("removes the authenticated user's item and returns its SKU id", async () => {
+    const removeItem = vi.fn().mockResolvedValue(undefined);
+    const resolver = new CartResolver({ removeItem } as unknown as CartService);
+
+    await expect(
+      resolver.removeCartItem({ skuId: "7" }, authenticatedRequest()),
+    ).resolves.toEqual({
+      data: { skuId: "7" },
+      errors: [],
+    });
+    expect(removeItem).toHaveBeenCalledWith(userId, skuId);
+  });
+
+  it.each(["not-an-id", "", "0", "-1"])(
+    "rejects invalid SKU id %j before calling the service",
+    async (invalidSkuId) => {
+      const removeItem = vi.fn();
+      const resolver = new CartResolver({
+        removeItem,
+      } as unknown as CartService);
+
+      await expect(
+        resolver.removeCartItem(
+          { skuId: invalidSkuId },
+          authenticatedRequest(),
+        ),
+      ).resolves.toEqual({
+        errors: [{ code: ErrorCode.SKU_NOT_FOUND }],
+      });
+      expect(removeItem).not.toHaveBeenCalled();
+    },
+  );
+});
+
+describe("CartResolver.updateCartItemQuantity", () => {
+  it("sets the authenticated user's final item quantity", async () => {
+    const item: CartItem = {
+      userId,
+      skuId,
+      quantity: 4,
+      createdAt: new Date("2026-01-01T00:00:00.000Z"),
+      updatedAt: new Date("2026-01-01T00:00:00.000Z"),
+    };
+    const updateItemQuantity = vi.fn().mockResolvedValue({
+      ok: true,
+      cartItem: item,
+    });
+    const resolver = new CartResolver({
+      updateItemQuantity,
+    } as unknown as CartService);
+
+    await expect(
+      resolver.updateCartItemQuantity(
+        { skuId: "7", quantity: 4 },
+        authenticatedRequest(),
+      ),
+    ).resolves.toEqual({
+      data: { skuId: "7", quantity: 4 },
+      errors: [],
+    });
+    expect(updateItemQuantity).toHaveBeenCalledWith(userId, skuId, 4);
+  });
+
+  it("maps a quantity update business error", async () => {
+    const updateItemQuantity = vi.fn().mockResolvedValue({
+      ok: false,
+      errCode: ErrorCode.INVALID_QUANTITY,
+    });
+    const resolver = new CartResolver({
+      updateItemQuantity,
+    } as unknown as CartService);
+
+    await expect(
+      resolver.updateCartItemQuantity(
+        { skuId: "7", quantity: 0 },
+        authenticatedRequest(),
+      ),
+    ).resolves.toEqual({
+      errors: [{ code: ErrorCode.INVALID_QUANTITY }],
+    });
+  });
+});

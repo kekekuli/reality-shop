@@ -2,8 +2,8 @@ import { ErrorCode } from "../../common/errors/error-code";
 import type { CartItem } from "../../generated/prisma/client";
 import { PrismaService } from "../../prisma/prisma.service";
 import { Injectable } from "@nestjs/common";
-
-const MAX_CART_ITEM_QUANTITY = 99;
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
+import { CART_ITEM_QUANTITY } from "@reality-shop/shared-types";
 
 class CartQuantityLimitExceededError extends Error {}
 
@@ -20,6 +20,24 @@ export type AddItemResult =
       cartItem: CartItem;
     };
 
+export type UpdateItemQuantityResult =
+  | {
+      ok: false;
+      errCode: ErrorCode.INVALID_QUANTITY | ErrorCode.CART_ITEM_NOT_FOUND;
+    }
+  | {
+      ok: true;
+      cartItem: CartItem;
+    };
+
+function isValidQuantity(quantity: number): boolean {
+  return (
+    Number.isInteger(quantity) &&
+    quantity >= CART_ITEM_QUANTITY.min &&
+    quantity <= CART_ITEM_QUANTITY.max
+  );
+}
+
 @Injectable()
 export class CartService {
   constructor(private readonly prisma: PrismaService) {}
@@ -29,11 +47,7 @@ export class CartService {
     skuId: bigint,
     quantity: number,
   ): Promise<AddItemResult> {
-    if (
-      !Number.isInteger(quantity) ||
-      quantity <= 0 ||
-      quantity > MAX_CART_ITEM_QUANTITY
-    ) {
+    if (!isValidQuantity(quantity)) {
       return {
         ok: false,
         errCode: ErrorCode.INVALID_QUANTITY,
@@ -65,7 +79,7 @@ export class CartService {
           },
         });
 
-        if (item.quantity > MAX_CART_ITEM_QUANTITY) {
+        if (item.quantity > CART_ITEM_QUANTITY.max) {
           throw new CartQuantityLimitExceededError();
         }
 
@@ -92,6 +106,40 @@ export class CartService {
     return this.prisma.cartItem.findMany({
       where: { userId },
       orderBy: [{ createdAt: "asc" }, { skuId: "asc" }],
+    });
+  }
+
+  async updateItemQuantity(
+    userId: bigint,
+    skuId: bigint,
+    quantity: number,
+  ): Promise<UpdateItemQuantityResult> {
+    if (!isValidQuantity(quantity)) {
+      return { ok: false, errCode: ErrorCode.INVALID_QUANTITY };
+    }
+
+    try {
+      const cartItem = await this.prisma.cartItem.update({
+        where: { userId_skuId: { userId, skuId } },
+        data: { quantity },
+      });
+
+      return { ok: true, cartItem };
+    } catch (error) {
+      if (
+        error instanceof PrismaClientKnownRequestError &&
+        error.code === "P2025"
+      ) {
+        return { ok: false, errCode: ErrorCode.CART_ITEM_NOT_FOUND };
+      }
+
+      throw error;
+    }
+  }
+
+  async removeItem(userId: bigint, skuId: bigint): Promise<void> {
+    await this.prisma.cartItem.deleteMany({
+      where: { userId, skuId },
     });
   }
 }

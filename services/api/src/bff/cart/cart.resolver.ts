@@ -1,11 +1,29 @@
 import { Args, Context, Mutation, Query, Resolver } from "@nestjs/graphql";
-import { AddCartItemPayload, CartType } from "./cart.type";
+import {
+  AddCartItemPayload,
+  CartType,
+  RemoveCartItemPayload,
+  UpdateCartItemQuantityPayload,
+} from "./cart.type";
 import { CartService } from "../../modules/cart/cart.service";
 import { UseGuards } from "@nestjs/common";
 import { AuthenticatedRequest, GqlAuthGuard } from "../user/gql-auth.guard";
-import { AddCartItemInput } from "./cart.input";
+import {
+  AddCartItemInput,
+  RemoveCartItemInput,
+  UpdateCartItemQuantityInput,
+} from "./cart.input";
 import { toCartItemType } from "./cart.mapper";
 import { ErrorCode } from "../../common/errors/error-code";
+
+function parseSkuId(value: string): bigint | null {
+  try {
+    const skuId = BigInt(value);
+    return skuId > 0n ? skuId : null;
+  } catch {
+    return null;
+  }
+}
 
 @Resolver()
 export class CartResolver {
@@ -19,11 +37,8 @@ export class CartResolver {
   ): Promise<AddCartItemPayload> {
     const userId = request.auth!.userId;
 
-    let skuId: bigint;
-    try {
-      skuId = BigInt(input.skuId);
-      if (skuId <= 0n) throw new Error();
-    } catch {
+    const skuId = parseSkuId(input.skuId);
+    if (skuId === null) {
       return {
         errors: [
           {
@@ -55,6 +70,49 @@ export class CartResolver {
 
     return {
       items: items.map(toCartItemType),
+    };
+  }
+
+  @Mutation(() => UpdateCartItemQuantityPayload)
+  @UseGuards(GqlAuthGuard)
+  async updateCartItemQuantity(
+    @Args("input") input: UpdateCartItemQuantityInput,
+    @Context("req") request: AuthenticatedRequest,
+  ): Promise<UpdateCartItemQuantityPayload> {
+    const skuId = parseSkuId(input.skuId);
+    if (skuId === null) {
+      return { errors: [{ code: ErrorCode.CART_ITEM_NOT_FOUND }] };
+    }
+
+    const result = await this.cartService.updateItemQuantity(
+      request.auth!.userId,
+      skuId,
+      input.quantity,
+    );
+
+    return result.ok
+      ? { data: toCartItemType(result.cartItem), errors: [] }
+      : { errors: [{ code: result.errCode }] };
+  }
+
+  @Mutation(() => RemoveCartItemPayload)
+  @UseGuards(GqlAuthGuard)
+  async removeCartItem(
+    @Args("input") input: RemoveCartItemInput,
+    @Context("req") request: AuthenticatedRequest,
+  ): Promise<RemoveCartItemPayload> {
+    const skuId = parseSkuId(input.skuId);
+    if (skuId === null) {
+      return {
+        errors: [{ code: ErrorCode.SKU_NOT_FOUND }],
+      };
+    }
+
+    await this.cartService.removeItem(request.auth!.userId, skuId);
+
+    return {
+      data: { skuId: skuId.toString() },
+      errors: [],
     };
   }
 }

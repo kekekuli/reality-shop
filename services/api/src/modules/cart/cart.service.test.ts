@@ -3,6 +3,7 @@ import { ErrorCode } from "../../common/errors/error-code";
 import type { CartItem } from "../../generated/prisma/client";
 import { PrismaService } from "../../prisma/prisma.service";
 import { CartService } from "./cart.service";
+import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
 
 vi.mock("../../env", () => ({
   env: {
@@ -107,5 +108,74 @@ describe("CartService.addItem", () => {
     const { service } = createService({ upsertError: databaseError });
 
     await expect(service.addItem(userId, skuId, 1)).rejects.toBe(databaseError);
+  });
+});
+
+describe("CartService.removeItem", () => {
+  it("is successful even when no matching cart item exists", async () => {
+    const deleteMany = vi.fn().mockResolvedValue({ count: 0 });
+    const service = new CartService({
+      cartItem: { deleteMany },
+    } as unknown as PrismaService);
+
+    await expect(service.removeItem(userId, skuId)).resolves.toBeUndefined();
+    expect(deleteMany).toHaveBeenCalledWith({
+      where: { userId, skuId },
+    });
+  });
+});
+
+describe("CartService.updateItemQuantity", () => {
+  it.each([0, -1, 100, 1.5, Number.NaN])(
+    "rejects invalid quantity %s before accessing the database",
+    async (quantity) => {
+      const update = vi.fn();
+      const service = new CartService({
+        cartItem: { update },
+      } as unknown as PrismaService);
+
+      await expect(
+        service.updateItemQuantity(userId, skuId, quantity),
+      ).resolves.toEqual({
+        ok: false,
+        errCode: ErrorCode.INVALID_QUANTITY,
+      });
+      expect(update).not.toHaveBeenCalled();
+    },
+  );
+
+  it("sets the final quantity instead of applying a delta", async () => {
+    const item = cartItem(4);
+    const update = vi.fn().mockResolvedValue(item);
+    const service = new CartService({
+      cartItem: { update },
+    } as unknown as PrismaService);
+
+    await expect(
+      service.updateItemQuantity(userId, skuId, 4),
+    ).resolves.toEqual({ ok: true, cartItem: item });
+    expect(update).toHaveBeenCalledWith({
+      where: { userId_skuId: { userId, skuId } },
+      data: { quantity: 4 },
+    });
+  });
+
+  it("returns CART_ITEM_NOT_FOUND when the item no longer exists", async () => {
+    const update = vi.fn().mockRejectedValue(
+      new PrismaClientKnownRequestError("record not found", {
+        code: "P2025",
+        clientVersion: "7.8.0",
+      }),
+    );
+    const service = new CartService({
+      cartItem: { update },
+    } as unknown as PrismaService);
+
+    await expect(
+      service.updateItemQuantity(userId, skuId, 2),
+    ).resolves.toEqual({
+      ok: false,
+      errCode: ErrorCode.CART_ITEM_NOT_FOUND,
+    });
   });
 });

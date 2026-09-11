@@ -32,6 +32,7 @@
     "UNAUTHENTICATED": "Sign in to add items to your cart.",
     "INVALID_QUANTITY": "Choose a valid quantity.",
     "SKU_NOT_FOUND": "This product option is no longer available.",
+    "CART_ITEM_NOT_FOUND": "This item is no longer in your cart.",
     "CART_QUANTITY_LIMIT_EXCEED": "You can add up to 99 of this item.",
     "network": "Unable to connect. Please try again.",
     "unexpected": "Something went wrong. Please try again."

@@ -119,3 +119,53 @@ export const AddCartItemMutation = graphql(`
     }
   }
 `);
+
+export const CartQuery = graphql(`
+  query Cart {
+    cart {
+      items {
+        skuId
+        quantity
+        sku {
+          skuId
+          skuCode
+          price
+          status
+          product {
+            slug
+            title
+            brand
+            status
+          }
+        }
+      }
+    }
+  }
+`);
+
+export const RemoveCartItemMutation = graphql(`
+  mutation RemoveCartItem($input: RemoveCartItemInput!) {
+    removeCartItem(input: $input) {
+      data {
+        skuId
+      }
+      errors {
+        code
+      }
+    }
+  }
+`);
+
+export const UpdateCartItemQuantityMutation = graphql(`
+  mutation UpdateCartItemQuantity($input: UpdateCartItemQuantityInput!) {
+    updateCartItemQuantity(input: $input) {
+      data {
+        skuId
+        quantity
+      }
+      errors {
+        code
+      }
+    }
+  }
+`);

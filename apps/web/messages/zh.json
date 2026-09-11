@@ -32,6 +32,7 @@
     "UNAUTHENTICATED": "请先登录，再将商品加入购物车。",
     "INVALID_QUANTITY": "请选择有效的数量。",
     "SKU_NOT_FOUND": "该商品选项已不可用。",
+    "CART_ITEM_NOT_FOUND": "该商品已不在购物车中。",
     "CART_QUANTITY_LIMIT_EXCEED": "该商品最多可添加 99 件。",
     "network": "无法连接服务器，请重试。",
     "unexpected": "出现错误，请重试。"

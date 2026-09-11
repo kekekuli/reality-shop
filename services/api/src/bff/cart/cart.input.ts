@@ -10,3 +10,19 @@ export class AddCartItemInput {
   @IsInt()
   quantity!: number;
 }
+
+@InputType()
+export class RemoveCartItemInput {
+  @Field(() => ID)
+  skuId!: string;
+}
+
+@InputType()
+export class UpdateCartItemQuantityInput {
+  @Field(() => ID)
+  skuId!: string;
+
+  @Field(() => Int)
+  @IsInt()
+  quantity!: number;
+}

@@ -11,3 +11,8 @@ export const AUTH_COOKIE = {
   access: "access_token",
   refresh: "refresh_token",
 } as const;
+
+export const CART_ITEM_QUANTITY = {
+  min: 1,
+  max: 99,
+} as const;
