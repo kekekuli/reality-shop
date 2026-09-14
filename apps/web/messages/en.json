@@ -20,11 +20,40 @@
   },
   "account": {
     "title": "Your account",
+    "navigation": "Account navigation",
     "displayName": "Display name",
     "email": "Email",
-    "backToShop": "Back to products",
+    "manageAddresses": "Addresses",
+    "backToShop": "Products",
     "logout": "Sign out",
     "loggingOut": "Signing out…"
+  },
+  "address": {
+    "title": "Your addresses",
+    "description": "Manage the delivery addresses available during checkout.",
+    "backToAccount": "Back to account",
+    "savedTitle": "Saved addresses",
+    "savedDescription": "Your default address will be selected automatically at checkout.",
+    "emptyTitle": "No saved addresses",
+    "emptyDescription": "Add an address to make checkout faster.",
+    "defaultBadge": "Default",
+    "region": "{province}, {city}, {district}",
+    "fullAddress": "{region}, {detail}",
+    "formTitle": "Add an address",
+    "formDescription": "Enter the recipient and delivery details.",
+    "receiverName": "Recipient name",
+    "phone": "Phone number",
+    "province": "Province or state",
+    "city": "City",
+    "district": "District",
+    "detail": "Street address",
+    "defaultAddress": "Use as my default address",
+    "validation": {
+      "required": "This field is required."
+    },
+    "reset": "Clear",
+    "save": "Save address",
+    "saving": "Saving…"
   },
   "error": {
     "EMAIL_ALREADY_TAKEN": "An account with this email already exists.",
@@ -34,6 +63,7 @@
     "SKU_NOT_FOUND": "This product option is no longer available.",
     "CART_ITEM_NOT_FOUND": "This item is no longer in your cart.",
     "CART_QUANTITY_LIMIT_EXCEED": "You can add up to 99 of this item.",
+    "ADDRESS_NOT_FOUND": "This address is no longer available.",
     "network": "Unable to connect. Please try again.",
     "unexpected": "Something went wrong. Please try again."
   },

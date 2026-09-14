@@ -46,6 +46,94 @@ export const MeQuery = graphql(`
   }
 `);
 
+export const AddressesQuery = graphql(`
+  query Addresses {
+    addresses {
+      id
+      receiverName
+      phone
+      province
+      city
+      district
+      detail
+      isDefault
+    }
+  }
+`);
+
+export const CreateAddressMutation = graphql(`
+  mutation CreateAddress($input: CreateAddressInput!) {
+    createAddress(input: $input) {
+      data {
+        id
+        receiverName
+        phone
+        province
+        city
+        district
+        detail
+        isDefault
+      }
+      errors {
+        code
+      }
+    }
+  }
+`);
+
+export const UpdateAddressMutation = graphql(`
+  mutation UpdateAddress($input: UpdateAddressInput!) {
+    updateAddress(input: $input) {
+      data {
+        id
+        receiverName
+        phone
+        province
+        city
+        district
+        detail
+        isDefault
+      }
+      errors {
+        code
+      }
+    }
+  }
+`);
+
+export const SetDefaultAddressMutation = graphql(`
+  mutation SetDefaultAddress($input: SetDefaultAddressInput!) {
+    setDefaultAddress(input: $input) {
+      data {
+        id
+        receiverName
+        phone
+        province
+        city
+        district
+        detail
+        isDefault
+      }
+      errors {
+        code
+      }
+    }
+  }
+`);
+
+export const DeleteAddressMutation = graphql(`
+  mutation DeleteAddress($input: DeleteAddressInput!) {
+    deleteAddress(input: $input) {
+      data {
+        id
+      }
+      errors {
+        code
+      }
+    }
+  }
+`);
+
 export const LoginMutation = graphql(`
   mutation Login($input: LoginInput!) {
     login(input: $input) {

@@ -2,7 +2,12 @@ import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getPathname } from "@/i18n/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
+import { buttonVariants } from "@/components/ui/button";
 import { gqlFetch, GraphQLRequestError } from "@/lib/graphql/client";
 import { MeQuery } from "@/lib/graphql/queries";
 import { LogoutButton } from "./logout-button";
@@ -30,39 +35,50 @@ export default async function AccountPage({
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center px-4 py-12">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle as="h1" className="text-2xl">
-            {t("title")}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-5">
-          <dl className="space-y-4">
-            <div>
-              <dt className="text-sm text-muted-foreground">
-                {t("displayName")}
-              </dt>
-              <dd className="mt-1 font-medium">{data.me.displayName}</dd>
-            </div>
-            <div>
-              <dt className="text-sm text-muted-foreground">{t("email")}</dt>
-              <dd className="mt-1 font-medium">{data.me.email}</dd>
-            </div>
-          </dl>
+    <main className="mx-auto grid min-h-screen w-full max-w-5xl grid-rows-[auto_1fr] px-4 py-8">
+      <header className="flex items-center justify-between gap-4">
+        <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
+        <nav
+          aria-label={t("navigation")}
+          className="flex items-center gap-2"
+        >
+          <Link
+            className={buttonVariants({ variant: "outline" })}
+            href={getPathname({ href: "/", locale })}
+          >
+            {t("backToShop")}
+          </Link>
 
-          <div className="flex items-center justify-between gap-4">
-            <Link
-              className="inline-flex text-sm font-medium underline-offset-4 hover:underline"
-              href={getPathname({ href: "/", locale })}
-            >
-              {t("backToShop")}
-            </Link>
+          <Link
+            className={buttonVariants({ variant: "outline" })}
+            href={getPathname({ href: "/account/addresses", locale })}
+          >
+            {t("manageAddresses")}
+          </Link>
+        </nav>
+      </header>
 
+      <section className="flex items-center justify-center py-8">
+        <Card className="w-full max-w-md">
+          <CardContent className="pt-6">
+            <dl className="space-y-4">
+              <div>
+                <dt className="text-sm text-muted-foreground">
+                  {t("displayName")}
+                </dt>
+                <dd className="mt-1 font-medium">{data.me.displayName}</dd>
+              </div>
+              <div>
+                <dt className="text-sm text-muted-foreground">{t("email")}</dt>
+                <dd className="mt-1 font-medium">{data.me.email}</dd>
+              </div>
+            </dl>
+          </CardContent>
+          <CardFooter className="justify-end">
             <LogoutButton />
-          </div>
-        </CardContent>
-      </Card>
+          </CardFooter>
+        </Card>
+      </section>
     </main>
   );
 }

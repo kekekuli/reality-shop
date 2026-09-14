@@ -20,11 +20,40 @@
   },
   "account": {
     "title": "你的账号",
+    "navigation": "账号导航",
     "displayName": "显示名称",
     "email": "邮箱",
-    "backToShop": "返回商品列表",
+    "manageAddresses": "地址",
+    "backToShop": "商品",
     "logout": "退出登录",
     "loggingOut": "正在退出…"
+  },
+  "address": {
+    "title": "收货地址",
+    "description": "管理结算时可选择的收货地址。",
+    "backToAccount": "返回账号",
+    "savedTitle": "已保存的地址",
+    "savedDescription": "结算时会自动选择默认地址。",
+    "emptyTitle": "还没有收货地址",
+    "emptyDescription": "添加地址，让结算更快捷。",
+    "defaultBadge": "默认",
+    "region": "{province}{city}{district}",
+    "fullAddress": "{region}{detail}",
+    "formTitle": "添加收货地址",
+    "formDescription": "填写收货人和配送信息。",
+    "receiverName": "收货人",
+    "phone": "手机号码",
+    "province": "省份",
+    "city": "城市",
+    "district": "区县",
+    "detail": "详细地址",
+    "defaultAddress": "设为默认收货地址",
+    "validation": {
+      "required": "请填写此字段。"
+    },
+    "reset": "清空",
+    "save": "保存地址",
+    "saving": "正在保存…"
   },
   "error": {
     "EMAIL_ALREADY_TAKEN": "该邮箱已注册账号。",
@@ -34,6 +63,7 @@
     "SKU_NOT_FOUND": "该商品选项已不可用。",
     "CART_ITEM_NOT_FOUND": "该商品已不在购物车中。",
     "CART_QUANTITY_LIMIT_EXCEED": "该商品最多可添加 99 件。",
+    "ADDRESS_NOT_FOUND": "该地址已不存在。",
     "network": "无法连接服务器，请重试。",
     "unexpected": "出现错误，请重试。"
   },

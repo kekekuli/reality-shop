@@ -13,6 +13,7 @@ export default async function AccountLayout({
     <NextIntlClientProvider
       messages={{
         account: messages.account,
+        address: messages.address,
         error: messages.error,
       }}
     >
