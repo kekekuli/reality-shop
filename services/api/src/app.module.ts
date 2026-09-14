@@ -17,6 +17,7 @@ import {
 import { createProductByIdLoader } from "./bff/catalog/product.loader";
 import type { Response, Request } from "express";
 import { CartBffModule } from "./bff/cart/cart-bff.module";
+import { AddressBffModule } from "./bff/address/address-bff.module";
 
 @Module({
   controllers: [AppController],
@@ -43,6 +44,7 @@ import { CartBffModule } from "./bff/cart/cart-bff.module";
     CatalogBffModule,
     UserBffModule,
     CartBffModule,
+    AddressBffModule,
   ],
 })
 export class AppModule {}
