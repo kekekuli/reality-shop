@@ -7,7 +7,7 @@ import {
 } from "./cart.type";
 import { CartService } from "../../modules/cart/cart.service";
 import { UseGuards } from "@nestjs/common";
-import { AuthenticatedRequest, GqlAuthGuard } from "../user/gql-auth.guard";
+import { AuthenticatedRequest, GqlAuthGuard } from "../auth/gql-auth.guard";
 import {
   AddCartItemInput,
   RemoveCartItemInput,

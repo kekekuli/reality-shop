@@ -16,7 +16,7 @@ import { clearAuthCookies, setAuthCookies } from "./auth-cookie";
 import type { Request, Response } from "express";
 import { ErrorCode } from "../../common/errors/error-code";
 import { UnauthorizedException, UseGuards } from "@nestjs/common";
-import { AuthenticatedRequest, GqlAuthGuard } from "./gql-auth.guard";
+import { AuthenticatedRequest, GqlAuthGuard } from "../auth/gql-auth.guard";
 
 @Resolver(() => User)
 export class UserResolver {

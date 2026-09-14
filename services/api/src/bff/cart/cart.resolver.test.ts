@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { ErrorCode } from "../../common/errors/error-code";
 import type { CartItem } from "../../generated/prisma/client";
 import type { CartService } from "../../modules/cart/cart.service";
-import type { AuthenticatedRequest } from "../user/gql-auth.guard";
+import type { AuthenticatedRequest } from "../auth/gql-auth.guard";
 import { CartResolver } from "./cart.resolver";
 
 vi.mock("../../env", () => ({
