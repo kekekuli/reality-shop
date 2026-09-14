@@ -61,12 +61,22 @@ export class ProductResolver {
     };
   }
 
+  @Query(() => Product, { nullable: true })
+  async product(
+    @Args("slug", { type: () => String }) slug: string,
+  ): Promise<Product | null> {
+    const row = await this.productService.findBySlug(slug);
+
+    return row ? toProduct(row) : null;
+  }
+
   @ResolveField(() => [Sku])
   async skus(
     @Parent() product: Product,
-    @Context("skusLoader") skusLoader: DataLoader<bigint, PrismaSku[]>,
+    @Context("skusByProductIdLoader")
+    skusByProductIdLoader: DataLoader<bigint, PrismaSku[]>,
   ): Promise<Sku[]> {
-    const rows = await skusLoader.load(BigInt(product.id));
+    const rows = await skusByProductIdLoader.load(BigInt(product.id));
     return rows.map(toSku);
   }
 }

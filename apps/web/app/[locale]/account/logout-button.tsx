@@ -10,7 +10,7 @@ import { useRouter } from "@/i18n/navigation";
 
 export function LogoutButton() {
   const t = useTranslations("account");
-  const errorT = useTranslations("auth.error");
+  const errorT = useTranslations("error");
   const [logout, { loading }] = useMutation(LogoutMutation);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const client = useApolloClient();

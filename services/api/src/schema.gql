@@ -2,13 +2,32 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+input AddCartItemInput {
+  quantity: Int!
+  skuId: ID!
+}
+
+type AddCartItemPayload {
+  data: CartItemType
+  errors: [BusinessError!]!
+}
+
 type AuthType {
   user: User!
 }
 
 type BusinessError {
   code: ErrorCode!
-  message: String!
+}
+
+type CartItemType {
+  quantity: Int!
+  sku: Sku!
+  skuId: ID!
+}
+
+type CartType {
+  items: [CartItemType!]!
 }
 
 """Cents scalar type"""
@@ -16,9 +35,13 @@ scalar Cents
 
 """Cause of an expected failure; clients render `error.<code>`."""
 enum ErrorCode {
+  CART_ITEM_NOT_FOUND
+  CART_QUANTITY_LIMIT_EXCEED
   EMAIL_ALREADY_TAKEN
   INVALID_CREDENTIALS
+  INVALID_QUANTITY
   INVALID_REFRESH_TOKEN
+  SKU_NOT_FOUND
 }
 
 input LoginInput {
@@ -41,10 +64,13 @@ type LogoutType {
 }
 
 type Mutation {
+  addCartItem(input: AddCartItemInput!): AddCartItemPayload!
   login(input: LoginInput!): LoginPayload!
   logout: LogoutPayload!
   refresh: RefreshPayload!
   register(input: RegisterInput!): RegisterPayload!
+  removeCartItem(input: RemoveCartItemInput!): RemoveCartItemPayload!
+  updateCartItemQuantity(input: UpdateCartItemQuantityInput!): UpdateCartItemQuantityPayload!
 }
 
 type PageInfo {
@@ -72,7 +98,9 @@ type ProductEdge {
 }
 
 type Query {
+  cart: CartType!
   me: User!
+  product(slug: String!): Product
   products(after: String, first: Int! = 20): ProductConnection!
 }
 
@@ -96,9 +124,35 @@ type RegisterPayload {
   errors: [BusinessError!]!
 }
 
+input RemoveCartItemInput {
+  skuId: ID!
+}
+
+type RemoveCartItemPayload {
+  data: RemovedCartItemType
+  errors: [BusinessError!]!
+}
+
+type RemovedCartItemType {
+  skuId: ID!
+}
+
 type Sku {
   price: Cents!
+  product: Product!
   skuCode: String!
+  skuId: ID!
+  status: String!
+}
+
+input UpdateCartItemQuantityInput {
+  quantity: Int!
+  skuId: ID!
+}
+
+type UpdateCartItemQuantityPayload {
+  data: CartItemType
+  errors: [BusinessError!]!
 }
 
 type User {

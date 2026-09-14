@@ -69,6 +69,7 @@ model Sku {
   createdAt  DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt  DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
   inventory  Inventory?
+  cartItems  CartItem[]
 
   @@unique([productId, specValues])
   @@map("skus")
@@ -86,14 +87,15 @@ model Inventory {
 }
 
 model User {
-  id           BigInt    @id @default(autoincrement())
-  email        String    @unique
-  passwordHash String    @map("password_hash")
-  displayName  String    @map("display_name")
-  status       String    @default("active")
-  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id           BigInt     @id @default(autoincrement())
+  email        String     @unique
+  passwordHash String     @map("password_hash")
+  displayName  String     @map("display_name")
+  status       String     @default("active")
+  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
   addresses    Address[]
+  cartItems    CartItem[]
 
   @@map("users")
 }
@@ -113,4 +115,18 @@ model Address {
   updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@map("addresses")
+}
+
+model CartItem {
+  user      User     @relation(fields: [userId], references: [id])
+  userId    BigInt   @map("user_id")
+  sku       Sku      @relation(fields: [skuId], references: [id])
+  skuId     BigInt   @map("sku_id")
+  quantity  Int
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@id([userId, skuId])
+  @@index([skuId])
+  @@map("cart_items")
 }

@@ -35,7 +35,7 @@ function renderLogout(client: ApolloClient) {
       locale="en"
       messages={{
         account: messages.account,
-        auth: { error: messages.auth.error },
+        error: messages.error,
       }}
     >
       <ApolloProvider client={client}>
@@ -74,9 +74,7 @@ describe("LogoutButton", () => {
       screen.getByRole("button", { name: messages.account.logout }),
     );
 
-    expect(
-      await screen.findByText(messages.auth.error.unexpected),
-    ).toBeVisible();
+    expect(await screen.findByText(messages.error.unexpected)).toBeVisible();
     expect(clearStore).not.toHaveBeenCalled();
     expect(replace).not.toHaveBeenCalled();
   });
@@ -93,8 +91,10 @@ describe("LogoutButton", () => {
       screen.getByRole("button", { name: messages.account.logout }),
     );
 
-    expect(await screen.findByText(messages.auth.error.network)).toBeVisible();
-    expect(screen.queryByText("private network detail")).not.toBeInTheDocument();
+    expect(await screen.findByText(messages.error.network)).toBeVisible();
+    expect(
+      screen.queryByText("private network detail"),
+    ).not.toBeInTheDocument();
     expect(clearStore).not.toHaveBeenCalled();
     expect(replace).not.toHaveBeenCalled();
   });
@@ -102,7 +102,9 @@ describe("LogoutButton", () => {
   it("still redirects when cache clearing fails after logout", async () => {
     const user = userEvent.setup();
     const cacheError = new Error("cache failure");
-    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+    const consoleError = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
     const { client, clearStore } = createClient({
       data: { loggedOut: true },
       errors: [],
@@ -119,6 +121,5 @@ describe("LogoutButton", () => {
       "Failed to clear Apollo cache after logout",
       cacheError,
     );
-
   });
 });

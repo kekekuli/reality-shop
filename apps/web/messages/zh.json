@@ -8,9 +8,15 @@
   },
   "catalog": {
     "title": "商品",
+    "navigation": "商店导航",
     "account": "我的账号",
+    "cart": "购物车",
     "priceFrom": "{price} 起",
-    "noPrice": "暂无报价"
+    "noPrice": "暂无报价",
+    "backToProducts": "返回商品列表",
+    "availableOptions": "可选规格",
+    "skuCode": "SKU {code}",
+    "noSkus": "暂无可用规格。"
   },
   "account": {
     "title": "你的账号",
@@ -19,6 +25,44 @@
     "backToShop": "返回商品列表",
     "logout": "退出登录",
     "loggingOut": "正在退出…"
+  },
+  "error": {
+    "EMAIL_ALREADY_TAKEN": "该邮箱已注册账号。",
+    "INVALID_CREDENTIALS": "邮箱或密码错误。",
+    "UNAUTHENTICATED": "请先登录，再将商品加入购物车。",
+    "INVALID_QUANTITY": "请选择有效的数量。",
+    "SKU_NOT_FOUND": "该商品选项已不可用。",
+    "CART_ITEM_NOT_FOUND": "该商品已不在购物车中。",
+    "CART_QUANTITY_LIMIT_EXCEED": "该商品最多可添加 99 件。",
+    "network": "无法连接服务器，请重试。",
+    "unexpected": "出现错误，请重试。"
+  },
+  "cart": {
+    "title": "购物车",
+    "itemCount": "共 {count} 件商品",
+    "items": "购物车商品",
+    "continueShopping": "继续购物",
+    "emptyTitle": "购物车还是空的",
+    "emptyDescription": "浏览商品，将喜欢的商品加入购物车。",
+    "browseProducts": "浏览商品",
+    "skuCode": "SKU {code}",
+    "unitPrice": "单价 {price}",
+    "itemQuantity": "{sku} 的数量",
+    "decreaseItemQuantity": "减少 {sku} 的数量",
+    "increaseItemQuantity": "增加 {sku} 的数量",
+    "removeItem": "移除",
+    "summary": "订单汇总",
+    "subtotal": "商品小计",
+    "shipping": "运费",
+    "shippingAtCheckout": "结算时计算",
+    "total": "合计",
+    "checkout": "去结算",
+    "addItem": "加入购物车",
+    "addingItem": "正在添加…",
+    "addedItem": "已将 {quantity} 件 {sku} 加入购物车。",
+    "quantity": "数量",
+    "decreaseQuantity": "减少数量",
+    "increaseQuantity": "增加数量"
   },
   "auth": {
     "validation": {
@@ -29,12 +73,6 @@
       "passwordTooLong": "密码不能超过 32 个字符。",
       "displayNameRequired": "请输入显示名称。",
       "displayNameTooLong": "显示名称不能超过 50 个字符。"
-    },
-    "error": {
-      "EMAIL_ALREADY_TAKEN": "该邮箱已注册账号。",
-      "INVALID_CREDENTIALS": "邮箱或密码错误。",
-      "network": "无法连接服务器，请重试。",
-      "unexpected": "出现错误，请重试。"
     },
     "login": {
       "title": "欢迎回来",

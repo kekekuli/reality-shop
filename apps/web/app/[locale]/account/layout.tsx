@@ -13,7 +13,7 @@ export default async function AccountLayout({
     <NextIntlClientProvider
       messages={{
         account: messages.account,
-        auth: { error: messages.auth.error },
+        error: messages.error,
       }}
     >
       <GraphQLProvider>{children}</GraphQLProvider>

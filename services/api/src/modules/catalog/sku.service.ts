@@ -14,4 +14,16 @@ export class SkuService {
       },
     });
   }
+  async findByIds(ids: bigint[]) {
+    if (ids.length === 0) {
+      return [];
+    }
+    return this.prisma.sku.findMany({
+      where: {
+        id: {
+          in: ids,
+        },
+      },
+    });
+  }
 }

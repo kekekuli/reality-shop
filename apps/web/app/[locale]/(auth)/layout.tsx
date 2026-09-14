@@ -10,7 +10,9 @@ export default async function AuthLayout({
   const messages = await getMessages();
 
   return (
-    <NextIntlClientProvider messages={{ auth: messages.auth }}>
+    <NextIntlClientProvider
+      messages={{ auth: messages.auth, error: messages.error }}
+    >
       <GraphQLProvider>{children}</GraphQLProvider>
     </NextIntlClientProvider>
   );

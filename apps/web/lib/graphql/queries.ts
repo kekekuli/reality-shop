@@ -6,13 +6,31 @@ export const ProductsQuery = graphql(`
       edges {
         node {
           id
+          slug
           title
           brand
           skus {
+            skuId
             skuCode
             price
           }
         }
+      }
+    }
+  }
+`);
+
+export const ProductQuery = graphql(`
+  query Product($slug: String!) {
+    product(slug: $slug) {
+      id
+      slug
+      title
+      brand
+      skus {
+        skuId
+        skuCode
+        price
       }
     }
   }
@@ -40,7 +58,6 @@ export const LoginMutation = graphql(`
       }
       errors {
         code
-        message
       }
     }
   }
@@ -58,7 +75,6 @@ export const RegisterMutation = graphql(`
       }
       errors {
         code
-        message
       }
     }
   }
@@ -72,7 +88,6 @@ export const RefreshMutation = graphql(`
       }
       errors {
         code
-        message
       }
     }
   }
@@ -86,7 +101,70 @@ export const LogoutMutation = graphql(`
       }
       errors {
         code
-        message
+      }
+    }
+  }
+`);
+
+export const AddCartItemMutation = graphql(`
+  mutation AddCartItem($input: AddCartItemInput!) {
+    addCartItem(input: $input) {
+      data {
+        quantity
+        skuId
+      }
+      errors {
+        code
+      }
+    }
+  }
+`);
+
+export const CartQuery = graphql(`
+  query Cart {
+    cart {
+      items {
+        skuId
+        quantity
+        sku {
+          skuId
+          skuCode
+          price
+          status
+          product {
+            slug
+            title
+            brand
+            status
+          }
+        }
+      }
+    }
+  }
+`);
+
+export const RemoveCartItemMutation = graphql(`
+  mutation RemoveCartItem($input: RemoveCartItemInput!) {
+    removeCartItem(input: $input) {
+      data {
+        skuId
+      }
+      errors {
+        code
+      }
+    }
+  }
+`);
+
+export const UpdateCartItemQuantityMutation = graphql(`
+  mutation UpdateCartItemQuantity($input: UpdateCartItemQuantityInput!) {
+    updateCartItemQuantity(input: $input) {
+      data {
+        skuId
+        quantity
+      }
+      errors {
+        code
       }
     }
   }
