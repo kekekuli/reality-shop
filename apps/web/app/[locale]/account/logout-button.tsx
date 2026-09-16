@@ -7,6 +7,7 @@ import { useApolloClient, useMutation } from "@apollo/client/react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useRouter } from "@/i18n/navigation";
+import { clearAllAddressDrafts } from "@/lib/address-draft";
 
 export function LogoutButton() {
   const t = useTranslations("account");
@@ -34,6 +35,8 @@ export function LogoutButton() {
       setErrorMessage(errorT("unexpected"));
       return;
     }
+
+    clearAllAddressDrafts(window.sessionStorage);
 
     try {
       await client.clearStore();

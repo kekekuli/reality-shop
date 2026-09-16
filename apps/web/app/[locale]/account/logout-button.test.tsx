@@ -7,6 +7,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import messages from "@/messages/en.json";
 import { LogoutMutation } from "@/lib/graphql/queries";
+import { addressDraftKey } from "@/lib/address-draft";
 import { LogoutButton } from "./logout-button";
 
 const { replace } = vi.hoisted(() => ({ replace: vi.fn() }));
@@ -46,8 +47,14 @@ function renderLogout(client: ApolloClient) {
 }
 
 describe("LogoutButton", () => {
-  beforeEach(() => replace.mockReset());
-  afterEach(() => vi.restoreAllMocks());
+  beforeEach(() => {
+    replace.mockReset();
+    sessionStorage.clear();
+  });
+  afterEach(() => {
+    vi.restoreAllMocks();
+    sessionStorage.clear();
+  });
 
   it("clears the cache and redirects after successful logout", async () => {
     const user = userEvent.setup();
@@ -55,6 +62,8 @@ describe("LogoutButton", () => {
       data: { loggedOut: true },
       errors: [],
     });
+    sessionStorage.setItem(addressDraftKey("user-1", "address-1"), "draft");
+    sessionStorage.setItem("unrelated", "keep");
     renderLogout(client);
 
     await user.click(
@@ -62,6 +71,10 @@ describe("LogoutButton", () => {
     );
 
     await waitFor(() => expect(clearStore).toHaveBeenCalledOnce());
+    expect(
+      sessionStorage.getItem(addressDraftKey("user-1", "address-1")),
+    ).toBeNull();
+    expect(sessionStorage.getItem("unrelated")).toBe("keep");
     expect(replace).toHaveBeenCalledWith("/login");
   });
 

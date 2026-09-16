@@ -39,8 +39,13 @@
     "defaultBadge": "默认",
     "region": "{province}{city}{district}",
     "fullAddress": "{region}{detail}",
+    "editAddress": "编辑{receiver}的地址",
+    "createMode": "新地址",
+    "editMode": "正在编辑",
     "formTitle": "添加收货地址",
     "formDescription": "填写收货人和配送信息。",
+    "editFormTitle": "编辑收货地址",
+    "editFormDescription": "修改收货人或配送信息。",
     "receiverName": "收货人",
     "phone": "手机号码",
     "province": "省份",
@@ -52,7 +57,9 @@
       "required": "请填写此字段。"
     },
     "reset": "清空",
+    "cancel": "取消",
     "save": "保存地址",
+    "saveChanges": "保存修改",
     "saving": "正在保存…"
   },
   "error": {

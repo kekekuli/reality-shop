@@ -48,6 +48,9 @@ export const MeQuery = graphql(`
 
 export const AddressesQuery = graphql(`
   query Addresses {
+    me {
+      id
+    }
     addresses {
       id
       receiverName

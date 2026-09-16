@@ -39,8 +39,13 @@
     "defaultBadge": "Default",
     "region": "{province}, {city}, {district}",
     "fullAddress": "{region}, {detail}",
+    "editAddress": "Edit address for {receiver}",
+    "createMode": "New address",
+    "editMode": "Editing",
     "formTitle": "Add an address",
     "formDescription": "Enter the recipient and delivery details.",
+    "editFormTitle": "Edit address",
+    "editFormDescription": "Update the recipient or delivery details.",
     "receiverName": "Recipient name",
     "phone": "Phone number",
     "province": "Province or state",
@@ -52,7 +57,9 @@
       "required": "This field is required."
     },
     "reset": "Clear",
+    "cancel": "Cancel",
     "save": "Save address",
+    "saveChanges": "Save changes",
     "saving": "Saving…"
   },
   "error": {

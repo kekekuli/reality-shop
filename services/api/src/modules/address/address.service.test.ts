@@ -79,40 +79,14 @@ describe("AddressService.findByUserId", () => {
 });
 
 describe("AddressService.create", () => {
-  it("makes the first address the default", async () => {
-    const createdAddress = address({ isDefault: true });
-    const findFirst = vi.fn().mockResolvedValue(null);
-    const updateMany = vi.fn().mockResolvedValue({ count: 0 });
-    const create = vi.fn().mockResolvedValue(createdAddress);
-    const { service } = serviceWithTransaction({
-      findFirst,
-      updateMany,
-      create,
-    });
-
-    await expect(service.create(userId, input)).resolves.toBe(createdAddress);
-    expect(updateMany).toHaveBeenCalledWith({
-      where: { userId, isDefault: true },
-      data: { isDefault: false },
-    });
-    expect(create).toHaveBeenCalledWith({
-      data: { ...input, userId, isDefault: true },
-    });
-  });
-
-  it("keeps a later address non-default unless requested", async () => {
+  it("does not infer a default when one was not requested", async () => {
     const createdAddress = address();
-    const findFirst = vi.fn().mockResolvedValue({ id: 1n });
-    const updateMany = vi.fn();
     const create = vi.fn().mockResolvedValue(createdAddress);
-    const { service } = serviceWithTransaction({
-      findFirst,
-      updateMany,
-      create,
-    });
+    const service = new AddressService({
+      address: { create },
+    } as unknown as PrismaService);
 
     await expect(service.create(userId, input)).resolves.toBe(createdAddress);
-    expect(updateMany).not.toHaveBeenCalled();
     expect(create).toHaveBeenCalledWith({
       data: { ...input, userId, isDefault: false },
     });
@@ -120,11 +94,9 @@ describe("AddressService.create", () => {
 
   it("unsets the previous default when the new address is default", async () => {
     const createdAddress = address({ isDefault: true });
-    const findFirst = vi.fn().mockResolvedValue({ id: 1n });
     const updateMany = vi.fn().mockResolvedValue({ count: 1 });
     const create = vi.fn().mockResolvedValue(createdAddress);
     const { service } = serviceWithTransaction({
-      findFirst,
       updateMany,
       create,
     });
@@ -169,6 +141,44 @@ describe("AddressService.update", () => {
     ).resolves.toEqual({
       ok: false,
       errCode: ErrorCode.ADDRESS_NOT_FOUND,
+    });
+  });
+
+  it("updates the address and switches the default in one transaction", async () => {
+    const updatedAddress = address({ receiverName: "Bob", isDefault: true });
+    const updateMany = vi.fn().mockResolvedValue({ count: 1 });
+    const update = vi.fn().mockResolvedValue(updatedAddress);
+    const { service } = serviceWithTransaction({ updateMany, update });
+
+    await expect(
+      service.update(userId, addressId, {
+        receiverName: "Bob",
+        isDefault: true,
+      }),
+    ).resolves.toEqual({ ok: true, address: updatedAddress });
+    expect(updateMany).toHaveBeenCalledWith({
+      where: { userId, isDefault: true },
+      data: { isDefault: false },
+    });
+    expect(update).toHaveBeenCalledWith({
+      where: { id: addressId, userId },
+      data: { receiverName: "Bob", isDefault: true },
+    });
+  });
+
+  it("allows the current default to be unset", async () => {
+    const updatedAddress = address({ isDefault: false });
+    const update = vi.fn().mockResolvedValue(updatedAddress);
+    const service = new AddressService({
+      address: { update },
+    } as unknown as PrismaService);
+
+    await expect(
+      service.update(userId, addressId, { isDefault: false }),
+    ).resolves.toEqual({ ok: true, address: updatedAddress });
+    expect(update).toHaveBeenCalledWith({
+      where: { id: addressId, userId },
+      data: { isDefault: false },
     });
   });
 
@@ -219,51 +229,31 @@ describe("AddressService.setDefault", () => {
 });
 
 describe("AddressService.delete", () => {
-  it("promotes the oldest remaining address after deleting the default", async () => {
-    const deleteAddress = vi
-      .fn()
-      .mockResolvedValue(address({ isDefault: true }));
-    const findFirst = vi.fn().mockResolvedValue({ id: 3n });
-    const update = vi.fn().mockResolvedValue(address({ id: 3n }));
-    const { service } = serviceWithTransaction({
-      delete: deleteAddress,
-      findFirst,
-      update,
-    });
+  it("does not promote another address after deleting the default", async () => {
+    const deletedAddress = address({ isDefault: true });
+    const deleteAddress = vi.fn().mockResolvedValue(deletedAddress);
+    const service = new AddressService({
+      address: { delete: deleteAddress },
+    } as unknown as PrismaService);
 
     await expect(service.delete(userId, addressId)).resolves.toEqual({
       ok: true,
-      address: address({ isDefault: true }),
+      address: deletedAddress,
     });
     expect(deleteAddress).toHaveBeenCalledWith({
       where: { id: addressId, userId },
-    });
-    expect(findFirst).toHaveBeenCalledWith({
-      where: { userId },
-      orderBy: [{ createdAt: "asc" }, { id: "asc" }],
-      select: { id: true },
-    });
-    expect(update).toHaveBeenCalledWith({
-      where: { id: 3n },
-      data: { isDefault: true },
     });
   });
 
   it("returns ADDRESS_NOT_FOUND without changing another user's address", async () => {
     const deleteAddress = vi.fn().mockRejectedValue(notFoundError());
-    const findFirst = vi.fn();
-    const update = vi.fn();
-    const { service } = serviceWithTransaction({
-      delete: deleteAddress,
-      findFirst,
-      update,
-    });
+    const service = new AddressService({
+      address: { delete: deleteAddress },
+    } as unknown as PrismaService);
 
     await expect(service.delete(userId, addressId)).resolves.toEqual({
       ok: false,
       errCode: ErrorCode.ADDRESS_NOT_FOUND,
     });
-    expect(findFirst).not.toHaveBeenCalled();
-    expect(update).not.toHaveBeenCalled();
   });
 });

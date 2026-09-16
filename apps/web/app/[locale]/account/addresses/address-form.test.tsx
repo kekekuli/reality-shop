@@ -11,14 +11,21 @@ import { act, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { GraphQLError } from "graphql";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { CreateAddressMutation } from "@/lib/graphql/queries";
+import {
+  CreateAddressMutation,
+  UpdateAddressMutation,
+} from "@/lib/graphql/queries";
+import { addressDraftKey, writeAddressDraft } from "@/lib/address-draft";
 import messages from "@/messages/en.json";
 import { AddressForm } from "./address-form";
 
-const { refresh } = vi.hoisted(() => ({ refresh: vi.fn() }));
+const { refresh, replace } = vi.hoisted(() => ({
+  refresh: vi.fn(),
+  replace: vi.fn(),
+}));
 
 vi.mock("@/i18n/navigation", () => ({
-  useRouter: () => ({ refresh }),
+  useRouter: () => ({ refresh, replace }),
 }));
 
 const input = {
@@ -32,8 +39,12 @@ const input = {
 };
 
 const createdAddress = { id: "1", ...input };
+const draftKey = addressDraftKey("user-1", "1");
 
-function renderForm(link: ApolloLink = new MockLink([])) {
+function renderForm(
+  link: ApolloLink = new MockLink([]),
+  initialAddress?: typeof createdAddress,
+) {
   const client = new ApolloClient({
     cache: new InMemoryCache(),
     link,
@@ -45,7 +56,7 @@ function renderForm(link: ApolloLink = new MockLink([])) {
       messages={{ address: messages.address, error: messages.error }}
     >
       <ApolloProvider client={client}>
-        <AddressForm />
+        <AddressForm draftKey={draftKey} initialAddress={initialAddress} />
       </ApolloProvider>
     </NextIntlClientProvider>,
   );
@@ -85,13 +96,45 @@ function createAddressMock(
   };
 }
 
+function updateAddressMock(
+  values: typeof input,
+  payload: {
+    data: typeof createdAddress | null;
+    errors: Array<{ code: string }>;
+  },
+) {
+  return {
+    request: {
+      query: UpdateAddressMutation,
+      variables: {
+        input: {
+          addressId: createdAddress.id,
+          receiverName: values.receiverName,
+          phone: values.phone,
+          province: values.province,
+          city: values.city,
+          district: values.district,
+          detail: values.detail,
+          isDefault: values.isDefault,
+        },
+      },
+    },
+    result: { data: { updateAddress: payload } },
+  };
+}
+
 describe("AddressForm", () => {
-  beforeEach(() => refresh.mockReset());
+  beforeEach(() => {
+    refresh.mockReset();
+    replace.mockReset();
+    sessionStorage.clear();
+  });
 
   it("shows localized validation errors and does not submit empty fields", async () => {
     const user = userEvent.setup();
     renderForm();
 
+    expect(screen.getByText(messages.address.createMode)).toBeVisible();
     await user.click(
       screen.getByRole("button", { name: messages.address.save }),
     );
@@ -100,6 +143,88 @@ describe("AddressForm", () => {
       await screen.findAllByText(messages.address.validation.required),
     ).toHaveLength(6);
     expect(refresh).not.toHaveBeenCalled();
+  });
+
+  it("prefills the shared form for editing", () => {
+    renderForm(new MockLink([]), createdAddress);
+
+    expect(
+      screen.getByRole("heading", { name: messages.address.editFormTitle }),
+    ).toBeVisible();
+    expect(screen.getByText(messages.address.editMode)).toBeVisible();
+    expect(screen.getByLabelText(messages.address.receiverName)).toHaveValue(
+      input.receiverName,
+    );
+    expect(screen.getByLabelText(messages.address.phone)).toHaveValue(
+      input.phone,
+    );
+    expect(screen.getByLabelText(messages.address.province)).toHaveValue(
+      input.province,
+    );
+    expect(screen.getByLabelText(messages.address.city)).toHaveValue(input.city);
+    expect(screen.getByLabelText(messages.address.district)).toHaveValue(
+      input.district,
+    );
+    expect(screen.getByLabelText(messages.address.detail)).toHaveValue(
+      input.detail,
+    );
+    expect(screen.getByLabelText(messages.address.defaultAddress)).toBeChecked();
+    expect(
+      screen.getByRole("button", { name: messages.address.saveChanges }),
+    ).toBeEnabled();
+    expect(
+      screen.getByRole("button", { name: messages.address.cancel }),
+    ).toBeEnabled();
+  });
+
+  it("allows the current default address to be unchecked", async () => {
+    const user = userEvent.setup();
+    renderForm(new MockLink([]), createdAddress);
+
+    const defaultAddress = screen.getByLabelText(
+      messages.address.defaultAddress,
+    );
+    await user.click(defaultAddress);
+
+    expect(defaultAddress).not.toBeChecked();
+  });
+
+  it("restores a current session draft over the saved address", async () => {
+    const draft = {
+      ...input,
+      receiverName: "Draft recipient",
+      detail: "Draft street",
+    };
+    writeAddressDraft(sessionStorage, draftKey, draft);
+
+    renderForm(new MockLink([]), createdAddress);
+
+    expect(
+      await screen.findByDisplayValue(draft.receiverName),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText(messages.address.detail)).toHaveValue(
+      draft.detail,
+    );
+  });
+
+  it("clears the draft when the user cancels editing", async () => {
+    const user = userEvent.setup();
+    renderForm(new MockLink([]), createdAddress);
+
+    await user.clear(screen.getByLabelText(messages.address.receiverName));
+    await user.type(
+      screen.getByLabelText(messages.address.receiverName),
+      "Changed recipient",
+    );
+    await waitFor(() =>
+      expect(sessionStorage.getItem(draftKey)).not.toBeNull(),
+    );
+
+    await user.click(
+      screen.getByRole("button", { name: messages.address.cancel }),
+    );
+    expect(replace).toHaveBeenCalledWith("/account/addresses");
+    expect(sessionStorage.getItem(draftKey)).toBeNull();
   });
 
   it("submits the form, clears it, and refreshes the RSC list", async () => {
@@ -116,10 +241,65 @@ describe("AddressForm", () => {
     );
 
     await waitFor(() => expect(refresh).toHaveBeenCalledOnce());
+    expect(sessionStorage.getItem(draftKey)).toBeNull();
     expect(screen.getByLabelText(messages.address.receiverName)).toHaveValue(
       "",
     );
-    expect(screen.getByLabelText(messages.address.defaultAddress)).not.toBeChecked();
+    expect(
+      screen.getByLabelText(messages.address.defaultAddress),
+    ).not.toBeChecked();
+  });
+
+  it("updates an address, clears its draft, and returns to the list", async () => {
+    const user = userEvent.setup();
+    const updatedInput = { ...input, receiverName: "Grace Hopper" };
+    const updatedAddress = { ...createdAddress, ...updatedInput };
+    const nonDefaultAddress = { ...createdAddress, isDefault: false };
+    renderForm(
+      new MockLink([
+        updateAddressMock(updatedInput, {
+          data: updatedAddress,
+          errors: [],
+        }),
+      ]),
+      nonDefaultAddress,
+    );
+
+    const receiverName = screen.getByLabelText(messages.address.receiverName);
+    await user.clear(receiverName);
+    await user.type(receiverName, updatedInput.receiverName);
+    await user.click(screen.getByLabelText(messages.address.defaultAddress));
+    await user.click(
+      screen.getByRole("button", { name: messages.address.saveChanges }),
+    );
+
+    await waitFor(() =>
+      expect(replace).toHaveBeenCalledWith("/account/addresses"),
+    );
+    expect(sessionStorage.getItem(draftKey)).toBeNull();
+    expect(refresh).not.toHaveBeenCalled();
+  });
+
+  it("shows the address error returned by an update", async () => {
+    const user = userEvent.setup();
+    renderForm(
+      new MockLink([
+        updateAddressMock(input, {
+          data: null,
+          errors: [{ code: "ADDRESS_NOT_FOUND" }],
+        }),
+      ]),
+      createdAddress,
+    );
+
+    await user.click(
+      screen.getByRole("button", { name: messages.address.saveChanges }),
+    );
+
+    expect(
+      await screen.findByText(messages.error.ADDRESS_NOT_FOUND),
+    ).toBeVisible();
+    expect(replace).not.toHaveBeenCalled();
   });
 
   it("disables the form and prevents another submit while pending", async () => {
@@ -152,7 +332,9 @@ describe("AddressForm", () => {
     });
     expect(pendingButton).toBeDisabled();
     expect(screen.getByLabelText(messages.address.receiverName)).toBeDisabled();
-    expect(screen.getByLabelText(messages.address.defaultAddress)).toBeDisabled();
+    expect(
+      screen.getByLabelText(messages.address.defaultAddress),
+    ).toBeDisabled();
 
     await user.click(pendingButton);
     expect(requestCount).toBe(1);

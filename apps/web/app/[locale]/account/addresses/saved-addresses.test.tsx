@@ -1,8 +1,17 @@
 import { NextIntlClientProvider } from "next-intl";
 import { render, screen, within } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import type { ComponentProps } from "react";
+import { describe, expect, it, vi } from "vitest";
 import messages from "@/messages/en.json";
 import { SavedAddresses } from "./saved-addresses";
+
+vi.mock("@/i18n/navigation", () => ({
+  Link: ({ children, href, ...props }: ComponentProps<"a">) => (
+    <a href={String(href)} {...props}>
+      {children}
+    </a>
+  ),
+}));
 
 const addresses = [
   {
@@ -27,10 +36,13 @@ const addresses = [
   },
 ];
 
-function renderAddresses(items = addresses) {
+function renderAddresses(items = addresses, editingAddressId?: string) {
   return render(
     <NextIntlClientProvider locale="en" messages={{ address: messages.address }}>
-      <SavedAddresses addresses={items} />
+      <SavedAddresses
+        addresses={items}
+        editingAddressId={editingAddressId}
+      />
     </NextIntlClientProvider>,
   );
 }
@@ -43,8 +55,8 @@ describe("SavedAddresses", () => {
     expect(screen.queryByRole("list")).not.toBeInTheDocument();
   });
 
-  it("renders saved addresses and marks only the default one", () => {
-    renderAddresses();
+  it("renders saved addresses with edit links and marks the selected one", () => {
+    renderAddresses(addresses, addresses[0].id);
 
     const items = screen.getAllByRole("listitem");
     expect(items).toHaveLength(2);
@@ -61,5 +73,20 @@ describe("SavedAddresses", () => {
     expect(
       within(items[1]).queryByText(messages.address.defaultBadge),
     ).not.toBeInTheDocument();
+    expect(items[0]).toHaveAttribute("data-editing", "true");
+    const addressLink = within(items[0]).getByRole("link", {
+      name: messages.address.editAddress.replace(
+        "{receiver}",
+        addresses[0].receiverName,
+      ),
+    });
+    expect(addressLink).toHaveAttribute("href", "/account/addresses?edit=1");
+    expect(addressLink).toHaveAttribute("aria-current", "page");
+    expect(addressLink).toContainElement(
+      within(items[0]).getByText(addresses[0].receiverName),
+    );
+    expect(addressLink).toContainElement(
+      within(items[0]).getByText(addresses[0].phone),
+    );
   });
 });

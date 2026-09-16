@@ -200,6 +200,7 @@ input UpdateAddressInput {
   city: String
   detail: String
   district: String
+  isDefault: Boolean
   phone: String
   province: String
   receiverName: String

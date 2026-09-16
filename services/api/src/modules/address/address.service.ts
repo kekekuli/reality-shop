@@ -28,27 +28,21 @@ export class AddressService {
       "id" | "userId" | "createdAt" | "updatedAt"
     >,
   ) {
-    return this.prisma.$transaction(async (transaction) => {
-      const existingAddress = await transaction.address.findFirst({
-        where: { userId },
-        select: { id: true },
-      });
-      const shouldBeDefault = data.isDefault === true || !existingAddress;
-
-      if (shouldBeDefault) {
+    if (data.isDefault === true) {
+      return this.prisma.$transaction(async (transaction) => {
         await transaction.address.updateMany({
           where: { userId, isDefault: true },
           data: { isDefault: false },
         });
-      }
 
-      return transaction.address.create({
-        data: {
-          ...data,
-          userId,
-          isDefault: shouldBeDefault,
-        },
+        return transaction.address.create({
+          data: { ...data, userId, isDefault: true },
+        });
       });
+    }
+
+    return this.prisma.address.create({
+      data: { ...data, userId, isDefault: false },
     });
   }
 
@@ -58,15 +52,31 @@ export class AddressService {
     data: Partial<
       Omit<
         Prisma.AddressUncheckedCreateInput,
-        "id" | "userId" | "isDefault" | "createdAt" | "updatedAt"
+        "id" | "userId" | "createdAt" | "updatedAt"
       >
     >,
   ) {
     try {
-      const address = await this.prisma.address.update({
-        where: { id: addressId, userId },
-        data,
-      });
+      const { isDefault, ...addressDetails } = data;
+      const address = isDefault === true
+        ? await this.prisma.$transaction(async (transaction) => {
+            await transaction.address.updateMany({
+              where: { userId, isDefault: true },
+              data: { isDefault: false },
+            });
+
+            return transaction.address.update({
+              where: { id: addressId, userId },
+              data: { ...addressDetails, isDefault: true },
+            });
+          })
+        : await this.prisma.address.update({
+            where: { id: addressId, userId },
+            data:
+              isDefault === false
+                ? { ...addressDetails, isDefault: false }
+                : addressDetails,
+          });
 
       return { ok: true as const, address };
     } catch (error) {
@@ -82,55 +92,13 @@ export class AddressService {
   }
 
   async setDefault(userId: bigint, addressId: bigint) {
-    try {
-      const address = await this.prisma.$transaction(async (transaction) => {
-        await transaction.address.updateMany({
-          where: { userId, isDefault: true },
-          data: { isDefault: false },
-        });
-
-        return transaction.address.update({
-          where: { id: addressId, userId },
-          data: { isDefault: true },
-        });
-      });
-
-      return { ok: true as const, address };
-    } catch (error) {
-      if (isRecordNotFound(error)) {
-        return {
-          ok: false as const,
-          errCode: ErrorCode.ADDRESS_NOT_FOUND,
-        };
-      }
-
-      throw error;
-    }
+    return this.update(userId, addressId, { isDefault: true });
   }
 
   async delete(userId: bigint, addressId: bigint) {
     try {
-      const address = await this.prisma.$transaction(async (transaction) => {
-        const deletedAddress = await transaction.address.delete({
-          where: { id: addressId, userId },
-        });
-
-        if (deletedAddress.isDefault) {
-          const nextDefault = await transaction.address.findFirst({
-            where: { userId },
-            orderBy: [{ createdAt: "asc" }, { id: "asc" }],
-            select: { id: true },
-          });
-
-          if (nextDefault) {
-            await transaction.address.update({
-              where: { id: nextDefault.id },
-              data: { isDefault: true },
-            });
-          }
-        }
-
-        return deletedAddress;
+      const address = await this.prisma.address.delete({
+        where: { id: addressId, userId },
       });
 
       return { ok: true as const, address };

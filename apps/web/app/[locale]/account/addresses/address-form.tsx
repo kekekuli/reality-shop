@@ -3,8 +3,9 @@
 import { useMutation } from "@apollo/client/react";
 import { CombinedGraphQLErrors } from "@apollo/client/errors";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Pencil, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { type SubmitHandler, useForm } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
@@ -23,36 +24,91 @@ import {
 } from "@/components/ui/field";
 import { TextField } from "@/components/ui/text-field";
 import { useRouter } from "@/i18n/navigation";
-import { CreateAddressMutation } from "@/lib/graphql/queries";
+import { cn } from "@/lib/utils";
+import type { AddressesQuery as AddressesQueryResult } from "@/lib/graphql/generated/graphql";
+import {
+  CreateAddressMutation,
+  UpdateAddressMutation,
+} from "@/lib/graphql/queries";
+import {
+  clearAddressDraft,
+  readAddressDraft,
+  writeAddressDraft,
+} from "@/lib/address-draft";
 import {
   createAddressSchema,
   type AddressFormValues,
 } from "@/lib/validation/address";
 
-export function AddressForm() {
+type AddressFormProps = {
+  draftKey: string;
+  initialAddress?: AddressesQueryResult["addresses"][number];
+};
+
+export function AddressForm({ draftKey, initialAddress }: AddressFormProps) {
   const router = useRouter();
   const t = useTranslations("address");
   const errorT = useTranslations("error");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [createAddress] = useMutation(CreateAddressMutation);
+  const [updateAddress] = useMutation(UpdateAddressMutation);
+  const isEditing = initialAddress !== undefined;
 
   const {
     register,
     handleSubmit,
     reset,
+    subscribe,
     formState: { errors, isSubmitting },
   } = useForm<AddressFormValues>({
     resolver: zodResolver(createAddressSchema),
-    defaultValues: {
-      receiverName: "",
-      phone: "",
-      province: "",
-      city: "",
-      district: "",
-      detail: "",
-      isDefault: false,
-    },
+    defaultValues: initialAddress
+      ? {
+          receiverName: initialAddress.receiverName,
+          phone: initialAddress.phone,
+          province: initialAddress.province,
+          city: initialAddress.city,
+          district: initialAddress.district,
+          detail: initialAddress.detail,
+          isDefault: initialAddress.isDefault,
+        }
+      : {
+          receiverName: "",
+          phone: "",
+          province: "",
+          city: "",
+          district: "",
+          detail: "",
+          isDefault: false,
+        },
   });
+
+  const discardDraft = useCallback(
+    () => clearAddressDraft(window.sessionStorage, draftKey),
+    [draftKey],
+  );
+
+  useEffect(() => {
+    const draft = readAddressDraft(window.sessionStorage, draftKey);
+    if (draft) {
+      reset(draft, { keepDefaultValues: true });
+    }
+  }, [draftKey, reset]);
+
+  useEffect(
+    () =>
+      subscribe({
+        formState: { isDirty: true, values: true },
+        callback: ({ isDirty: draftIsDirty, values }) => {
+          if (draftIsDirty) {
+            writeAddressDraft(window.sessionStorage, draftKey, values);
+          } else {
+            clearAddressDraft(window.sessionStorage, draftKey);
+          }
+        },
+      }),
+    [draftKey, subscribe],
+  );
 
   const requiredMessage = t("validation.required");
 
@@ -60,16 +116,45 @@ export function AddressForm() {
     setErrorMessage(null);
 
     try {
-      const result = await createAddress({ variables: { input } });
-      const payload = result.data?.createAddress;
+      const payload = isEditing
+        ? (
+            await updateAddress({
+              variables: {
+                input: {
+                  addressId: initialAddress.id,
+                  ...input,
+                },
+              },
+            })
+          ).data?.updateAddress
+        : (
+            await createAddress({
+              variables: { input },
+            })
+          ).data?.createAddress;
 
-      if (!payload?.data || payload.errors.length > 0) {
-        setErrorMessage(errorT("unexpected"));
+      const errorCode = payload?.errors[0]?.code;
+
+      if (!payload?.data || errorCode) {
+        setErrorMessage(
+          errorT(
+            errorCode === "ADDRESS_NOT_FOUND"
+              ? "ADDRESS_NOT_FOUND"
+              : "unexpected",
+          ),
+        );
         return;
       }
 
-      reset();
-      router.refresh();
+      discardDraft();
+
+      if (isEditing) {
+        reset(input);
+        router.replace("/account/addresses");
+      } else {
+        reset();
+        router.refresh();
+      }
     } catch (error) {
       if (CombinedGraphQLErrors.is(error)) {
         const isUnauthenticated = error.errors.some(
@@ -87,10 +172,34 @@ export function AddressForm() {
   };
 
   return (
-    <Card>
+    <Card
+      className={cn(
+        "transition-colors",
+        isEditing && "border-primary/50 bg-primary/[0.03] shadow-md",
+      )}
+    >
       <CardHeader>
-        <CardTitle as="h2">{t("formTitle")}</CardTitle>
-        <CardDescription>{t("formDescription")}</CardDescription>
+        <div
+          className={cn(
+            "mb-1 flex w-fit items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium",
+            isEditing
+              ? "bg-primary text-primary-foreground"
+              : "bg-muted text-muted-foreground",
+          )}
+        >
+          {isEditing ? (
+            <Pencil className="size-3" aria-hidden="true" />
+          ) : (
+            <Plus className="size-3" aria-hidden="true" />
+          )}
+          {t(isEditing ? "editMode" : "createMode")}
+        </div>
+        <CardTitle as="h2">
+          {t(isEditing ? "editFormTitle" : "formTitle")}
+        </CardTitle>
+        <CardDescription>
+          {t(isEditing ? "editFormDescription" : "formDescription")}
+        </CardDescription>
       </CardHeader>
 
       <form
@@ -175,19 +284,35 @@ export function AddressForm() {
         </CardContent>
 
         <CardFooter className="mt-5 justify-end gap-2">
-          <Button
-            type="button"
-            variant="ghost"
-            disabled={isSubmitting}
-            onClick={() => {
-              reset();
-              setErrorMessage(null);
-            }}
-          >
-            {t("reset")}
-          </Button>
+          {isEditing ? (
+            <Button
+              type="button"
+              variant="ghost"
+              disabled={isSubmitting}
+              onClick={() => {
+                discardDraft();
+                reset();
+                setErrorMessage(null);
+                router.replace("/account/addresses");
+              }}
+            >
+              {t("cancel")}
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              variant="ghost"
+              disabled={isSubmitting}
+              onClick={() => {
+                reset();
+                setErrorMessage(null);
+              }}
+            >
+              {t("reset")}
+            </Button>
+          )}
           <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? t("saving") : t("save")}
+            {isSubmitting ? t("saving") : t(isEditing ? "saveChanges" : "save")}
           </Button>
         </CardFooter>
       </form>

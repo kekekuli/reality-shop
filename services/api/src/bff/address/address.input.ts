@@ -2,7 +2,6 @@ import {
   Field,
   ID,
   InputType,
-  OmitType,
   PartialType,
 } from "@nestjs/graphql";
 import { IsBoolean, IsNotEmpty, IsOptional, IsString } from "class-validator";
@@ -46,9 +45,7 @@ export class CreateAddressInput {
 }
 
 @InputType()
-export class UpdateAddressInput extends PartialType(
-  OmitType(CreateAddressInput, ["isDefault"] as const),
-) {
+export class UpdateAddressInput extends PartialType(CreateAddressInput) {
   @Field(() => ID)
   @IsString()
   @IsNotEmpty()

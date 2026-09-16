@@ -86,7 +86,7 @@ describe("AddressResolver.updateAddress", () => {
 
     await expect(
       resolver.updateAddress(
-        { addressId: "7", receiverName: "Bob" },
+        { addressId: "7", receiverName: "Bob", isDefault: true },
         authenticatedRequest(),
       ),
     ).resolves.toEqual({
@@ -100,6 +100,7 @@ describe("AddressResolver.updateAddress", () => {
     });
     expect(update).toHaveBeenCalledWith(userId, 7n, {
       receiverName: "Bob",
+      isDefault: true,
     });
   });
 
