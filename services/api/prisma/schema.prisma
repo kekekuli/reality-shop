@@ -59,17 +59,18 @@ model Product {
 }
 
 model Sku {
-  id         BigInt     @id @default(autoincrement())
-  product    Product    @relation(fields: [productId], references: [id])
-  productId  BigInt     @map("product_id")
-  skuCode    String     @unique @map("sku_code")
-  specValues Json       @map("spec_values")
-  priceCents BigInt     @map("price_cents")
-  status     String     @default("on_sale")
-  createdAt  DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt  DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id         BigInt      @id @default(autoincrement())
+  product    Product     @relation(fields: [productId], references: [id])
+  productId  BigInt      @map("product_id")
+  skuCode    String      @unique @map("sku_code")
+  specValues Json        @map("spec_values")
+  priceCents BigInt      @map("price_cents")
+  status     String      @default("on_sale")
+  createdAt  DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime    @updatedAt @map("updated_at") @db.Timestamptz(6)
   inventory  Inventory?
   cartItems  CartItem[]
+  orderItems OrderItem[]
 
   @@unique([productId, specValues])
   @@map("skus")
@@ -96,6 +97,7 @@ model User {
   updatedAt    DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
   addresses    Address[]
   cartItems    CartItem[]
+  orders       Order[]
 
   @@map("users")
 }
@@ -129,4 +131,49 @@ model CartItem {
   @@id([userId, skuId])
   @@index([skuId])
   @@map("cart_items")
+}
+
+model Order {
+  id                   BigInt      @id @default(autoincrement())
+  orderNo              String      @unique @map("order_no")
+  user                 User        @relation(fields: [userId], references: [id])
+  userId               BigInt      @map("user_id")
+  status               String      @default("pending_payment")
+  subtotalCents        BigInt      @map("subtotal_cents")
+  shippingCents        BigInt      @default(0) @map("shipping_cents")
+  totalCents           BigInt      @map("total_cents")
+  currency             String      @default("cny")
+  shippingReceiverName String      @map("shipping_receiver_name")
+  shippingPhone        String      @map("shipping_phone")
+  shippingProvince     String      @map("shipping_province")
+  shippingCity         String      @map("shipping_city")
+  shippingDistrict     String      @map("shipping_district")
+  shippingDetail       String      @map("shipping_detail")
+  paymentExpiresAt     DateTime    @map("payment_expires_at") @db.Timestamptz(6)
+  paidAt               DateTime?   @map("paid_at") @db.Timestamptz(6)
+  cancelledAt          DateTime?   @map("cancelled_at") @db.Timestamptz(6)
+  createdAt            DateTime    @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime    @updatedAt @map("updated_at") @db.Timestamptz(6)
+  orderItems           OrderItem[]
+
+  @@index([userId, createdAt, id])
+  @@map("orders")
+}
+
+model OrderItem {
+  order          Order    @relation(fields: [orderId], references: [id])
+  orderId        BigInt   @map("order_id")
+  sku            Sku      @relation(fields: [skuId], references: [id])
+  skuId          BigInt   @map("sku_id")
+  skuCode        String   @map("sku_code")
+  productTitle   String   @map("product_title")
+  specValues     Json     @map("spec_values")
+  unitPriceCents BigInt   @map("unit_price_cents")
+  quantity       Int
+  lineTotalCents BigInt   @map("line_total_cents")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@id([orderId, skuId])
+  @@index([skuId])
+  @@map("order_items")
 }

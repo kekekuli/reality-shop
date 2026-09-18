@@ -24,7 +24,7 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { getPathname } from "@/i18n/navigation";
 import { formatPrice } from "@/lib/format";
-import { CART_ITEM_QUANTITY } from "@reality-shop/shared-types";
+import { PURCHASE_QUANTITY } from "@reality-shop/shared-types";
 import type { CartQuery as CartQueryData } from "@/lib/graphql/generated/graphql";
 import {
   CartQuery,
@@ -226,8 +226,8 @@ export function CartView({ locale }: CartViewProps) {
   ) {
     if (
       !Number.isInteger(desiredQuantity) ||
-      desiredQuantity < CART_ITEM_QUANTITY.min ||
-      desiredQuantity > CART_ITEM_QUANTITY.max
+      desiredQuantity < PURCHASE_QUANTITY.min ||
+      desiredQuantity > PURCHASE_QUANTITY.max
     ) {
       return;
     }
@@ -390,7 +390,7 @@ export function CartView({ locale }: CartViewProps) {
                             variant="outline"
                             size="icon-sm"
                             disabled={
-                              item.quantity <= CART_ITEM_QUANTITY.min
+                              item.quantity <= PURCHASE_QUANTITY.min
                             }
                             aria-label={t("decreaseItemQuantity", {
                               sku: item.sku.skuCode,
@@ -402,8 +402,8 @@ export function CartView({ locale }: CartViewProps) {
                           <Input
                             className="h-7 w-16 text-center"
                             type="number"
-                            min={CART_ITEM_QUANTITY.min}
-                            max={CART_ITEM_QUANTITY.max}
+                            min={PURCHASE_QUANTITY.min}
+                            max={PURCHASE_QUANTITY.max}
                             step="1"
                             inputMode="numeric"
                             value={item.quantity}
@@ -423,7 +423,7 @@ export function CartView({ locale }: CartViewProps) {
                             variant="outline"
                             size="icon-sm"
                             disabled={
-                              item.quantity >= CART_ITEM_QUANTITY.max
+                              item.quantity >= PURCHASE_QUANTITY.max
                             }
                             aria-label={t("increaseItemQuantity", {
                               sku: item.sku.skuCode,

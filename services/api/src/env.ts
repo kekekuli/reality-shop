@@ -21,6 +21,7 @@ const schema = z.object({
     .int()
     .positive()
     .default(30 * 24 * 60 * 60),
+  ORDER_PAYMENT_TTL: z.coerce.number().int().positive().default(30 * 60),
 
   PORT: z.coerce.number().int().positive().default(7676),
   NODE_ENV: z.enum(["development", "production", "test"]).default("development"),

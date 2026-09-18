@@ -12,7 +12,7 @@ export const AUTH_COOKIE = {
   refresh: "refresh_token",
 } as const;
 
-export const CART_ITEM_QUANTITY = {
+export const PURCHASE_QUANTITY = {
   min: 1,
   max: 99,
 } as const;

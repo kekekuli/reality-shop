@@ -3,7 +3,7 @@ import type { CartItem } from "../../generated/prisma/client";
 import { PrismaService } from "../../prisma/prisma.service";
 import { Injectable } from "@nestjs/common";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
-import { CART_ITEM_QUANTITY } from "@reality-shop/shared-types";
+import { PURCHASE_QUANTITY } from "@reality-shop/shared-types";
 
 class CartQuantityLimitExceededError extends Error {}
 
@@ -33,8 +33,8 @@ export type UpdateItemQuantityResult =
 function isValidQuantity(quantity: number): boolean {
   return (
     Number.isInteger(quantity) &&
-    quantity >= CART_ITEM_QUANTITY.min &&
-    quantity <= CART_ITEM_QUANTITY.max
+    quantity >= PURCHASE_QUANTITY.min &&
+    quantity <= PURCHASE_QUANTITY.max
   );
 }
 
@@ -79,7 +79,7 @@ export class CartService {
           },
         });
 
-        if (item.quantity > CART_ITEM_QUANTITY.max) {
+        if (item.quantity > PURCHASE_QUANTITY.max) {
           throw new CartQuantityLimitExceededError();
         }
 
