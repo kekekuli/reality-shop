@@ -18,6 +18,54 @@ import { env } from "../../env";
 export class OrderService {
   constructor(private readonly prisma: PrismaService) {}
 
+  async findPageByUserId({
+    userId,
+    first,
+    cursor,
+  }: {
+    userId: bigint;
+    first: number;
+    cursor?: {
+      sortKey: Date;
+      id: bigint;
+    };
+  }) {
+    const where: Prisma.OrderWhereInput = { userId };
+
+    if (cursor) {
+      where.OR = [
+        {
+          createdAt: {
+            lt: cursor.sortKey,
+          },
+        },
+        {
+          createdAt: cursor.sortKey,
+          id: {
+            lt: cursor.id,
+          },
+        },
+      ];
+    }
+
+    return this.prisma.order.findMany({
+      where,
+      include: orderWithItems,
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      take: first + 1,
+    });
+  }
+
+  async findByOrderNo(userId: bigint, orderNo: string) {
+    return this.prisma.order.findUnique({
+      where: {
+        orderNo,
+        userId,
+      },
+      include: orderWithItems,
+    });
+  }
+
   async createOrder(
     userId: bigint,
     address: Address,
@@ -148,6 +196,14 @@ const orderSkuSelect = {
 type OrderSkuRecord = Prisma.SkuGetPayload<{
   select: typeof orderSkuSelect;
 }>;
+
+const orderWithItems = {
+  orderItems: {
+    orderBy: {
+      skuId: "asc",
+    },
+  },
+} satisfies Prisma.OrderInclude;
 
 function validateRequestedItems(items: readonly OrderRequestItem[]):
   | CreateOrderFailure

@@ -121,6 +121,94 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
+describe("OrderService.findPageByUserId", () => {
+  it("returns one extra order for page-info calculation", async () => {
+    const orders = [{ id: 3n }, { id: 2n }, { id: 1n }];
+    const findMany = vi.fn().mockResolvedValue(orders);
+    const service = new OrderService({
+      order: { findMany },
+    } as unknown as PrismaService);
+
+    await expect(service.findPageByUserId({ userId, first: 2 })).resolves.toBe(
+      orders,
+    );
+    expect(findMany).toHaveBeenCalledWith({
+      where: { userId },
+      include: {
+        orderItems: {
+          orderBy: { skuId: "asc" },
+        },
+      },
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      take: 3,
+    });
+  });
+
+  it("continues after the composite creation-time and ID cursor", async () => {
+    const findMany = vi.fn().mockResolvedValue([]);
+    const service = new OrderService({
+      order: { findMany },
+    } as unknown as PrismaService);
+    const cursor = {
+      sortKey: new Date("2026-09-18T07:00:00.000Z"),
+      id: 20n,
+    };
+
+    await service.findPageByUserId({ userId, first: 10, cursor });
+
+    expect(findMany).toHaveBeenCalledWith({
+      where: {
+        userId,
+        OR: [
+          {
+            createdAt: {
+              lt: cursor.sortKey,
+            },
+          },
+          {
+            createdAt: cursor.sortKey,
+            id: {
+              lt: cursor.id,
+            },
+          },
+        ],
+      },
+      include: {
+        orderItems: {
+          orderBy: { skuId: "asc" },
+        },
+      },
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      take: 11,
+    });
+  });
+});
+
+describe("OrderService.findByOrderNo", () => {
+  it("scopes the order and its item snapshots to the current user", async () => {
+    const order = { id: 100n, orderNo: "order-100", orderItems: [] };
+    const findUnique = vi.fn().mockResolvedValue(order);
+    const service = new OrderService({
+      order: { findUnique },
+    } as unknown as PrismaService);
+
+    await expect(service.findByOrderNo(userId, "order-100")).resolves.toBe(
+      order,
+    );
+    expect(findUnique).toHaveBeenCalledWith({
+      where: {
+        orderNo: "order-100",
+        userId,
+      },
+      include: {
+        orderItems: {
+          orderBy: { skuId: "asc" },
+        },
+      },
+    });
+  });
+});
+
 describe("OrderService.createOrder", () => {
   it("rejects an empty order before starting a transaction", async () => {
     const { service, transaction } = createService();

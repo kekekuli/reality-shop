@@ -59,6 +59,34 @@ type CreateAddressPayload {
   errors: [BusinessError!]!
 }
 
+type CreateOrderErrorType {
+  addressId: ID
+  code: ErrorCode!
+  quantity: Int
+  requestedQuantity: Int
+  skuId: ID
+}
+
+input CreateOrderInput {
+  addressId: ID!
+  items: [CreateOrderItemInput!]!
+}
+
+input CreateOrderItemInput {
+  quantity: Int!
+  skuId: ID!
+}
+
+type CreateOrderPayload {
+  data: OrderType
+  errors: [CreateOrderErrorType!]!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
 input DeleteAddressInput {
   addressId: ID!
 }
@@ -107,6 +135,7 @@ type LogoutType {
 type Mutation {
   addCartItem(input: AddCartItemInput!): AddCartItemPayload!
   createAddress(input: CreateAddressInput!): CreateAddressPayload!
+  createOrder(input: CreateOrderInput!): CreateOrderPayload!
   deleteAddress(input: DeleteAddressInput!): DeleteAddressPayload!
   login(input: LoginInput!): LoginPayload!
   logout: LogoutPayload!
@@ -116,6 +145,46 @@ type Mutation {
   setDefaultAddress(input: SetDefaultAddressInput!): SetDefaultAddressPayload!
   updateAddress(input: UpdateAddressInput!): UpdateAddressPayload!
   updateCartItemQuantity(input: UpdateCartItemQuantityInput!): UpdateCartItemQuantityPayload!
+}
+
+type OrderConnection {
+  edges: [OrderTypeEdge!]!
+  pageInfo: PageInfo!
+}
+
+type OrderItemSpecType {
+  key: String!
+  value: String!
+}
+
+type OrderItemType {
+  lineTotal: Cents!
+  productTitle: String!
+  quantity: Int!
+  skuCode: String!
+  skuId: ID!
+  specs: [OrderItemSpecType!]!
+  unitPrice: Cents!
+}
+
+type OrderType {
+  cancelledAt: DateTime
+  createdAt: DateTime!
+  currency: String!
+  items: [OrderItemType!]!
+  orderNo: ID!
+  paidAt: DateTime
+  paymentExpiresAt: DateTime!
+  shipping: Cents!
+  shippingAddress: ShippingAddressType!
+  status: String!
+  subtotal: Cents!
+  total: Cents!
+}
+
+type OrderTypeEdge {
+  cursor: String!
+  node: OrderType!
 }
 
 type PageInfo {
@@ -146,6 +215,8 @@ type Query {
   addresses: [AddressType!]!
   cart: CartType!
   me: User!
+  order(orderNo: ID!): OrderType
+  orders(after: String, first: Int! = 20): OrderConnection!
   product(slug: String!): Product
   products(after: String, first: Int! = 20): ProductConnection!
 }
@@ -190,6 +261,15 @@ input SetDefaultAddressInput {
 type SetDefaultAddressPayload {
   data: AddressType
   errors: [BusinessError!]!
+}
+
+type ShippingAddressType {
+  city: String!
+  detail: String!
+  district: String!
+  phone: String!
+  province: String!
+  receiverName: String!
 }
 
 type Sku {

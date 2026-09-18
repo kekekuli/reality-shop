@@ -21,6 +21,15 @@ export class AddressService {
     });
   }
 
+  async findByIdForUser(userId: bigint, addressId: bigint) {
+    return this.prisma.address.findUnique({
+      where: {
+        id: addressId,
+        userId,
+      },
+    });
+  }
+
   async create(
     userId: bigint,
     data: Omit<
@@ -58,25 +67,26 @@ export class AddressService {
   ) {
     try {
       const { isDefault, ...addressDetails } = data;
-      const address = isDefault === true
-        ? await this.prisma.$transaction(async (transaction) => {
-            await transaction.address.updateMany({
-              where: { userId, isDefault: true },
-              data: { isDefault: false },
-            });
+      const address =
+        isDefault === true
+          ? await this.prisma.$transaction(async (transaction) => {
+              await transaction.address.updateMany({
+                where: { userId, isDefault: true },
+                data: { isDefault: false },
+              });
 
-            return transaction.address.update({
+              return transaction.address.update({
+                where: { id: addressId, userId },
+                data: { ...addressDetails, isDefault: true },
+              });
+            })
+          : await this.prisma.address.update({
               where: { id: addressId, userId },
-              data: { ...addressDetails, isDefault: true },
+              data:
+                isDefault === false
+                  ? { ...addressDetails, isDefault: false }
+                  : addressDetails,
             });
-          })
-        : await this.prisma.address.update({
-            where: { id: addressId, userId },
-            data:
-              isDefault === false
-                ? { ...addressDetails, isDefault: false }
-                : addressDetails,
-          });
 
       return { ok: true as const, address };
     } catch (error) {
