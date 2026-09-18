@@ -2,6 +2,7 @@ import { Field, ID, Int, ObjectType } from "@nestjs/graphql";
 import { Cents } from "../../common/graphql/cents.scalar";
 import { Paginated } from "../../common/graphql/connection";
 import { ErrorCode } from "../../common/errors/error-code";
+import { MutationPayload } from "../../common/graphql/mutation-payload";
 
 @ObjectType()
 export class OrderItemSpecType {
@@ -118,10 +119,7 @@ export class CreateOrderErrorType {
 }
 
 @ObjectType()
-export class CreateOrderPayload {
-  @Field(() => OrderType, { nullable: true })
-  data?: OrderType;
-
-  @Field(() => [CreateOrderErrorType])
-  errors!: CreateOrderErrorType[];
-}
+export class CreateOrderPayload extends MutationPayload(
+  OrderType,
+  CreateOrderErrorType,
+) {}
