@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Clock3, MapPin, PackageOpen, ReceiptText } from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -10,7 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { getPathname } from "@/i18n/navigation";
+import { Link } from "@/i18n/navigation";
 import { formatDateTime, formatPrice } from "@/lib/format";
 import { OrderStatus } from "./order-status";
 import type { OrderDetailViewModel } from "./order-view-model";
@@ -29,7 +28,7 @@ export async function OrderDetailView({
     return (
       <main className="mx-auto min-h-screen w-full max-w-3xl px-4 py-8">
         <Link
-          href={getPathname({ href: "/orders", locale })}
+          href="/orders"
           className={buttonVariants({ variant: "ghost" })}
         >
           ← {t("detail.backToOrders")}
@@ -67,7 +66,7 @@ export async function OrderDetailView({
     <main className="mx-auto min-h-screen w-full max-w-5xl px-4 py-8">
       <nav>
         <Link
-          href={getPathname({ href: "/orders", locale })}
+          href="/orders"
           className={buttonVariants({ variant: "ghost" })}
         >
           ← {t("detail.backToOrders")}

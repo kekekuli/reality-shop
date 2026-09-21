@@ -1,5 +1,5 @@
 import { ErrorCode } from "../../common/errors/error-code";
-import type { CartItem } from "../../generated/prisma/client";
+import type { CartItem, Prisma } from "../../generated/prisma/client";
 import { PrismaService } from "../../prisma/prisma.service";
 import { Injectable } from "@nestjs/common";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/client";
@@ -140,6 +140,21 @@ export class CartService {
   async removeItem(userId: bigint, skuId: bigint): Promise<void> {
     await this.prisma.cartItem.deleteMany({
       where: { userId, skuId },
+    });
+  }
+
+  async removeItems(
+    userId: bigint,
+    skuIds: readonly bigint[],
+    transaction: Pick<Prisma.TransactionClient, "cartItem">,
+  ): Promise<void> {
+    if (skuIds.length === 0) return;
+
+    await transaction.cartItem.deleteMany({
+      where: {
+        userId,
+        skuId: { in: [...skuIds] },
+      },
     });
   }
 }

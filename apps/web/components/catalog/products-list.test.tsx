@@ -3,6 +3,7 @@ import { ApolloProvider } from "@apollo/client/react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { NextIntlClientProvider } from "next-intl";
+import type { ComponentProps } from "react";
 import { describe, expect, it, vi } from "vitest";
 import { createApolloCache } from "@/lib/graphql/cache";
 import { ProductsQuery } from "@/lib/graphql/queries";
@@ -10,7 +11,11 @@ import messages from "@/messages/en.json";
 import { ProductsList } from "./products-list";
 
 vi.mock("@/i18n/navigation", () => ({
-  getPathname: ({ href }: { href: string }) => href,
+  Link: ({ children, href, ...props }: ComponentProps<"a">) => (
+    <a href={String(href)} {...props}>
+      {children}
+    </a>
+  ),
 }));
 
 const firstPage = {

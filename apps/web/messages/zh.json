@@ -75,6 +75,10 @@
     "CART_ITEM_NOT_FOUND": "该商品已不在购物车中。",
     "CART_QUANTITY_LIMIT_EXCEED": "该商品最多可添加 99 件。",
     "ADDRESS_NOT_FOUND": "该地址已不存在。",
+    "ORDER_ITEMS_EMPTY": "购物车为空。",
+    "DUPLICATE_ORDER_ITEM": "购物车中存在重复商品。",
+    "SKU_NOT_AVAILABLE": "购物车中有商品已无法购买。",
+    "INSUFFICIENT_STOCK": "购物车中有商品库存不足。",
     "network": "无法连接服务器，请重试。",
     "unexpected": "出现错误，请重试。"
   },
@@ -104,6 +108,27 @@
     "quantity": "数量",
     "decreaseQuantity": "减少数量",
     "increaseQuantity": "增加数量"
+  },
+  "checkout": {
+    "title": "确认订单",
+    "description": "提交订单前，请确认商品和收货地址。",
+    "backToCart": "返回购物车",
+    "items": "订单商品",
+    "quantity": "数量：{quantity}",
+    "deliveryAddress": "收货地址",
+    "manageAddresses": "管理地址",
+    "defaultAddress": "默认",
+    "noAddress": "请先添加收货地址，再提交订单。",
+    "addAddress": "添加地址",
+    "summary": "订单汇总",
+    "subtotal": "商品小计",
+    "shipping": "运费",
+    "shippingAtCheckout": "创建订单时计算",
+    "total": "合计",
+    "placeOrder": "提交订单",
+    "creatingOrder": "正在创建订单…",
+    "emptyTitle": "购物车为空",
+    "emptyDescription": "请先添加商品，再继续结算。"
   },
   "order": {
     "eyebrow": "购买记录",

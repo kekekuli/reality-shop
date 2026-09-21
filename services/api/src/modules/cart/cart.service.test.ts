@@ -123,6 +123,24 @@ describe("CartService.removeItem", () => {
       where: { userId, skuId },
     });
   });
+
+  it("removes the checked-out SKU set with the supplied transaction", async () => {
+    const deleteMany = vi.fn().mockResolvedValue({ count: 2 });
+    const service = new CartService({} as PrismaService);
+    const transaction = {
+      cartItem: { deleteMany },
+    } as unknown as Parameters<CartService["removeItems"]>[2];
+
+    await expect(
+      service.removeItems(userId, [skuId, 3n], transaction),
+    ).resolves.toBeUndefined();
+    expect(deleteMany).toHaveBeenCalledWith({
+      where: {
+        userId,
+        skuId: { in: [skuId, 3n] },
+      },
+    });
+  });
 });
 
 describe("CartService.updateItemQuantity", () => {
@@ -151,9 +169,9 @@ describe("CartService.updateItemQuantity", () => {
       cartItem: { update },
     } as unknown as PrismaService);
 
-    await expect(
-      service.updateItemQuantity(userId, skuId, 4),
-    ).resolves.toEqual({ ok: true, cartItem: item });
+    await expect(service.updateItemQuantity(userId, skuId, 4)).resolves.toEqual(
+      { ok: true, cartItem: item },
+    );
     expect(update).toHaveBeenCalledWith({
       where: { userId_skuId: { userId, skuId } },
       data: { quantity: 4 },
@@ -171,11 +189,11 @@ describe("CartService.updateItemQuantity", () => {
       cartItem: { update },
     } as unknown as PrismaService);
 
-    await expect(
-      service.updateItemQuantity(userId, skuId, 2),
-    ).resolves.toEqual({
-      ok: false,
-      errCode: ErrorCode.CART_ITEM_NOT_FOUND,
-    });
+    await expect(service.updateItemQuantity(userId, skuId, 2)).resolves.toEqual(
+      {
+        ok: false,
+        errCode: ErrorCode.CART_ITEM_NOT_FOUND,
+      },
+    );
   });
 });

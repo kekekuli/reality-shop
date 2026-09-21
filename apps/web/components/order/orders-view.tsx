@@ -1,14 +1,12 @@
-import Link from "next/link";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
 import { buttonVariants } from "@/components/ui/button";
-import { getPathname } from "@/i18n/navigation";
+import { Link } from "@/i18n/navigation";
 
 export async function OrdersView({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const locale = await getLocale();
   const t = await getTranslations("order");
 
   return (
@@ -28,13 +26,13 @@ export async function OrdersView({
 
         <nav className="flex items-center gap-2" aria-label={t("navigation")}>
           <Link
-            href={getPathname({ href: "/", locale })}
+            href="/"
             className={buttonVariants({ variant: "outline" })}
           >
             {t("products")}
           </Link>
           <Link
-            href={getPathname({ href: "/account", locale })}
+            href="/account"
             className={buttonVariants({ variant: "outline" })}
           >
             {t("account")}

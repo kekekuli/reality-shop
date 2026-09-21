@@ -4,7 +4,7 @@ import type { Order, OrderItem } from "../../generated/prisma/client";
 import type { OrderService } from "../../modules/order/order.service";
 import { encodeCursor } from "../../common/graphql/cursor";
 import type { AuthenticatedRequest } from "../auth/gql-auth.guard";
-import type { CheckoutService } from "./checkout.service";
+import type { CheckoutService } from "../../modules/checkout/checkout.service";
 import { OrderResolver } from "./order.resolver";
 
 vi.mock("../../env", () => ({

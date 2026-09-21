@@ -2,7 +2,11 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { ErrorCode } from "../../common/errors/error-code";
 import type { Address } from "../../generated/prisma/client";
 import { PrismaService } from "../../prisma/prisma.service";
-import { OrderService, type OrderRequestItem } from "./order.service";
+import {
+  OrderService,
+  orderCreationFailure,
+  type OrderRequestItem,
+} from "./order.service";
 
 vi.mock("../../env", () => ({
   env: {
@@ -104,14 +108,22 @@ function createService(
     },
   );
 
+  const service = new OrderService({
+    $transaction: transaction,
+  } as unknown as PrismaService);
+  const orderTransaction = transactionClient as unknown as Parameters<
+    OrderService["createOrder"]
+  >[0];
+
   return {
-    service: new OrderService({
-      $transaction: transaction,
-    } as unknown as PrismaService),
+    service,
+    createOrder: (items: readonly OrderRequestItem[]) =>
+      service.createOrder(orderTransaction, userId, address, items),
     findMany,
     updateMany,
     create,
     transaction,
+    transactionClient,
     createdOrder,
     wasRolledBack: () => rolledBack,
   };
@@ -210,53 +222,51 @@ describe("OrderService.findByOrderNo", () => {
 });
 
 describe("OrderService.createOrder", () => {
-  it("rejects an empty order before starting a transaction", async () => {
-    const { service, transaction } = createService();
+  it("rejects an empty order before accessing SKU data", async () => {
+    const { createOrder, findMany } = createService();
 
-    await expect(service.createOrder(userId, address, [])).resolves.toEqual({
+    await expect(createOrder([])).resolves.toEqual({
       ok: false,
       errCode: ErrorCode.ORDER_ITEMS_EMPTY,
     });
-    expect(transaction).not.toHaveBeenCalled();
+    expect(findMany).not.toHaveBeenCalled();
   });
 
   it("identifies the duplicated SKU", async () => {
-    const { service, transaction } = createService();
+    const { createOrder, findMany } = createService();
     const items: OrderRequestItem[] = [
       { skuId: 2n, quantity: 1 },
       { skuId: 2n, quantity: 2 },
     ];
 
-    await expect(service.createOrder(userId, address, items)).resolves.toEqual({
+    await expect(createOrder(items)).resolves.toEqual({
       ok: false,
       errCode: ErrorCode.DUPLICATE_ORDER_ITEM,
       skuId: 2n,
     });
-    expect(transaction).not.toHaveBeenCalled();
+    expect(findMany).not.toHaveBeenCalled();
   });
 
   it.each([0, -1, 100, 1.5, Number.NaN])(
     "identifies invalid quantity %s and its SKU",
     async (quantity) => {
-      const { service, transaction } = createService();
+      const { createOrder, findMany } = createService();
 
-      await expect(
-        service.createOrder(userId, address, [{ skuId: 2n, quantity }]),
-      ).resolves.toEqual({
+      await expect(createOrder([{ skuId: 2n, quantity }])).resolves.toEqual({
         ok: false,
         errCode: ErrorCode.INVALID_QUANTITY,
         skuId: 2n,
         quantity,
       });
-      expect(transaction).not.toHaveBeenCalled();
+      expect(findMany).not.toHaveBeenCalled();
     },
   );
 
   it("identifies the requested SKU that was not found", async () => {
-    const { service } = createService({ skuRecords: [skuRecord()] });
+    const { createOrder } = createService({ skuRecords: [skuRecord()] });
 
     await expect(
-      service.createOrder(userId, address, [
+      createOrder([
         { skuId: 2n, quantity: 1 },
         { skuId: 3n, quantity: 1 },
       ]),
@@ -273,11 +283,9 @@ describe("OrderService.createOrder", () => {
       product: { title: "Product 2", status: "off_shelf" },
     }),
   ])("identifies an unavailable SKU or product", async (record) => {
-    const { service } = createService({ skuRecords: [record] });
+    const { createOrder } = createService({ skuRecords: [record] });
 
-    await expect(
-      service.createOrder(userId, address, [{ skuId: 2n, quantity: 1 }]),
-    ).resolves.toEqual({
+    await expect(createOrder([{ skuId: 2n, quantity: 1 }])).resolves.toEqual({
       ok: false,
       errCode: ErrorCode.SKU_NOT_AVAILABLE,
       skuId: 2n,
@@ -288,11 +296,9 @@ describe("OrderService.createOrder", () => {
     skuRecord({ inventory: null }),
     skuRecord({ inventory: { available: 1 } }),
   ])("identifies the SKU with insufficient inventory", async (record) => {
-    const { service } = createService({ skuRecords: [record] });
+    const { createOrder } = createService({ skuRecords: [record] });
 
-    await expect(
-      service.createOrder(userId, address, [{ skuId: 2n, quantity: 2 }]),
-    ).resolves.toEqual({
+    await expect(createOrder([{ skuId: 2n, quantity: 2 }])).resolves.toEqual({
       ok: false,
       errCode: ErrorCode.INSUFFICIENT_STOCK,
       skuId: 2n,
@@ -309,7 +315,7 @@ describe("OrderService.createOrder", () => {
       priceCents: 500n,
       product: { title: "Product 3", status: "on_sale" },
     });
-    const { service, updateMany, create, createdOrder } = createService({
+    const { createOrder, updateMany, create, createdOrder } = createService({
       skuRecords: [skuRecord(), secondSku],
     });
     const items: OrderRequestItem[] = [
@@ -317,7 +323,7 @@ describe("OrderService.createOrder", () => {
       { skuId: 2n, quantity: 2 },
     ];
 
-    await expect(service.createOrder(userId, address, items)).resolves.toEqual({
+    await expect(createOrder(items)).resolves.toEqual({
       ok: true,
       order: createdOrder,
     });
@@ -378,19 +384,39 @@ describe("OrderService.createOrder", () => {
     });
   });
 
+  it("uses the caller-owned transaction without starting a nested one", async () => {
+    const { createOrder, transaction, createdOrder } = createService();
+
+    await expect(createOrder([{ skuId: 2n, quantity: 1 }])).resolves.toEqual({
+      ok: true,
+      order: createdOrder,
+    });
+    expect(transaction).not.toHaveBeenCalled();
+  });
+
   it("lets the transaction roll back when a later reservation loses the race", async () => {
     const secondSku = skuRecord({ id: 3n, skuCode: "SKU-3" });
-    const { service, create, wasRolledBack } = createService({
-      skuRecords: [skuRecord(), secondSku],
-      reservationCounts: [1, 0],
-    });
+    const { service, transaction, transactionClient, create, wasRolledBack } =
+      createService({
+        skuRecords: [skuRecord(), secondSku],
+        reservationCounts: [1, 0],
+      });
 
-    await expect(
-      service.createOrder(userId, address, [
-        { skuId: 2n, quantity: 1 },
-        { skuId: 3n, quantity: 4 },
-      ]),
-    ).resolves.toEqual({
+    const error = await transaction(() =>
+      service.createOrder(
+        transactionClient as unknown as Parameters<
+          OrderService["createOrder"]
+        >[0],
+        userId,
+        address,
+        [
+          { skuId: 2n, quantity: 1 },
+          { skuId: 3n, quantity: 4 },
+        ],
+      ),
+    ).catch((caught: unknown) => caught);
+
+    expect(orderCreationFailure(error)).toEqual({
       ok: false,
       errCode: ErrorCode.INSUFFICIENT_STOCK,
       skuId: 3n,
@@ -402,21 +428,36 @@ describe("OrderService.createOrder", () => {
 
   it("does not hide unexpected database errors", async () => {
     const databaseError = new Error("database unavailable");
-    const { service } = createService({ findManyError: databaseError });
+    const { createOrder } = createService({ findManyError: databaseError });
 
-    await expect(
-      service.createOrder(userId, address, [{ skuId: 2n, quantity: 1 }]),
-    ).rejects.toBe(databaseError);
+    await expect(createOrder([{ skuId: 2n, quantity: 1 }])).rejects.toBe(
+      databaseError,
+    );
   });
 
   it("rolls back reserved inventory when creating the order fails", async () => {
     const databaseError = new Error("order insert failed");
-    const { service, updateMany, wasRolledBack } = createService({
+    const {
+      service,
+      transaction,
+      transactionClient,
+      updateMany,
+      wasRolledBack,
+    } = createService({
       createError: databaseError,
     });
 
     await expect(
-      service.createOrder(userId, address, [{ skuId: 2n, quantity: 1 }]),
+      transaction(() =>
+        service.createOrder(
+          transactionClient as unknown as Parameters<
+            OrderService["createOrder"]
+          >[0],
+          userId,
+          address,
+          [{ skuId: 2n, quantity: 1 }],
+        ),
+      ),
     ).rejects.toBe(databaseError);
     expect(updateMany).toHaveBeenCalledOnce();
     expect(wasRolledBack()).toBe(true);

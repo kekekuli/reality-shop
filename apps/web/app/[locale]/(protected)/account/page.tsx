@@ -1,7 +1,6 @@
 import { getLocale, getTranslations } from "next-intl/server";
-import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getPathname } from "@/i18n/navigation";
+import { getPathname, Link } from "@/i18n/navigation";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { gqlFetch, GraphQLRequestError } from "@/lib/graphql/client";
@@ -33,20 +32,20 @@ export default async function AccountPage() {
         <nav aria-label={t("navigation")} className="flex items-center gap-2">
           <Link
             className={buttonVariants({ variant: "outline" })}
-            href={getPathname({ href: "/", locale })}
+            href="/"
           >
             {t("backToShop")}
           </Link>
 
           <Link
             className={buttonVariants({ variant: "outline" })}
-            href={getPathname({ href: "/account/addresses", locale })}
+            href="/account/addresses"
           >
             {t("manageAddresses")}
           </Link>
           <Link
             className={buttonVariants({ variant: "outline" })}
-            href={getPathname({ href: "/orders", locale })}
+            href="/orders"
           >
             {t("orders")}
           </Link>

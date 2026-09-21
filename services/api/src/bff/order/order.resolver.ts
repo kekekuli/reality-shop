@@ -15,7 +15,7 @@ import { decodeCursor, encodeCursor } from "../../common/graphql/cursor";
 import { toCreateOrderError, toOrder } from "./order.mapper";
 import { CreateOrderInput } from "./order.input";
 import { ErrorCode } from "../../common/errors/error-code";
-import { CheckoutService } from "./checkout.service";
+import { CheckoutService } from "../../modules/checkout/checkout.service";
 
 function parsePositiveId(value: string): bigint | null {
   try {

@@ -75,6 +75,10 @@
     "CART_ITEM_NOT_FOUND": "This item is no longer in your cart.",
     "CART_QUANTITY_LIMIT_EXCEED": "You can add up to 99 of this item.",
     "ADDRESS_NOT_FOUND": "This address is no longer available.",
+    "ORDER_ITEMS_EMPTY": "Your cart is empty.",
+    "DUPLICATE_ORDER_ITEM": "Your cart contains a duplicate item.",
+    "SKU_NOT_AVAILABLE": "An item in your cart is no longer available.",
+    "INSUFFICIENT_STOCK": "An item in your cart does not have enough stock.",
     "network": "Unable to connect. Please try again.",
     "unexpected": "Something went wrong. Please try again."
   },
@@ -104,6 +108,27 @@
     "quantity": "Quantity",
     "decreaseQuantity": "Decrease quantity",
     "increaseQuantity": "Increase quantity"
+  },
+  "checkout": {
+    "title": "Review your order",
+    "description": "Confirm your items and delivery address before placing the order.",
+    "backToCart": "Back to cart",
+    "items": "Order items",
+    "quantity": "Quantity: {quantity}",
+    "deliveryAddress": "Delivery address",
+    "manageAddresses": "Manage addresses",
+    "defaultAddress": "Default",
+    "noAddress": "Add a delivery address before placing your order.",
+    "addAddress": "Add an address",
+    "summary": "Order summary",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "shippingAtCheckout": "Calculated when the order is created",
+    "total": "Total",
+    "placeOrder": "Place order",
+    "creatingOrder": "Creating order…",
+    "emptyTitle": "Your cart is empty",
+    "emptyDescription": "Add an item before continuing to checkout."
   },
   "order": {
     "eyebrow": "Purchase history",

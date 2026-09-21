@@ -239,6 +239,54 @@ export const CartQuery = graphql(`
   }
 `);
 
+export const CheckoutQuery = graphql(`
+  query Checkout {
+    cart {
+      items {
+        skuId
+        quantity
+        sku {
+          skuId
+          skuCode
+          price
+          product {
+            slug
+            title
+            brand
+          }
+        }
+      }
+    }
+    addresses {
+      id
+      receiverName
+      phone
+      province
+      city
+      district
+      detail
+      isDefault
+    }
+  }
+`);
+
+export const CreateOrderMutation = graphql(`
+  mutation CreateOrder($input: CreateOrderInput!) {
+    createOrder(input: $input) {
+      data {
+        orderNo
+      }
+      errors {
+        code
+        addressId
+        skuId
+        quantity
+        requestedQuantity
+      }
+    }
+  }
+`);
+
 export const RemoveCartItemMutation = graphql(`
   mutation RemoveCartItem($input: RemoveCartItemInput!) {
     removeCartItem(input: $input) {

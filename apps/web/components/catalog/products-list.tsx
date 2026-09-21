@@ -1,17 +1,15 @@
 "use client";
 
-import Link from "next/link";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
 import { useSuspenseQuery } from "@apollo/client/react";
 import { Button } from "@/components/ui/button";
-import { getPathname } from "@/i18n/navigation";
+import { Link } from "@/i18n/navigation";
 import { lowestPrice } from "@/lib/format";
 import { CONNECTION_PAGE_SIZE } from "@/lib/graphql/pagination";
 import { ProductsQuery } from "@/lib/graphql/queries";
 
 export function ProductsList() {
-  const locale = useLocale();
   const t = useTranslations("catalog");
   const { data, fetchMore } = useSuspenseQuery(ProductsQuery, {
     variables: { first: CONNECTION_PAGE_SIZE },
@@ -51,10 +49,7 @@ export function ProductsList() {
               className="rounded-lg border border-black/10 transition-shadow hover:shadow-md dark:border-white/15"
             >
               <Link
-                href={getPathname({
-                  href: `/products/${node.slug}`,
-                  locale,
-                })}
+                href={`/products/${node.slug}`}
                 className="block rounded-lg p-4 outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
               >
                 <p className="text-xs uppercase tracking-wide text-black/50 dark:text-white/50">

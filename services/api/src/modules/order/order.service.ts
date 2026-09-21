@@ -67,62 +67,22 @@ export class OrderService {
   }
 
   async createOrder(
+    transaction: Prisma.TransactionClient,
     userId: bigint,
     address: Address,
     items: readonly OrderRequestItem[],
   ): Promise<CreateOrderResult> {
     const requestedItems = validateRequestedItems(items);
-    if (!requestedItems.ok) {
-      return requestedItems;
-    }
+    if (!requestedItems.ok) return requestedItems;
 
-    const skuIds = Array.from(requestedItems.requestedItemsBySkuId.keys());
-
-    try {
-      return await this.prisma.$transaction(async (transaction) => {
-        const skuRecords = await transaction.sku.findMany({
-          where: {
-            id: {
-              in: skuIds,
-            },
-          },
-          select: orderSkuSelect,
-          orderBy: {
-            id: "asc",
-          },
-        });
-
-        const snapshot = buildOrderSnapshot(
-          skuRecords,
-          requestedItems.requestedItemsBySkuId,
-        );
-        if (!snapshot.ok) {
-          return snapshot;
-        }
-
-        await reserveInventory(transaction, items);
-
-        const order = await transaction.order.create({
-          data: buildOrderCreateData(userId, address, snapshot),
-          include: {
-            orderItems: true,
-          },
-        });
-
-        return { ok: true as const, order };
-      });
-    } catch (error) {
-      if (error instanceof InventoryReservationError) {
-        return {
-          ok: false,
-          errCode: ErrorCode.INSUFFICIENT_STOCK,
-          skuId: error.skuId,
-          requestedQuantity: error.requestedQuantity,
-        };
-      }
-
-      throw error;
-    }
+    return createValidatedOrder(
+      transaction,
+      userId,
+      address,
+      items,
+      Array.from(requestedItems.requestedItemsBySkuId.keys()),
+      requestedItems.requestedItemsBySkuId,
+    );
   }
 }
 
@@ -174,6 +134,19 @@ export type CreateOrderResult =
     }
   | CreateOrderFailure;
 
+export function orderCreationFailure(
+  error: unknown,
+): CreateOrderFailure | null {
+  if (!(error instanceof InventoryReservationError)) return null;
+
+  return {
+    ok: false,
+    errCode: ErrorCode.INSUFFICIENT_STOCK,
+    skuId: error.skuId,
+    requestedQuantity: error.requestedQuantity,
+  };
+}
+
 const orderSkuSelect = {
   id: true,
   skuCode: true,
@@ -196,6 +169,41 @@ const orderSkuSelect = {
 type OrderSkuRecord = Prisma.SkuGetPayload<{
   select: typeof orderSkuSelect;
 }>;
+
+async function createValidatedOrder(
+  transaction: Prisma.TransactionClient,
+  userId: bigint,
+  address: Address,
+  items: readonly OrderRequestItem[],
+  skuIds: readonly bigint[],
+  requestedItemsBySkuId: ReadonlyMap<bigint, OrderRequestItem>,
+): Promise<CreateOrderResult> {
+  const skuRecords = await transaction.sku.findMany({
+    where: {
+      id: {
+        in: [...skuIds],
+      },
+    },
+    select: orderSkuSelect,
+    orderBy: {
+      id: "asc",
+    },
+  });
+
+  const snapshot = buildOrderSnapshot(skuRecords, requestedItemsBySkuId);
+  if (!snapshot.ok) return snapshot;
+
+  await reserveInventory(transaction, items);
+
+  const order = await transaction.order.create({
+    data: buildOrderCreateData(userId, address, snapshot),
+    include: {
+      orderItems: true,
+    },
+  });
+
+  return { ok: true, order };
+}
 
 const orderWithItems = {
   orderItems: {

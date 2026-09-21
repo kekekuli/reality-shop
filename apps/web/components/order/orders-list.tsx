@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { PackageOpen, ReceiptText } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useState, useTransition } from "react";
@@ -14,7 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { getPathname } from "@/i18n/navigation";
+import { Link } from "@/i18n/navigation";
 import { formatDateTime, formatPrice } from "@/lib/format";
 import { CONNECTION_PAGE_SIZE } from "@/lib/graphql/pagination";
 import { OrdersQuery } from "@/lib/graphql/queries";
@@ -71,7 +70,7 @@ export function OrdersList() {
             </CardDescription>
           </div>
           <Link
-            href={getPathname({ href: "/", locale })}
+            href="/"
             className={buttonVariants()}
           >
             {t("browseProducts")}
@@ -91,10 +90,7 @@ export function OrdersList() {
           return (
             <li key={order.orderNo}>
               <Link
-                href={getPathname({
-                  href: `/orders/${order.orderNo}`,
-                  locale,
-                })}
+                href={`/orders/${order.orderNo}`}
                 className="block rounded-xl outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
               >
                 <Card className="transition-colors hover:bg-muted/30">

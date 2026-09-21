@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { Minus, Plus, ShoppingCart, Trash2 } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { CombinedGraphQLErrors } from "@apollo/client/errors";
 import type { Reference } from "@apollo/client";
@@ -22,7 +21,7 @@ import {
 import { FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { getPathname } from "@/i18n/navigation";
+import { Link } from "@/i18n/navigation";
 import { formatPrice } from "@/lib/format";
 import { PURCHASE_QUANTITY } from "@reality-shop/shared-types";
 import type { CartQuery as CartQueryData } from "@/lib/graphql/generated/graphql";
@@ -57,7 +56,6 @@ function totalPrice(items: readonly CartItem[]) {
 }
 
 export function CartView() {
-  const locale = useLocale();
   const t = useTranslations("cart");
   const errorT = useTranslations("error");
   const client = useApolloClient();
@@ -311,10 +309,7 @@ export function CartView() {
           </h1>
         </div>
 
-        <Link
-          href={getPathname({ href: "/", locale })}
-          className={buttonVariants({ variant: "outline" })}
-        >
+        <Link href="/" className={buttonVariants({ variant: "outline" })}>
           {t("continueShopping")}
         </Link>
       </header>
@@ -335,10 +330,7 @@ export function CartView() {
                 {t("emptyDescription")}
               </CardDescription>
             </div>
-            <Link
-              href={getPathname({ href: "/", locale })}
-              className={buttonVariants()}
-            >
+            <Link href="/" className={buttonVariants()}>
               {t("browseProducts")}
             </Link>
           </CardContent>
@@ -360,10 +352,7 @@ export function CartView() {
                           {item.sku.product.brand}
                         </p>
                         <Link
-                          href={getPathname({
-                            href: `/products/${item.sku.product.slug}`,
-                            locale,
-                          })}
+                          href={`/products/${item.sku.product.slug}`}
                           className="mt-1 inline-block text-base font-medium underline-offset-4 hover:underline"
                         >
                           {item.sku.product.title}
@@ -470,9 +459,15 @@ export function CartView() {
                 <span>{t("total")}</span>
                 <span>{subtotal}</span>
               </div>
-              <Button type="button" size="lg" className="w-full">
+              <Link
+                href="/checkout"
+                className={buttonVariants({
+                  size: "lg",
+                  className: "w-full",
+                })}
+              >
                 {t("checkout")}
-              </Button>
+              </Link>
             </CardContent>
           </Card>
         </div>

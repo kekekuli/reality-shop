@@ -21,8 +21,12 @@ export class AddressService {
     });
   }
 
-  async findByIdForUser(userId: bigint, addressId: bigint) {
-    return this.prisma.address.findUnique({
+  async findByIdForUser(
+    userId: bigint,
+    addressId: bigint,
+    database: Pick<Prisma.TransactionClient, "address"> = this.prisma,
+  ) {
+    return database.address.findUnique({
       where: {
         id: addressId,
         userId,

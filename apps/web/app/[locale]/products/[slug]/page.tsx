@@ -1,9 +1,8 @@
 import { notFound } from "next/navigation";
-import Link from "next/link";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getTranslations } from "next-intl/server";
 import { AddCartItemButton } from "@/components/cart/add-cart-item-button";
 import { buttonVariants } from "@/components/ui/button";
-import { getPathname } from "@/i18n/navigation";
+import { Link } from "@/i18n/navigation";
 import { formatPrice } from "@/lib/format";
 import { gqlFetch } from "@/lib/graphql/client";
 import { ProductQuery } from "@/lib/graphql/queries";
@@ -14,8 +13,7 @@ export default async function ProductPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const [locale, catalogT, data] = await Promise.all([
-    getLocale(),
+  const [catalogT, data] = await Promise.all([
     getTranslations("catalog"),
     gqlFetch(ProductQuery, { slug }),
   ]);
@@ -27,13 +25,13 @@ export default async function ProductPage({
     <main className="mx-auto max-w-3xl px-4 py-8">
       <nav className="flex items-center justify-between gap-4">
         <Link
-          href={getPathname({ href: "/", locale })}
+          href="/"
           className={buttonVariants({ variant: "ghost" })}
         >
           ← {catalogT("backToProducts")}
         </Link>
         <Link
-          href={getPathname({ href: "/cart", locale })}
+          href="/cart"
           className={buttonVariants({ variant: "outline" })}
         >
           {catalogT("cart")}
