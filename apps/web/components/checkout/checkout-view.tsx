@@ -3,7 +3,6 @@
 import { MapPin, ShoppingCart } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { CombinedGraphQLErrors } from "@apollo/client/errors";
 import {
   useApolloClient,
   useMutation,
@@ -22,6 +21,7 @@ import { Separator } from "@/components/ui/separator";
 import { Link, useRouter } from "@/i18n/navigation";
 import { formatPrice } from "@/lib/format";
 import type { CheckoutQuery as CheckoutQueryData } from "@/lib/graphql/generated/graphql";
+import { classifyGraphQLRequestError } from "@/lib/graphql/errors";
 import { CheckoutQuery, CreateOrderMutation } from "@/lib/graphql/queries";
 import { cn } from "@/lib/utils";
 
@@ -72,17 +72,7 @@ export function CheckoutView() {
   }
 
   function reportRequestError(error: unknown) {
-    if (CombinedGraphQLErrors.is(error)) {
-      const unauthenticated = error.errors.some(
-        (graphQLError) => graphQLError.extensions?.code === "UNAUTHENTICATED",
-      );
-      setErrorMessage(
-        errorT(unauthenticated ? "UNAUTHENTICATED" : "unexpected"),
-      );
-      return;
-    }
-
-    setErrorMessage(errorT("network"));
+    setErrorMessage(errorT(classifyGraphQLRequestError(error)));
   }
 
   async function handleCreateOrder() {

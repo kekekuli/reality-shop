@@ -4,7 +4,8 @@ import { AddCartItemButton } from "@/components/cart/add-cart-item-button";
 import { buttonVariants } from "@/components/ui/button";
 import { Link } from "@/i18n/navigation";
 import { formatPrice } from "@/lib/format";
-import { gqlFetch } from "@/lib/graphql/client";
+import { query } from "@/lib/graphql/apollo-rsc";
+import { requireGraphQLData } from "@/lib/graphql/errors";
 import { ProductQuery } from "@/lib/graphql/queries";
 
 export default async function ProductPage({
@@ -13,11 +14,11 @@ export default async function ProductPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const [catalogT, data] = await Promise.all([
+  const [catalogT, result] = await Promise.all([
     getTranslations("catalog"),
-    gqlFetch(ProductQuery, { slug }),
+    query({ query: ProductQuery, variables: { slug } }),
   ]);
-  const product = data.product;
+  const product = requireGraphQLData(result.data).product;
 
   if (!product) notFound();
 

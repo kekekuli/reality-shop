@@ -32,7 +32,7 @@ COPY services/api/src/schema.gql services/api/src/schema.gql
 
 # Next's build loads the page module during "Collecting page data" to
 # determine static-vs-dynamic rendering (even for a route that's fully
-# dynamic at runtime), which transitively imports env.ts via gqlFetch
+# dynamic at runtime), which transitively imports env.ts via the Apollo RSC client
 # and generateMetadata — so env.ts's z.url() validation runs here too,
 # not just at next.config.ts load. Official t3-env pattern for exactly
 # this: https://create.t3.gg/en/deployment/docker. Set only for this

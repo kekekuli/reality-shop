@@ -2,7 +2,8 @@ import { getTranslations } from "next-intl/server";
 import { AddressForm } from "./address-form";
 import { SavedAddresses } from "./saved-addresses";
 import { Link } from "@/i18n/navigation";
-import { gqlFetch } from "@/lib/graphql/client";
+import { query } from "@/lib/graphql/apollo-rsc";
+import { requireGraphQLData } from "@/lib/graphql/errors";
 import { AddressesQuery } from "@/lib/graphql/queries";
 import { addressDraftKey } from "@/lib/address-draft";
 
@@ -14,7 +15,8 @@ export default async function AddressesPage({
   const { edit } = await searchParams;
   const t = await getTranslations("address");
 
-  const { addresses, me } = await gqlFetch(AddressesQuery);
+  const result = await query({ query: AddressesQuery });
+  const { addresses, me } = requireGraphQLData(result.data);
   const editingAddress =
     typeof edit === "string"
       ? addresses.find((address) => address.id === edit)

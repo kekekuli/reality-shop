@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { FieldError } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { useMutation } from "@apollo/client/react";
-import { CombinedGraphQLErrors } from "@apollo/client/errors";
+import { classifyGraphQLRequestError } from "@/lib/graphql/errors";
 import { AddCartItemMutation } from "@/lib/graphql/queries";
 
 type AddCartItemButtonProps = {
@@ -70,18 +70,7 @@ export function AddCartItemButton({ sku }: AddCartItemButtonProps) {
       );
       setQuantity("1");
     } catch (error) {
-      if (CombinedGraphQLErrors.is(error)) {
-        const isUnauthenticated = error.errors.some(
-          (graphQLError) => graphQLError.extensions?.code === "UNAUTHENTICATED",
-        );
-
-        setErrorMessage(
-          errorT(isUnauthenticated ? "UNAUTHENTICATED" : "unexpected"),
-        );
-        return;
-      }
-
-      setErrorMessage(errorT("network"));
+      setErrorMessage(errorT(classifyGraphQLRequestError(error)));
     }
   }
 

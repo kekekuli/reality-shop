@@ -22,7 +22,7 @@ const forwardRequestCookies: typeof fetch = async (input, init) => {
   });
 };
 
-export const { getClient, PreloadQuery } = registerApolloClient(
+export const { query, PreloadQuery } = registerApolloClient(
   () =>
     new ApolloClient({
       cache: createApolloCache(),

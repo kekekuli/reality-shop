@@ -1,7 +1,6 @@
 "use client";
 
 import { useMutation } from "@apollo/client/react";
-import { CombinedGraphQLErrors } from "@apollo/client/errors";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Pencil, Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -26,6 +25,7 @@ import { TextField } from "@/components/ui/text-field";
 import { useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import type { AddressesQuery as AddressesQueryResult } from "@/lib/graphql/generated/graphql";
+import { classifyGraphQLRequestError } from "@/lib/graphql/errors";
 import {
   CreateAddressMutation,
   UpdateAddressMutation,
@@ -156,18 +156,7 @@ export function AddressForm({ draftKey, initialAddress }: AddressFormProps) {
         router.refresh();
       }
     } catch (error) {
-      if (CombinedGraphQLErrors.is(error)) {
-        const isUnauthenticated = error.errors.some(
-          (graphQLError) => graphQLError.extensions?.code === "UNAUTHENTICATED",
-        );
-
-        setErrorMessage(
-          errorT(isUnauthenticated ? "UNAUTHENTICATED" : "unexpected"),
-        );
-        return;
-      }
-
-      setErrorMessage(errorT("network"));
+      setErrorMessage(errorT(classifyGraphQLRequestError(error)));
     }
   };
 

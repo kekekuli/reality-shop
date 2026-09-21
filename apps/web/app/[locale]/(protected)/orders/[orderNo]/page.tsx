@@ -1,5 +1,6 @@
 import { OrderDetailView } from "@/components/order/order-detail-view";
-import { getClient } from "@/lib/graphql/apollo-rsc";
+import { query } from "@/lib/graphql/apollo-rsc";
+import { requireGraphQLData } from "@/lib/graphql/errors";
 import { OrderQuery } from "@/lib/graphql/queries";
 
 export default async function OrderPage({
@@ -9,14 +10,12 @@ export default async function OrderPage({
 }) {
   const { orderNo } = await params;
 
-  const { data } = await getClient().query({
+  const { data } = await query({
     query: OrderQuery,
     variables: { orderNo },
   });
 
-  if (!data) {
-    throw new Error("Order query did not return data");
-  }
+  const order = requireGraphQLData(data).order;
 
-  return <OrderDetailView order={data.order} requestedOrderNo={orderNo} />;
+  return <OrderDetailView order={order} requestedOrderNo={orderNo} />;
 }

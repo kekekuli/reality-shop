@@ -3,7 +3,6 @@
 import { Minus, Plus, ShoppingCart, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
-import { CombinedGraphQLErrors } from "@apollo/client/errors";
 import type { Reference } from "@apollo/client";
 import {
   useApolloClient,
@@ -25,6 +24,7 @@ import { Link } from "@/i18n/navigation";
 import { formatPrice } from "@/lib/format";
 import { PURCHASE_QUANTITY } from "@reality-shop/shared-types";
 import type { CartQuery as CartQueryData } from "@/lib/graphql/generated/graphql";
+import { classifyGraphQLRequestError } from "@/lib/graphql/errors";
 import {
   CartQuery,
   RemoveCartItemMutation,
@@ -143,16 +143,7 @@ export function CartView() {
   }
 
   function reportRequestError(error: unknown) {
-    if (CombinedGraphQLErrors.is(error)) {
-      const isUnauthenticated = error.errors.some(
-        (graphQLError) => graphQLError.extensions?.code === "UNAUTHENTICATED",
-      );
-      setErrorMessage(
-        errorT(isUnauthenticated ? "UNAUTHENTICATED" : "unexpected"),
-      );
-    } else {
-      setErrorMessage(errorT("network"));
-    }
+    setErrorMessage(errorT(classifyGraphQLRequestError(error)));
   }
 
   async function flushQuantityUpdate(

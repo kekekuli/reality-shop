@@ -3,27 +3,25 @@ import { redirect } from "next/navigation";
 import { getPathname, Link } from "@/i18n/navigation";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
-import { gqlFetch, GraphQLRequestError } from "@/lib/graphql/client";
+import { query } from "@/lib/graphql/apollo-rsc";
+import {
+  hasGraphQLErrorCode,
+  requireGraphQLData,
+} from "@/lib/graphql/errors";
 import { MeQuery } from "@/lib/graphql/queries";
 import { LogoutButton } from "./logout-button";
 
 export default async function AccountPage() {
   const locale = await getLocale();
   const t = await getTranslations("account");
-  let data;
-
-  try {
-    data = await gqlFetch(MeQuery);
-  } catch (error) {
-    if (
-      error instanceof GraphQLRequestError &&
-      error.hasCode("UNAUTHENTICATED")
-    ) {
+  const result = await query({ query: MeQuery }).catch((error: unknown) => {
+    if (hasGraphQLErrorCode(error, "UNAUTHENTICATED")) {
       redirect(getPathname({ href: "/login", locale }));
     }
 
     throw error;
-  }
+  });
+  const { me } = requireGraphQLData(result.data);
 
   return (
     <main className="mx-auto grid min-h-screen w-full max-w-5xl grid-rows-[auto_1fr] px-4 py-8">
@@ -60,11 +58,11 @@ export default async function AccountPage() {
                 <dt className="text-sm text-muted-foreground">
                   {t("displayName")}
                 </dt>
-                <dd className="mt-1 font-medium">{data.me.displayName}</dd>
+                <dd className="mt-1 font-medium">{me.displayName}</dd>
               </div>
               <div>
                 <dt className="text-sm text-muted-foreground">{t("email")}</dt>
-                <dd className="mt-1 font-medium">{data.me.email}</dd>
+                <dd className="mt-1 font-medium">{me.email}</dd>
               </div>
             </dl>
           </CardContent>
