@@ -1,10 +1,7 @@
-import { getLocale, getTranslations } from "next-intl/server";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-import { AUTH_COOKIE } from "@reality-shop/shared-types";
+import { getTranslations } from "next-intl/server";
 import { AddressForm } from "./address-form";
 import { SavedAddresses } from "./saved-addresses";
-import { getPathname, Link } from "@/i18n/navigation";
+import { Link } from "@/i18n/navigation";
 import { gqlFetch } from "@/lib/graphql/client";
 import { AddressesQuery } from "@/lib/graphql/queries";
 import { addressDraftKey } from "@/lib/address-draft";
@@ -14,14 +11,8 @@ export default async function AddressesPage({
 }: {
   searchParams: Promise<{ edit?: string | string[] }>;
 }) {
-  const locale = await getLocale();
   const { edit } = await searchParams;
   const t = await getTranslations("address");
-  const hasAccessToken = (await cookies()).has(AUTH_COOKIE.access);
-
-  if (!hasAccessToken) {
-    redirect(getPathname({ href: "/login", locale }));
-  }
 
   const { addresses, me } = await gqlFetch(AddressesQuery);
   const editingAddress =
