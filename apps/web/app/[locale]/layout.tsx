@@ -1,11 +1,12 @@
-import { hasLocale } from "next-intl";
+import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { routing } from "@/i18n/routing";
 import { notFound } from "next/navigation";
 import "../globals.css";
 import { Metadata } from "next";
-import { getLocale, getTranslations } from "next-intl/server";
+import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import { env } from "@/env";
 import { getPathname } from "@/i18n/navigation";
+import { GraphQLProvider } from "@/lib/graphql/apollo-provider";
 
 export default async function LocaleLayout({
   children,
@@ -18,10 +19,15 @@ export default async function LocaleLayout({
   if (!hasLocale(routing.locales, lang)) {
     return notFound();
   }
+  const messages = await getMessages();
 
   return (
     <html lang={lang}>
-      <body>{children}</body>
+      <body>
+        <NextIntlClientProvider locale={lang} messages={messages}>
+          <GraphQLProvider>{children}</GraphQLProvider>
+        </NextIntlClientProvider>
+      </body>
     </html>
   );
 }
