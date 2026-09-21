@@ -16,7 +16,10 @@
     "backToProducts": "返回商品列表",
     "availableOptions": "可选规格",
     "skuCode": "SKU {code}",
-    "noSkus": "暂无可用规格。"
+    "noSkus": "暂无可用规格。",
+    "loadMore": "查看更多商品",
+    "loadingMore": "正在加载…",
+    "loadMoreError": "无法加载更多商品，请重试。"
   },
   "account": {
     "title": "你的账号",
@@ -24,6 +27,7 @@
     "displayName": "显示名称",
     "email": "邮箱",
     "manageAddresses": "地址",
+    "orders": "订单",
     "backToShop": "商品",
     "logout": "退出登录",
     "loggingOut": "正在退出…"
@@ -100,6 +104,49 @@
     "quantity": "数量",
     "decreaseQuantity": "减少数量",
     "increaseQuantity": "增加数量"
+  },
+  "order": {
+    "eyebrow": "购买记录",
+    "navigation": "订单导航",
+    "products": "商品",
+    "account": "账号",
+    "browseProducts": "浏览商品",
+    "orderNumber": "订单 {orderNo}",
+    "quantity": "× {quantity}",
+    "skuCode": "SKU {code}",
+    "subtotal": "商品小计",
+    "shipping": "运费",
+    "total": "合计",
+    "summary": "订单汇总",
+    "status": {
+      "pendingPayment": "待支付",
+      "paid": "已支付",
+      "cancelled": "已取消",
+      "unknown": "处理中"
+    },
+    "list": {
+      "title": "我的订单",
+      "description": "查看最近的购买记录，进入订单可查看完整详情。",
+      "emptyTitle": "还没有订单",
+      "emptyDescription": "完成结算后，订单会显示在这里。",
+      "moreItems": "还有 {count} 件商品",
+      "nextPage": "查看更多订单",
+      "loadingMore": "正在加载…",
+      "loadMoreError": "无法加载更多订单，请重试。"
+    },
+    "detail": {
+      "backToOrders": "返回订单列表",
+      "notFoundTitle": "未找到订单",
+      "notFoundDescription": "你的账号中没有订单 {orderNo}。",
+      "items": "商品",
+      "itemCount": "共 {count} 件商品",
+      "unitPriceQuantity": "{price} × {quantity}",
+      "shippingAddress": "收货地址",
+      "fullAddress": "{province}{city}{district}{detail}",
+      "paymentPending": "等待支付",
+      "paymentExpires": "请在 {date} 前完成支付。",
+      "payNow": "立即支付"
+    }
   },
   "auth": {
     "validation": {

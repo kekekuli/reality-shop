@@ -2,11 +2,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getPathname } from "@/i18n/navigation";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-} from "@/components/ui/card";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { buttonVariants } from "@/components/ui/button";
 import { gqlFetch, GraphQLRequestError } from "@/lib/graphql/client";
 import { MeQuery } from "@/lib/graphql/queries";
@@ -34,10 +30,7 @@ export default async function AccountPage() {
     <main className="mx-auto grid min-h-screen w-full max-w-5xl grid-rows-[auto_1fr] px-4 py-8">
       <header className="flex items-center justify-between gap-4">
         <h1 className="text-2xl font-semibold tracking-tight">{t("title")}</h1>
-        <nav
-          aria-label={t("navigation")}
-          className="flex items-center gap-2"
-        >
+        <nav aria-label={t("navigation")} className="flex items-center gap-2">
           <Link
             className={buttonVariants({ variant: "outline" })}
             href={getPathname({ href: "/", locale })}
@@ -50,6 +43,12 @@ export default async function AccountPage() {
             href={getPathname({ href: "/account/addresses", locale })}
           >
             {t("manageAddresses")}
+          </Link>
+          <Link
+            className={buttonVariants({ variant: "outline" })}
+            href={getPathname({ href: "/orders", locale })}
+          >
+            {t("orders")}
           </Link>
         </nav>
       </header>

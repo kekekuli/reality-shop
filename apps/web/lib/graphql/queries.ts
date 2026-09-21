@@ -1,9 +1,10 @@
 import { graphql } from "./generated";
 
 export const ProductsQuery = graphql(`
-  query Products {
-    products(first: 20) {
+  query Products($first: Int! = 20, $after: String) {
+    products(first: $first, after: $after) {
       edges {
+        cursor
         node {
           id
           slug
@@ -15,6 +16,10 @@ export const ProductsQuery = graphql(`
             price
           }
         }
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
       }
     }
   }
@@ -256,6 +261,67 @@ export const UpdateCartItemQuantityMutation = graphql(`
       }
       errors {
         code
+      }
+    }
+  }
+`);
+
+export const OrdersQuery = graphql(`
+  query Orders($first: Int! = 20, $after: String) {
+    orders(first: $first, after: $after) {
+      edges {
+        cursor
+        node {
+          orderNo
+          status
+          total
+          createdAt
+          items {
+            skuId
+            productTitle
+            quantity
+          }
+        }
+      }
+      pageInfo {
+        hasNextPage
+        endCursor
+      }
+    }
+  }
+`);
+
+export const OrderQuery = graphql(`
+  query Order($orderNo: ID!) {
+    order(orderNo: $orderNo) {
+      orderNo
+      status
+      subtotal
+      shipping
+      total
+      paymentExpiresAt
+      paidAt
+      cancelledAt
+      createdAt
+      shippingAddress {
+        receiverName
+        phone
+        province
+        city
+        district
+        detail
+      }
+      items {
+        skuId
+        skuCode
+        productTitle
+        specs {
+          key
+          value
+        }
+        unitPrice
+        quantity
+        lineTotal
       }
     }
   }

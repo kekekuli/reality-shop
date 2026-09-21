@@ -1,8 +1,15 @@
 import { InMemoryCache } from "@apollo/client-integration-nextjs";
+import { relayStylePagination } from "@apollo/client/utilities";
 
 export function createApolloCache() {
   return new InMemoryCache({
     typePolicies: {
+      Query: {
+        fields: {
+          orders: relayStylePagination(),
+          products: relayStylePagination(),
+        },
+      },
       CartType: {
         keyFields: [],
       },
@@ -11,6 +18,9 @@ export function createApolloCache() {
       },
       Sku: {
         keyFields: ["skuId"],
+      },
+      OrderType: {
+        keyFields: ["orderNo"],
       },
     },
   });

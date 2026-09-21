@@ -16,7 +16,10 @@
     "backToProducts": "Back to products",
     "availableOptions": "Available options",
     "skuCode": "SKU {code}",
-    "noSkus": "No options are currently available."
+    "noSkus": "No options are currently available.",
+    "loadMore": "View more products",
+    "loadingMore": "Loading more…",
+    "loadMoreError": "Unable to load more products. Please try again."
   },
   "account": {
     "title": "Your account",
@@ -24,6 +27,7 @@
     "displayName": "Display name",
     "email": "Email",
     "manageAddresses": "Addresses",
+    "orders": "Orders",
     "backToShop": "Products",
     "logout": "Sign out",
     "loggingOut": "Signing out…"
@@ -100,6 +104,49 @@
     "quantity": "Quantity",
     "decreaseQuantity": "Decrease quantity",
     "increaseQuantity": "Increase quantity"
+  },
+  "order": {
+    "eyebrow": "Purchase history",
+    "navigation": "Order navigation",
+    "products": "Products",
+    "account": "Account",
+    "browseProducts": "Browse products",
+    "orderNumber": "Order {orderNo}",
+    "quantity": "× {quantity}",
+    "skuCode": "SKU {code}",
+    "subtotal": "Subtotal",
+    "shipping": "Shipping",
+    "total": "Total",
+    "summary": "Order summary",
+    "status": {
+      "pendingPayment": "Awaiting payment",
+      "paid": "Paid",
+      "cancelled": "Cancelled",
+      "unknown": "Processing"
+    },
+    "list": {
+      "title": "Your orders",
+      "description": "Review your recent purchases and open an order for full details.",
+      "emptyTitle": "No orders yet",
+      "emptyDescription": "Orders will appear here after you finish checkout.",
+      "moreItems": "{count, plural, one {# more item} other {# more items}}",
+      "nextPage": "View more orders",
+      "loadingMore": "Loading more…",
+      "loadMoreError": "Unable to load more orders. Please try again."
+    },
+    "detail": {
+      "backToOrders": "Back to orders",
+      "notFoundTitle": "Order not found",
+      "notFoundDescription": "We could not find order {orderNo} in your account.",
+      "items": "Items",
+      "itemCount": "{count, plural, one {# item} other {# items}}",
+      "unitPriceQuantity": "{price} × {quantity}",
+      "shippingAddress": "Shipping address",
+      "fullAddress": "{province}, {city}, {district}, {detail}",
+      "paymentPending": "Payment pending",
+      "paymentExpires": "Complete payment before {date}.",
+      "payNow": "Pay now"
+    }
   },
   "auth": {
     "validation": {

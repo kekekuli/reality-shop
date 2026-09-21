@@ -1,15 +1,18 @@
-import { getLocale, getTranslations } from "next-intl/server";
+import { getLocale, getMessages, getTranslations } from "next-intl/server";
+import { NextIntlClientProvider } from "next-intl";
 import Link from "next/link";
+import { ProductsList } from "@/components/catalog/products-list";
 import { getPathname } from "@/i18n/navigation";
 import { buttonVariants } from "@/components/ui/button";
-import { gqlFetch } from "@/lib/graphql/client";
+import { GraphQLProvider } from "@/lib/graphql/apollo-provider";
+import { PreloadQuery } from "@/lib/graphql/apollo-rsc";
+import { CONNECTION_PAGE_SIZE } from "@/lib/graphql/pagination";
 import { ProductsQuery } from "@/lib/graphql/queries";
-import { lowestPrice } from "@/lib/format";
 
 export default async function Home() {
   const locale = await getLocale();
   const t = await getTranslations("catalog");
-  const data = await gqlFetch(ProductsQuery);
+  const messages = await getMessages();
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8">
@@ -31,34 +34,16 @@ export default async function Home() {
         </nav>
       </header>
 
-      <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {data.products.edges.map(({ node }) => {
-          const price = lowestPrice(node.skus.map((s) => s.price));
-
-          return (
-            <li
-              key={node.id}
-              className="rounded-lg border border-black/10 transition-shadow hover:shadow-md dark:border-white/15"
-            >
-              <Link
-                href={getPathname({
-                  href: `/products/${node.slug}`,
-                  locale,
-                })}
-                className="block rounded-lg p-4 outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-              >
-                <p className="text-xs uppercase tracking-wide text-black/50 dark:text-white/50">
-                  {node.brand}
-                </p>
-                <h2 className="mt-1 font-medium">{node.title}</h2>
-                <p className="mt-3 text-lg font-semibold text-red-600 dark:text-red-400">
-                  {price ? t("priceFrom", { price }) : t("noPrice")}
-                </p>
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
+      <NextIntlClientProvider messages={{ catalog: messages.catalog }}>
+        <GraphQLProvider>
+          <PreloadQuery
+            query={ProductsQuery}
+            variables={{ first: CONNECTION_PAGE_SIZE }}
+          >
+            <ProductsList />
+          </PreloadQuery>
+        </GraphQLProvider>
+      </NextIntlClientProvider>
     </main>
   );
 }

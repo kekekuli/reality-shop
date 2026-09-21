@@ -3,6 +3,13 @@ export function formatPrice(cents: string) {
   return `¥${yuan.toFixed(2)}`;
 }
 
+export function formatDateTime(locale: string, value: string | Date) {
+  return new Intl.DateTimeFormat(locale, {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(value));
+}
+
 // Lowest price among a product's SKUs, formatted. undefined when it has none.
 export function lowestPrice(prices: string[]): string | undefined {
   if (prices.length === 0) return undefined;
