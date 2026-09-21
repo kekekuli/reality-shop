@@ -3,7 +3,7 @@ import { routing } from "@/i18n/routing";
 import { notFound } from "next/navigation";
 import "../globals.css";
 import { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { env } from "@/env";
 import { getPathname } from "@/i18n/navigation";
 
@@ -26,12 +26,8 @@ export default async function LocaleLayout({
   );
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}): Promise<Metadata> {
-  const { locale } = await params;
+export async function generateMetadata(): Promise<Metadata> {
+  const locale = await getLocale();
 
   const t = await getTranslations({ locale, namespace: "meta" });
 

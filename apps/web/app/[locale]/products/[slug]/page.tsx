@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { AddCartItemButton } from "@/components/cart/add-cart-item-button";
 import { buttonVariants } from "@/components/ui/button";
 import { getPathname } from "@/i18n/navigation";
@@ -11,10 +11,11 @@ import { ProductQuery } from "@/lib/graphql/queries";
 export default async function ProductPage({
   params,
 }: {
-  params: Promise<{ locale: string; slug: string }>;
+  params: Promise<{ slug: string }>;
 }) {
-  const { locale, slug } = await params;
-  const [catalogT, data] = await Promise.all([
+  const { slug } = await params;
+  const [locale, catalogT, data] = await Promise.all([
+    getLocale(),
     getTranslations("catalog"),
     gqlFetch(ProductQuery, { slug }),
   ]);

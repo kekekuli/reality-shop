@@ -1,4 +1,4 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { getPathname } from "@/i18n/navigation";
 import { buttonVariants } from "@/components/ui/button";
@@ -6,12 +6,8 @@ import { gqlFetch } from "@/lib/graphql/client";
 import { ProductsQuery } from "@/lib/graphql/queries";
 import { lowestPrice } from "@/lib/format";
 
-export default async function Home({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
-  const { locale } = await params;
+export default async function Home() {
+  const locale = await getLocale();
   const t = await getTranslations("catalog");
   const data = await gqlFetch(ProductsQuery);
 

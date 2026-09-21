@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { Minus, Plus, ShoppingCart, Trash2 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { CombinedGraphQLErrors } from "@apollo/client/errors";
 import type { Reference } from "@apollo/client";
@@ -34,10 +34,6 @@ import {
 
 const QUANTITY_UPDATE_DELAY_MS = 250;
 
-type CartViewProps = {
-  locale: string;
-};
-
 type CartItem = CartQueryData["cart"]["items"][number];
 
 type PendingQuantityUpdate = {
@@ -60,7 +56,8 @@ function totalPrice(items: readonly CartItem[]) {
   return formatPrice(cents.toString());
 }
 
-export function CartView({ locale }: CartViewProps) {
+export function CartView() {
+  const locale = useLocale();
   const t = useTranslations("cart");
   const errorT = useTranslations("error");
   const client = useApolloClient();

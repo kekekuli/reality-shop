@@ -155,7 +155,7 @@ function renderCart(link: ApolloLink, data = cartData) {
       messages={{ cart: messages.cart, error: messages.error }}
     >
       <ApolloProvider client={client}>
-        <CartView locale="en" />
+        <CartView />
       </ApolloProvider>
     </NextIntlClientProvider>,
   );

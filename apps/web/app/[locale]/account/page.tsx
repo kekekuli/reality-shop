@@ -1,4 +1,4 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getPathname } from "@/i18n/navigation";
@@ -12,12 +12,8 @@ import { gqlFetch, GraphQLRequestError } from "@/lib/graphql/client";
 import { MeQuery } from "@/lib/graphql/queries";
 import { LogoutButton } from "./logout-button";
 
-export default async function AccountPage({
-  params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
-  const { locale } = await params;
+export default async function AccountPage() {
+  const locale = await getLocale();
   const t = await getTranslations("account");
   let data;
 

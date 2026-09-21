@@ -1,4 +1,4 @@
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { AUTH_COOKIE } from "@reality-shop/shared-types";
@@ -10,13 +10,11 @@ import { AddressesQuery } from "@/lib/graphql/queries";
 import { addressDraftKey } from "@/lib/address-draft";
 
 export default async function AddressesPage({
-  params,
   searchParams,
 }: {
-  params: Promise<{ locale: string }>;
   searchParams: Promise<{ edit?: string | string[] }>;
 }) {
-  const { locale } = await params;
+  const locale = await getLocale();
   const { edit } = await searchParams;
   const t = await getTranslations("address");
   const hasAccessToken = (await cookies()).has(AUTH_COOKIE.access);
