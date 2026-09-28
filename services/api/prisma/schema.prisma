@@ -120,13 +120,14 @@ model Address {
 }
 
 model CartItem {
-  user      User     @relation(fields: [userId], references: [id])
-  userId    BigInt   @map("user_id")
-  sku       Sku      @relation(fields: [skuId], references: [id])
-  skuId     BigInt   @map("sku_id")
-  quantity  Int
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  user       User     @relation(fields: [userId], references: [id])
+  userId     BigInt   @map("user_id")
+  sku        Sku      @relation(fields: [skuId], references: [id])
+  skuId      BigInt   @map("sku_id")
+  quantity   Int
+  isSelected Boolean  @default(true) @map("is_selected")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@id([userId, skuId])
   @@index([skuId])

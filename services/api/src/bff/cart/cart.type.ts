@@ -8,15 +8,16 @@ export class CartItemType {
 
   @Field(() => Int)
   quantity!: number;
+
+  @Field(() => Boolean)
+  isSelected!: boolean;
 }
 
 @ObjectType()
 export class AddCartItemPayload extends MutationPayload(CartItemType) {}
 
 @ObjectType()
-export class UpdateCartItemQuantityPayload extends MutationPayload(
-  CartItemType,
-) {}
+export class UpdateCartItemPayload extends MutationPayload(CartItemType) {}
 
 @ObjectType()
 export class RemovedCartItemType {

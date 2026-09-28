@@ -208,6 +208,7 @@ export const AddCartItemMutation = graphql(`
       data {
         quantity
         skuId
+        isSelected
       }
       errors {
         code
@@ -222,6 +223,7 @@ export const CartQuery = graphql(`
       items {
         skuId
         quantity
+        isSelected
         sku {
           skuId
           skuCode
@@ -245,6 +247,7 @@ export const CheckoutQuery = graphql(`
       items {
         skuId
         quantity
+        isSelected
         sku {
           skuId
           skuCode
@@ -300,12 +303,13 @@ export const RemoveCartItemMutation = graphql(`
   }
 `);
 
-export const UpdateCartItemQuantityMutation = graphql(`
-  mutation UpdateCartItemQuantity($input: UpdateCartItemQuantityInput!) {
-    updateCartItemQuantity(input: $input) {
+export const UpdateCartItemMutation = graphql(`
+  mutation UpdateCartItem($input: UpdateCartItemInput!) {
+    updateCartItem(input: $input) {
       data {
         skuId
         quantity
+        isSelected
       }
       errors {
         code

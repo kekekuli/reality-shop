@@ -19,7 +19,10 @@ describe("CartItemResolver.sku", () => {
     const loader = { load } as unknown as DataLoader<bigint, PrismaSku>;
 
     await expect(
-      new CartItemResolver().sku({ skuId: "7", quantity: 2 }, loader),
+      new CartItemResolver().sku(
+        { skuId: "7", quantity: 2, isSelected: true },
+        loader,
+      ),
     ).resolves.toEqual({
       skuId: "7",
       skuCode: "phone-128gb",

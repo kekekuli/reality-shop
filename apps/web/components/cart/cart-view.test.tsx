@@ -30,6 +30,7 @@ const cartData = {
         __typename: "CartItemType" as const,
         skuId: "7",
         quantity: 2,
+        isSelected: true,
         sku: {
           __typename: "Sku" as const,
           skuId: "7",
@@ -93,8 +94,12 @@ function controlledQuantityMutation() {
         succeed = (confirmedQuantity) => {
           observer.next({
             data: {
-              updateCartItemQuantity: {
-                data: { skuId: "7", quantity: confirmedQuantity },
+              updateCartItem: {
+                data: {
+                  skuId: "7",
+                  quantity: confirmedQuantity,
+                  isSelected: true,
+                },
                 errors: [],
               },
             },

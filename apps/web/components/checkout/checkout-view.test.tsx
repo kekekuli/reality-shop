@@ -29,6 +29,7 @@ const checkoutData = {
         __typename: "CartItemType" as const,
         skuId: "7",
         quantity: 2,
+        isSelected: true,
         sku: {
           __typename: "Sku" as const,
           skuId: "7",

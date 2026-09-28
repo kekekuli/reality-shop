@@ -19,6 +19,7 @@ function cartItem(quantity: number): CartItem {
     userId,
     skuId,
     quantity,
+    isSelected: true,
     createdAt: new Date("2026-01-01T00:00:00.000Z"),
     updatedAt: new Date("2026-01-01T00:00:00.000Z"),
   };
@@ -89,7 +90,7 @@ describe("CartService.addItem", () => {
     });
     expect(upsert).toHaveBeenCalledWith({
       where: { userId_skuId: { userId, skuId } },
-      create: { userId, skuId, quantity: 2 },
+      create: { userId, skuId, quantity: 2, isSelected: true },
       update: { quantity: { increment: 2 } },
     });
   });
@@ -143,7 +144,7 @@ describe("CartService.removeItem", () => {
   });
 });
 
-describe("CartService.updateItemQuantity", () => {
+describe("CartService.updateItem", () => {
   it.each([0, -1, 100, 1.5, Number.NaN])(
     "rejects invalid quantity %s before accessing the database",
     async (quantity) => {
@@ -153,7 +154,7 @@ describe("CartService.updateItemQuantity", () => {
       } as unknown as PrismaService);
 
       await expect(
-        service.updateItemQuantity(userId, skuId, quantity),
+        service.updateItem(userId, skuId, { quantity }),
       ).resolves.toEqual({
         ok: false,
         errCode: ErrorCode.INVALID_QUANTITY,
@@ -169,12 +170,28 @@ describe("CartService.updateItemQuantity", () => {
       cartItem: { update },
     } as unknown as PrismaService);
 
-    await expect(service.updateItemQuantity(userId, skuId, 4)).resolves.toEqual(
-      { ok: true, cartItem: item },
-    );
+    await expect(
+      service.updateItem(userId, skuId, { quantity: 4 }),
+    ).resolves.toEqual({ ok: true, cartItem: item });
     expect(update).toHaveBeenCalledWith({
       where: { userId_skuId: { userId, skuId } },
       data: { quantity: 4 },
+    });
+  });
+
+  it("updates selection without changing quantity", async () => {
+    const item = { ...cartItem(4), isSelected: false };
+    const update = vi.fn().mockResolvedValue(item);
+    const service = new CartService({
+      cartItem: { update },
+    } as unknown as PrismaService);
+
+    await expect(
+      service.updateItem(userId, skuId, { isSelected: false }),
+    ).resolves.toEqual({ ok: true, cartItem: item });
+    expect(update).toHaveBeenCalledWith({
+      where: { userId_skuId: { userId, skuId } },
+      data: { isSelected: false },
     });
   });
 
@@ -189,11 +206,11 @@ describe("CartService.updateItemQuantity", () => {
       cartItem: { update },
     } as unknown as PrismaService);
 
-    await expect(service.updateItemQuantity(userId, skuId, 2)).resolves.toEqual(
-      {
-        ok: false,
-        errCode: ErrorCode.CART_ITEM_NOT_FOUND,
-      },
-    );
+    await expect(
+      service.updateItem(userId, skuId, { quantity: 2 }),
+    ).resolves.toEqual({
+      ok: false,
+      errCode: ErrorCode.CART_ITEM_NOT_FOUND,
+    });
   });
 });

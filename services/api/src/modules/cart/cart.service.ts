@@ -20,7 +20,7 @@ export type AddItemResult =
       cartItem: CartItem;
     };
 
-export type UpdateItemQuantityResult =
+export type UpdateItemResult =
   | {
       ok: false;
       errCode: ErrorCode.INVALID_QUANTITY | ErrorCode.CART_ITEM_NOT_FOUND;
@@ -29,6 +29,10 @@ export type UpdateItemQuantityResult =
       ok: true;
       cartItem: CartItem;
     };
+
+export type CartItemUpdate =
+  | { quantity: number; isSelected?: boolean }
+  | { quantity?: number; isSelected: boolean };
 
 function isValidQuantity(quantity: number): boolean {
   return (
@@ -73,7 +77,7 @@ export class CartService {
           where: {
             userId_skuId: { userId, skuId },
           },
-          create: { userId, skuId, quantity },
+          create: { userId, skuId, quantity, isSelected: true },
           update: {
             quantity: { increment: quantity },
           },
@@ -109,19 +113,19 @@ export class CartService {
     });
   }
 
-  async updateItemQuantity(
+  async updateItem(
     userId: bigint,
     skuId: bigint,
-    quantity: number,
-  ): Promise<UpdateItemQuantityResult> {
-    if (!isValidQuantity(quantity)) {
+    update: CartItemUpdate,
+  ): Promise<UpdateItemResult> {
+    if (update.quantity !== undefined && !isValidQuantity(update.quantity)) {
       return { ok: false, errCode: ErrorCode.INVALID_QUANTITY };
     }
 
     try {
       const cartItem = await this.prisma.cartItem.update({
         where: { userId_skuId: { userId, skuId } },
-        data: { quantity },
+        data: update,
       });
 
       return { ok: true, cartItem };

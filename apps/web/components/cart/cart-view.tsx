@@ -28,7 +28,7 @@ import { classifyGraphQLRequestError } from "@/lib/graphql/errors";
 import {
   CartQuery,
   RemoveCartItemMutation,
-  UpdateCartItemQuantityMutation,
+  UpdateCartItemMutation,
 } from "@/lib/graphql/queries";
 
 const QUANTITY_UPDATE_DELAY_MS = 250;
@@ -62,9 +62,7 @@ export function CartView() {
   const items = useCartItems();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const quantityUpdates = useRef(new Map<string, PendingQuantityUpdate>());
-  const [updateCartItemQuantity] = useMutation(
-    UpdateCartItemQuantityMutation,
-  );
+  const [updateCartItem] = useMutation(UpdateCartItemMutation);
   const [removeCartItem] = useMutation(RemoveCartItemMutation, {
     update(cache, { data }) {
       const payload = data?.removeCartItem;
@@ -162,13 +160,13 @@ export function CartView() {
     const sentQuantity = update.desired;
 
     try {
-      const result = await updateCartItemQuantity({
+      const result = await updateCartItem({
         variables: { input: { skuId, quantity: sentQuantity } },
       });
 
       if (quantityUpdates.current.get(skuId) !== update) return;
 
-      const payload = result.data?.updateCartItemQuantity;
+      const payload = result.data?.updateCartItem;
       const errorCode = payload?.errors[0]?.code;
 
       if (errorCode || !payload?.data) {

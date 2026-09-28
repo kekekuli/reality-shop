@@ -32,6 +32,7 @@ type BusinessError {
 }
 
 type CartItemType {
+  isSelected: Boolean!
   quantity: Int!
   sku: Sku!
   skuId: ID!
@@ -144,7 +145,7 @@ type Mutation {
   removeCartItem(input: RemoveCartItemInput!): RemoveCartItemPayload!
   setDefaultAddress(input: SetDefaultAddressInput!): SetDefaultAddressPayload!
   updateAddress(input: UpdateAddressInput!): UpdateAddressPayload!
-  updateCartItemQuantity(input: UpdateCartItemQuantityInput!): UpdateCartItemQuantityPayload!
+  updateCartItem(input: UpdateCartItemInput!): UpdateCartItemPayload!
 }
 
 type OrderConnection {
@@ -296,12 +297,13 @@ type UpdateAddressPayload {
   errors: [BusinessError!]!
 }
 
-input UpdateCartItemQuantityInput {
-  quantity: Int!
+input UpdateCartItemInput {
+  isSelected: Boolean
+  quantity: Int
   skuId: ID!
 }
 
-type UpdateCartItemQuantityPayload {
+type UpdateCartItemPayload {
   data: CartItemType
   errors: [BusinessError!]!
 }

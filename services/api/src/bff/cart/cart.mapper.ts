@@ -5,5 +5,6 @@ export function toCartItemType(item: CartItem): CartItemType {
   return {
     skuId: item.skuId.toString(),
     quantity: item.quantity,
+    isSelected: item.isSelected,
   };
 }

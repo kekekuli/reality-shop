@@ -36,6 +36,7 @@ describe("CartResolver.addCartItem", () => {
       userId,
       skuId,
       quantity: 3,
+      isSelected: true,
       createdAt: new Date("2026-01-01T00:00:00.000Z"),
       updatedAt: new Date("2026-01-01T00:00:00.000Z"),
     };
@@ -50,7 +51,7 @@ describe("CartResolver.addCartItem", () => {
         authenticatedRequest(),
       ),
     ).resolves.toEqual({
-      data: { skuId: "7", quantity: 3 },
+      data: { skuId: "7", quantity: 3, isSelected: true },
       errors: [],
     });
     expect(addItem).toHaveBeenCalledWith(userId, skuId, 2);
@@ -100,6 +101,7 @@ describe("CartResolver.cart", () => {
         userId,
         skuId,
         quantity: 2,
+        isSelected: true,
         createdAt: new Date("2026-01-01T00:00:00.000Z"),
         updatedAt: new Date("2026-01-01T00:00:00.000Z"),
       },
@@ -108,7 +110,7 @@ describe("CartResolver.cart", () => {
     const resolver = new CartResolver({ listItems } as unknown as CartService);
 
     await expect(resolver.cart(authenticatedRequest())).resolves.toEqual({
-      items: [{ skuId: "7", quantity: 2 }],
+      items: [{ skuId: "7", quantity: 2, isSelected: true }],
     });
     expect(listItems).toHaveBeenCalledWith(userId);
   });
@@ -159,51 +161,83 @@ describe("CartResolver.removeCartItem", () => {
   );
 });
 
-describe("CartResolver.updateCartItemQuantity", () => {
+describe("CartResolver.updateCartItem", () => {
   it("sets the authenticated user's final item quantity", async () => {
     const item: CartItem = {
       userId,
       skuId,
       quantity: 4,
+      isSelected: true,
       createdAt: new Date("2026-01-01T00:00:00.000Z"),
       updatedAt: new Date("2026-01-01T00:00:00.000Z"),
     };
-    const updateItemQuantity = vi.fn().mockResolvedValue({
+    const updateItem = vi.fn().mockResolvedValue({
       ok: true,
       cartItem: item,
     });
     const resolver = new CartResolver({
-      updateItemQuantity,
+      updateItem,
     } as unknown as CartService);
 
     await expect(
-      resolver.updateCartItemQuantity(
+      resolver.updateCartItem(
         { skuId: "7", quantity: 4 },
         authenticatedRequest(),
       ),
     ).resolves.toEqual({
-      data: { skuId: "7", quantity: 4 },
+      data: { skuId: "7", quantity: 4, isSelected: true },
       errors: [],
     });
-    expect(updateItemQuantity).toHaveBeenCalledWith(userId, skuId, 4);
+    expect(updateItem).toHaveBeenCalledWith(userId, skuId, {
+      quantity: 4,
+    });
   });
 
   it("maps a quantity update business error", async () => {
-    const updateItemQuantity = vi.fn().mockResolvedValue({
+    const updateItem = vi.fn().mockResolvedValue({
       ok: false,
       errCode: ErrorCode.INVALID_QUANTITY,
     });
     const resolver = new CartResolver({
-      updateItemQuantity,
+      updateItem,
     } as unknown as CartService);
 
     await expect(
-      resolver.updateCartItemQuantity(
+      resolver.updateCartItem(
         { skuId: "7", quantity: 0 },
         authenticatedRequest(),
       ),
     ).resolves.toEqual({
       errors: [{ code: ErrorCode.INVALID_QUANTITY }],
+    });
+  });
+
+  it("updates selection without requiring quantity", async () => {
+    const item: CartItem = {
+      userId,
+      skuId,
+      quantity: 4,
+      isSelected: false,
+      createdAt: new Date("2026-01-01T00:00:00.000Z"),
+      updatedAt: new Date("2026-01-01T00:00:00.000Z"),
+    };
+    const updateItem = vi.fn().mockResolvedValue({
+      ok: true,
+      cartItem: item,
+    });
+    const resolver = new CartResolver({ updateItem } as unknown as CartService);
+
+    await expect(
+      resolver.updateCartItem(
+        { skuId: "7", isSelected: false },
+        authenticatedRequest(),
+      ),
+    ).resolves.toEqual({
+      data: { skuId: "7", quantity: 4, isSelected: false },
+      errors: [],
+    });
+    expect(updateItem).toHaveBeenCalledWith(userId, skuId, {
+      isSelected: false,
     });
   });
 });

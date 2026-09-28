@@ -1,5 +1,5 @@
 import { Field, ID, InputType, Int } from "@nestjs/graphql";
-import { IsInt } from "class-validator";
+import { IsBoolean, IsInt, ValidateIf } from "class-validator";
 
 @InputType()
 export class AddCartItemInput {
@@ -18,11 +18,20 @@ export class RemoveCartItemInput {
 }
 
 @InputType()
-export class UpdateCartItemQuantityInput {
+export class UpdateCartItemInput {
   @Field(() => ID)
   skuId!: string;
 
-  @Field(() => Int)
+  @Field(() => Int, { nullable: true })
+  @ValidateIf(
+    (input: UpdateCartItemInput) =>
+      input.quantity !== undefined || input.isSelected === undefined,
+  )
   @IsInt()
-  quantity!: number;
+  quantity?: number;
+
+  @Field(() => Boolean, { nullable: true })
+  @ValidateIf((input: UpdateCartItemInput) => input.isSelected !== undefined)
+  @IsBoolean()
+  isSelected?: boolean;
 }
