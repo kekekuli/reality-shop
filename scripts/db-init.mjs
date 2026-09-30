@@ -51,8 +51,6 @@ async function waitForPostgres(timeoutMs = 15000) {
   while (Date.now() < deadline) {
     const result = spawnSync("docker", [
       "compose",
-      "-f",
-      "compose.dev.yaml",
       "exec",
       "-T",
       "postgres",
@@ -74,14 +72,7 @@ if (hasDatabaseUrl()) {
 console.log(
   "No DATABASE_URL configured — starting local Postgres via docker compose...",
 );
-const upCode = await run("docker", [
-  "compose",
-  "-f",
-  "compose.dev.yaml",
-  "up",
-  "-d",
-  "postgres",
-]);
+const upCode = await run("docker", ["compose", "up", "-d", "postgres"]);
 if (upCode !== 0) process.exit(upCode);
 
 console.log("Waiting for Postgres to accept connections...");
@@ -103,8 +94,6 @@ if (
 ) {
   await run("docker", [
     "compose",
-    "-f",
-    "compose.dev.yaml",
     "exec",
     "-T",
     "postgres",

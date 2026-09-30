@@ -17,7 +17,7 @@ depend on earlier ones.
 
 | # | Slice | Delivers |
 |---|-------|----------|
-| S0 | Foundations | Redis `8.10-alpine`, run with `--appendonly yes --maxmemory-policy noeviction` (neither is optional — see the comment in `compose.dev.yaml`); user-domain migration (`users`, `addresses`); empty `user`/`cart`/`order`/`payment`/`logistics-mock` modules so the ADR-014 seams exist from the start. Order-domain tables land with S5, BullMQ with the first queue that needs it |
+| S0 | Foundations | Redis `8.10-alpine`, run with `--appendonly yes --maxmemory-policy noeviction` (neither is optional — see the comment in `compose.yaml`); user-domain migration (`users`, `addresses`); empty `user`/`cart`/`order`/`payment`/`logistics-mock` modules so the ADR-014 seams exist from the start. Order-domain tables land with S5, BullMQ with the first queue that needs it |
 | S1 | Auth (D1/D2/D4) | register/login/refresh/logout mutations + `me`; argon2id hashes; refresh tokens hashed in Redis; one guard accepting cookie *or* Bearer; web login/register pages |
 | S2 | Addresses (D3) | CRUD + default-address partial unique index |
 | S3 | Browse depth (A2/A3/B1/B2) | Catalog surface deferred from M1: `attrs`, SKU resolution from spec values, per-SKU availability; category filters; ILIKE/full-text search; detail page with Strapi `product-content` by slug |

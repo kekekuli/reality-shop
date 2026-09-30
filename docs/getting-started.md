@@ -8,11 +8,11 @@ Prerequisites: Node (see `.nvmrc`), pnpm (version pinned via
 ```
 pnpm install
 pnpm db:init   # bootstraps a disposable local Postgres and applies migrations
-pnpm dev       # starts web + api + local Traefik + Redis
+pnpm dev       # starts web + api + PostgreSQL + Traefik + Redis
 ```
 
 `pnpm db:init` (`scripts/db-init.mjs`) is dev-only: if `DATABASE_URL`
-isn't already set, it starts Postgres via `compose.dev.yaml`, which
+isn't already set, it starts Postgres via `compose.yaml`, which
 applies `infra/postgres-init.sql` automatically on first start, offers
 to grant `CREATEDB` (needed for `prisma migrate dev`'s shadow database —
 a dev-only privilege), and offers to run migrations. It's interactive
@@ -31,18 +31,20 @@ else has a default.
 
 Once running:
 
-| Port | What |
-|------|------|
-| `:6767` | web app directly |
-| `:7676` | api directly |
+| Port    | What                                                                           |
+| ------- | ------------------------------------------------------------------------------ |
+| `:6767` | web app directly                                                               |
+| `:7676` | api directly                                                                   |
 | `:8000` | Traefik — same-origin view rehearsing the production routing (ARCHITECTURE.md) |
-| `:8081` | Traefik dashboard |
+| `:8081` | Traefik dashboard                                                              |
 
-`compose.dev.yaml` (Postgres, this local Traefik, and Redis) exists
+`compose.yaml` (Postgres, this local Traefik, and Redis) exists
 purely for local convenience and rehearsal — it is not what gets
-deployed. `pnpm dev` owns the Traefik and Redis container lifecycle;
-both containers stop with the dev session, while Redis data survives in
-its named volume. Redis remains outside `db:init`'s scope.
+deployed. `pnpm dev` starts all three containers, waits until they are
+ready, and stops them with the dev session. PostgreSQL and Redis data
+survive across dev sessions in named volumes; only the explicit reset
+command `docker compose down -v` deletes them.
+`db:init` remains the one-time database bootstrap and migration flow.
 
 ## Deployment
 

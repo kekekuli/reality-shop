@@ -1,4 +1,5 @@
-# Local dev PostgreSQL (Path B: clean disposable instance).
+# Local development infrastructure.
+# PostgreSQL is Path B: a clean disposable instance.
 # The always-on local PG (Path A) works too — see infra/postgres-init.sql.
 #
 #   docker compose up -d          # first start runs the init script
@@ -19,6 +20,11 @@ services:
     volumes:
       - postgres:/var/lib/postgresql
       - ./infra/postgres-init.sql:/docker-entrypoint-initdb.d/postgres-init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      interval: 2s
+      timeout: 5s
+      retries: 15
 
   traefik:
     image: traefik:v3.3
@@ -29,6 +35,7 @@ services:
       - "--entrypoints.web.address=:80"
       - "--api.dashboard=true"
       - "--api.insecure=true" # dev-only: dashboard has no auth, never do this in prod
+      - "--ping=true"
     ports:
       - "8000:80"
       - "8081:8080" # dashboard
@@ -36,15 +43,32 @@ services:
       - ./infra/traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD", "traefik", "healthcheck", "--ping"]
+      interval: 2s
+      timeout: 5s
+      retries: 15
 
   redis:
     image: redis:8.10-alpine
     container_name: reality-shop-redis
     ports:
       - "6379:6379"
-    command: ["redis-server", "--appendonly", "yes", "--maxmemory-policy", "noeviction"]
+    command:
+      [
+        "redis-server",
+        "--appendonly",
+        "yes",
+        "--maxmemory-policy",
+        "noeviction",
+      ]
     volumes:
       - redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 2s
+      timeout: 5s
+      retries: 15
 
 volumes:
   postgres:

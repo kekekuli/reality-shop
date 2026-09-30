@@ -8,11 +8,11 @@
 // child's single 'exit' event regardless of how it terminated.
 import { spawn, spawnSync } from "node:child_process";
 
-const devServices = ["traefik", "redis"];
+const devServices = ["postgres", "traefik", "redis"];
 
 const infrastructure = spawnSync(
   "docker",
-  ["compose", "-f", "compose.dev.yaml", "up", "-d", ...devServices],
+  ["compose", "up", "-d", "--wait", ...devServices],
   { stdio: "inherit" },
 );
 
@@ -22,11 +22,9 @@ if (infrastructure.status !== 0) process.exit(infrastructure.status ?? 1);
 const child = spawn("turbo", ["dev"], { stdio: "inherit" });
 
 function cleanup() {
-  spawnSync(
-    "docker",
-    ["compose", "-f", "compose.dev.yaml", "rm", "-sf", ...devServices],
-    { stdio: "inherit" },
-  );
+  spawnSync("docker", ["compose", "stop", ...devServices], {
+    stdio: "inherit",
+  });
 }
 
 for (const signal of ["SIGINT", "SIGTERM"]) {
