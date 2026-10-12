@@ -328,4 +328,67 @@ describe("CartView", () => {
     expect(await screen.findByText("Reality Phone")).toBeVisible();
     expect(screen.getByText(messages.error.network)).toBeVisible();
   });
+
+  it("restores the confirmed quantity when a pending update is cancelled by removal", async () => {
+    vi.useFakeTimers();
+
+    try {
+      const mutation = controlledMutation();
+      renderCart(mutation.link);
+
+      fireEvent.click(
+        screen.getByRole("button", {
+          name: messages.cart.increaseItemQuantity.replace(
+            "{sku}",
+            "phone-128gb",
+          ),
+        }),
+      );
+      act(() => vi.advanceTimersByTime(0));
+      await act(async () => Promise.resolve());
+      expect(screen.getByRole("spinbutton")).toHaveValue(3);
+
+      fireEvent.click(
+        screen.getByRole("button", { name: messages.cart.removeItem }),
+      );
+      expect(screen.queryByText("Reality Phone")).not.toBeInTheDocument();
+
+      await act(async () => mutation.fail());
+
+      expect(screen.getByText("Reality Phone")).toBeVisible();
+      expect(screen.getByRole("spinbutton")).toHaveValue(2);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("restores the confirmed quantity when unmounted before the deferred update", () => {
+    vi.useFakeTimers();
+
+    try {
+      const { client, unmount } = renderCart(
+        new ApolloLink(() => new Observable(() => undefined)),
+      );
+
+      fireEvent.click(
+        screen.getByRole("button", {
+          name: messages.cart.increaseItemQuantity.replace(
+            "{sku}",
+            "phone-128gb",
+          ),
+        }),
+      );
+      expect(
+        client.readQuery({ query: CartQuery })?.cart.items[0]?.quantity,
+      ).toBe(3);
+
+      unmount();
+
+      expect(
+        client.readQuery({ query: CartQuery })?.cart.items[0]?.quantity,
+      ).toBe(2);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });
