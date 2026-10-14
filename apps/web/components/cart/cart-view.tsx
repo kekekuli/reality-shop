@@ -41,8 +41,7 @@ export function CartView() {
   const errorT = useTranslations("error");
   const items = useCartItems();
 
-  const { errorKey, changeQuantity, queueQuantityUpdate, handleRemoveItem } =
-    useCartItemsUpdate();
+  const { errorKey, update, remove } = useCartItemsUpdate();
   const errorMessage = errorKey ? errorT(errorKey) : null;
   const itemCount = items.reduce((total, item) => total + item.quantity, 0);
   const subtotal = totalPrice(items);
@@ -129,7 +128,11 @@ export function CartView() {
                             aria-label={t("decreaseItemQuantity", {
                               sku: item.sku.skuCode,
                             })}
-                            onClick={() => changeQuantity(item, -1)}
+                            onClick={() =>
+                              update(item.skuId, {
+                                quantity: (current) => current - 1,
+                              })
+                            }
                           >
                             <Minus aria-hidden="true" />
                           </Button>
@@ -145,11 +148,9 @@ export function CartView() {
                               sku: item.sku.skuCode,
                             })}
                             onChange={(event) =>
-                              queueQuantityUpdate(
-                                item.skuId,
-                                item.quantity,
-                                Number(event.target.value),
-                              )
+                              update(item.skuId, {
+                                quantity: Number(event.target.value),
+                              })
                             }
                           />
                           <Button
@@ -160,7 +161,11 @@ export function CartView() {
                             aria-label={t("increaseItemQuantity", {
                               sku: item.sku.skuCode,
                             })}
-                            onClick={() => changeQuantity(item, 1)}
+                            onClick={() =>
+                              update(item.skuId, {
+                                quantity: (current) => current + 1,
+                              })
+                            }
                           >
                             <Plus aria-hidden="true" />
                           </Button>
@@ -170,7 +175,7 @@ export function CartView() {
                           type="button"
                           variant="ghost"
                           className="text-muted-foreground hover:text-destructive"
-                          onClick={() => handleRemoveItem(item.skuId)}
+                          onClick={() => remove(item.skuId)}
                         >
                           <Trash2 aria-hidden="true" />
                           {t("removeItem")}

@@ -318,6 +318,14 @@ export const UpdateCartItemMutation = graphql(`
   }
 `);
 
+export const CartItemUpdateStateFragment = graphql(`
+  fragment CartItemUpdateState on CartItemType {
+    skuId
+    quantity
+    isSelected
+  }
+`);
+
 export const OrdersQuery = graphql(`
   query Orders($first: Int! = 20, $after: String) {
     orders(first: $first, after: $after) {

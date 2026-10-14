@@ -43,6 +43,24 @@ const checkoutData = {
           },
         },
       },
+      {
+        __typename: "CartItemType" as const,
+        skuId: "8",
+        quantity: 1,
+        isSelected: false,
+        sku: {
+          __typename: "Sku" as const,
+          skuId: "8",
+          skuCode: "phone-256gb",
+          price: "149900",
+          product: {
+            __typename: "Product" as const,
+            slug: "reality-phone",
+            title: "Reality Phone",
+            brand: "Reality",
+          },
+        },
+      },
     ],
   },
   addresses: [
@@ -122,6 +140,8 @@ describe("CheckoutView", () => {
     expect(
       screen.getByRole("radio", { name: /Default address/ }),
     ).toBeChecked();
+    expect(screen.getAllByText("¥2598.00")).toHaveLength(3);
+    expect(screen.queryByText("¥4097.00")).not.toBeInTheDocument();
 
     await user.click(
       screen.getByRole("button", { name: messages.checkout.placeOrder }),
@@ -148,4 +168,39 @@ describe("CheckoutView", () => {
     ).toBeDisabled();
     expect(screen.getByText(messages.checkout.noAddress)).toBeVisible();
   });
+
+  it("requires at least one selected item", () => {
+    renderCheckout(new ApolloLink(() => new Observable(() => undefined)), {
+      ...checkoutData,
+      cart: {
+        ...checkoutData.cart,
+        items: checkoutData.cart.items.map((item) => ({
+          ...item,
+          isSelected: false,
+        })),
+      },
+    });
+
+    expect(
+      screen.getByRole("button", { name: messages.checkout.placeOrder }),
+    ).toBeDisabled();
+  });
+
+  it("updates an item's selection from the checkout page", async () => {
+    const user = userEvent.setup();
+
+    renderCheckout(new ApolloLink(() => new Observable(() => undefined)));
+
+    const selectedItem = screen.getByRole("checkbox", {
+      name: messages.checkout.selectItem.replace("{sku}", "phone-128gb"),
+    });
+
+    await user.click(selectedItem);
+
+    expect(selectedItem).not.toBeChecked();
+    expect(
+      screen.getByRole("button", { name: messages.checkout.placeOrder }),
+    ).toBeDisabled();
+  });
+
 });

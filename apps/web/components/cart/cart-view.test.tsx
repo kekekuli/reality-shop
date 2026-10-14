@@ -12,6 +12,7 @@ import { describe, expect, it, vi } from "vitest";
 import messages from "@/messages/en.json";
 import { createApolloCache } from "@/lib/graphql/cache";
 import { CartQuery } from "@/lib/graphql/queries";
+import type { ErrorCode } from "@/lib/graphql/generated/graphql";
 import { CartView } from "./cart-view";
 
 vi.mock("@/i18n/navigation", () => ({
@@ -85,6 +86,8 @@ function controlledMutation() {
 
 function controlledQuantityMutation() {
   let succeed = (quantity: number) => void quantity;
+  let reject = (code: ErrorCode) => void code;
+  let fail = () => {};
   const quantities: number[] = [];
   const link = new ApolloLink(
     (operation) =>
@@ -106,6 +109,18 @@ function controlledQuantityMutation() {
           });
           observer.complete();
         };
+        reject = (code) => {
+          observer.next({
+            data: {
+              updateCartItem: {
+                data: null,
+                errors: [{ code }],
+              },
+            },
+          });
+          observer.complete();
+        };
+        fail = () => observer.error(new Error("private network detail"));
       }),
   );
 
@@ -113,6 +128,52 @@ function controlledQuantityMutation() {
     link,
     quantities,
     succeed: (quantity: number) => succeed(quantity),
+    reject: (code: ErrorCode) => reject(code),
+    fail: () => fail(),
+  };
+}
+
+function controlledConcurrentQuantityMutations() {
+  const pending = new Map<
+    string,
+    {
+      succeed: () => void;
+      fail: () => void;
+    }
+  >();
+  const link = new ApolloLink(
+    (operation) =>
+      new Observable((observer) => {
+        const { skuId, quantity } = operation.variables.input as {
+          skuId: string;
+          quantity: number;
+        };
+
+        pending.set(skuId, {
+          succeed: () => {
+            observer.next({
+              data: {
+                updateCartItem: {
+                  data: { skuId, quantity, isSelected: true },
+                  errors: [],
+                },
+              },
+            });
+            observer.complete();
+          },
+          fail: () => observer.error(new Error("private network detail")),
+        });
+      }),
+  );
+
+  return {
+    link,
+    succeed(skuId: string) {
+      pending.get(skuId)?.succeed();
+    },
+    fail(skuId: string) {
+      pending.get(skuId)?.fail();
+    },
   };
 }
 
@@ -231,6 +292,102 @@ describe("CartView", () => {
       expect(mutation.quantities).toEqual([3, 5]);
 
       await act(async () => mutation.succeed(5));
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("restores the confirmed item after an update request fails", async () => {
+    vi.useFakeTimers();
+
+    try {
+      const mutation = controlledQuantityMutation();
+      renderCart(mutation.link);
+
+      fireEvent.click(
+        screen.getByRole("button", {
+          name: messages.cart.increaseItemQuantity.replace(
+            "{sku}",
+            "phone-128gb",
+          ),
+        }),
+      );
+      act(() => vi.advanceTimersByTime(0));
+      await act(async () => Promise.resolve());
+      expect(screen.getByRole("spinbutton")).toHaveValue(3);
+
+      await act(async () => vi.advanceTimersByTimeAsync(250));
+      await act(async () => mutation.fail());
+      act(() => vi.advanceTimersByTime(0));
+      await act(async () => Promise.resolve());
+
+      expect(screen.getByRole("spinbutton")).toHaveValue(2);
+      expect(screen.getByText(messages.error.network)).toBeVisible();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("does not clear one item's error when another item succeeds", async () => {
+    vi.useFakeTimers();
+
+    try {
+      const mutations = controlledConcurrentQuantityMutations();
+      renderCart(mutations.link, cartDataWithSecondItem());
+
+      fireEvent.click(
+        screen.getByRole("button", {
+          name: messages.cart.increaseItemQuantity.replace(
+            "{sku}",
+            "phone-128gb",
+          ),
+        }),
+      );
+      fireEvent.click(
+        screen.getByRole("button", {
+          name: messages.cart.increaseItemQuantity.replace(
+            "{sku}",
+            "buds-black",
+          ),
+        }),
+      );
+
+      await act(async () => vi.advanceTimersByTimeAsync(250));
+      await act(async () => mutations.fail("7"));
+      expect(screen.getByText(messages.error.network)).toBeVisible();
+
+      await act(async () => mutations.succeed("8"));
+      expect(screen.getByText(messages.error.network)).toBeVisible();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("removes an item when the server reports it no longer exists", async () => {
+    vi.useFakeTimers();
+
+    try {
+      const mutation = controlledQuantityMutation();
+      renderCart(mutation.link);
+
+      fireEvent.click(
+        screen.getByRole("button", {
+          name: messages.cart.increaseItemQuantity.replace(
+            "{sku}",
+            "phone-128gb",
+          ),
+        }),
+      );
+
+      await act(async () => vi.advanceTimersByTimeAsync(250));
+      await act(async () => mutation.reject("CART_ITEM_NOT_FOUND"));
+      act(() => vi.advanceTimersByTime(0));
+      await act(async () => Promise.resolve());
+
+      expect(screen.queryByText("Reality Phone")).not.toBeInTheDocument();
+      expect(
+        screen.getByText(messages.error.CART_ITEM_NOT_FOUND),
+      ).toBeVisible();
     } finally {
       vi.useRealTimers();
     }

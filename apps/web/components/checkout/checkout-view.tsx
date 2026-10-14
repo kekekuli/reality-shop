@@ -24,6 +24,8 @@ import type { CheckoutQuery as CheckoutQueryData } from "@/lib/graphql/generated
 import { classifyGraphQLRequestError } from "@/lib/graphql/errors";
 import { CheckoutQuery, CreateOrderMutation } from "@/lib/graphql/queries";
 import { cn } from "@/lib/utils";
+import useCartItemsUpdate from "../cart/useCartItemsUpdate";
+import { CheckoutItems } from "./checkout-items";
 
 type CheckoutItem = CheckoutQueryData["cart"]["items"][number];
 
@@ -53,7 +55,12 @@ export function CheckoutView() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [createOrder, { loading: isCreatingOrder }] =
     useMutation(CreateOrderMutation);
-  const subtotal = totalPrice(items);
+  const { errorKey: cartUpdateErrorKey, update } = useCartItemsUpdate();
+  const selectedItems = items.filter((item) => item.isSelected);
+  const subtotal = totalPrice(selectedItems);
+  const displayedErrorMessage = cartUpdateErrorKey
+    ? errorT(cartUpdateErrorKey)
+    : errorMessage;
 
   function reportOrderError(code?: string) {
     switch (code) {
@@ -76,7 +83,12 @@ export function CheckoutView() {
   }
 
   async function handleCreateOrder() {
-    if (!selectedAddressId || isCreatingOrder || items.length === 0) return;
+    if (
+      !selectedAddressId ||
+      isCreatingOrder ||
+      selectedItems.length === 0
+    )
+      return;
 
     setErrorMessage(null);
 
@@ -85,7 +97,7 @@ export function CheckoutView() {
         variables: {
           input: {
             addressId: selectedAddressId,
-            items: items.map((item) => ({
+            items: selectedItems.map((item) => ({
               skuId: item.skuId,
               quantity: item.quantity,
             })),
@@ -132,7 +144,9 @@ export function CheckoutView() {
         <p className="mt-2 text-muted-foreground">{t("description")}</p>
       </header>
 
-      {errorMessage && <FieldError className="mt-4">{errorMessage}</FieldError>}
+      {displayedErrorMessage && (
+        <FieldError className="mt-4">{displayedErrorMessage}</FieldError>
+      )}
 
       {items.length === 0 ? (
         <Card className="mt-8 items-center py-12 text-center">
@@ -156,44 +170,22 @@ export function CheckoutView() {
       ) : (
         <div className="mt-8 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
           <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle as="h2">{t("items")}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="divide-y">
-                  {items.map((item) => (
-                    <li
-                      key={item.skuId}
-                      className="flex justify-between gap-6 py-4 first:pt-0 last:pb-0"
-                    >
-                      <div className="min-w-0">
-                        <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                          {item.sku.product.brand}
-                        </p>
-                        <Link
-                          className="mt-1 inline-block font-medium underline-offset-4 hover:underline"
-                          href={`/products/${item.sku.product.slug}`}
-                        >
-                          {item.sku.product.title}
-                        </Link>
-                        <p className="mt-1 text-sm text-muted-foreground">
-                          {item.sku.skuCode} ·{" "}
-                          {t("quantity", { quantity: item.quantity })}
-                        </p>
-                      </div>
-                      <p className="shrink-0 font-medium">
-                        {formatPrice(
-                          (
-                            BigInt(item.sku.price) * BigInt(item.quantity)
-                          ).toString(),
-                        )}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
+            <CheckoutItems
+              items={items}
+              disabled={isCreatingOrder}
+              onQuantityChangeAction={(item, quantity) => {
+                setErrorMessage(null);
+                update(item.skuId, {
+                  quantity,
+                });
+              }}
+              onSelectionChangeAction={(item, isSelected) => {
+                setErrorMessage(null);
+                update(item.skuId, {
+                  isSelected,
+                });
+              }}
+            />
 
             <Card>
               <CardHeader className="flex-row items-start justify-between gap-4">
@@ -311,7 +303,11 @@ export function CheckoutView() {
                 type="button"
                 size="lg"
                 className="w-full"
-                disabled={!selectedAddressId || isCreatingOrder}
+                disabled={
+                  !selectedAddressId ||
+                  selectedItems.length === 0 ||
+                  isCreatingOrder
+                }
                 onClick={handleCreateOrder}
               >
                 {t(isCreatingOrder ? "creatingOrder" : "placeOrder")}
