@@ -162,6 +162,20 @@ describe("CartResolver.removeCartItem", () => {
 });
 
 describe("CartResolver.updateCartItem", () => {
+  it("rejects an update with no fields", async () => {
+    const updateItem = vi.fn();
+    const resolver = new CartResolver({
+      updateItem,
+    } as unknown as CartService);
+
+    await expect(
+      resolver.updateCartItem({ skuId: "7" }, authenticatedRequest()),
+    ).resolves.toEqual({
+      errors: [{ code: ErrorCode.CART_ITEM_UPDATE_EMPTY }],
+    });
+    expect(updateItem).not.toHaveBeenCalled();
+  });
+
   it("sets the authenticated user's final item quantity", async () => {
     const item: CartItem = {
       userId,

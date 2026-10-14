@@ -23,10 +23,7 @@ export class UpdateCartItemInput {
   skuId!: string;
 
   @Field(() => Int, { nullable: true })
-  @ValidateIf(
-    (input: UpdateCartItemInput) =>
-      input.quantity !== undefined || input.isSelected === undefined,
-  )
+  @ValidateIf((input: UpdateCartItemInput) => input.quantity !== undefined)
   @IsInt()
   quantity?: number;
 

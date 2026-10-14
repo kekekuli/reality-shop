@@ -5,7 +5,10 @@ import {
   RemoveCartItemPayload,
   UpdateCartItemPayload,
 } from "./cart.type";
-import { CartService } from "../../modules/cart/cart.service";
+import {
+  CartService,
+  type CartItemUpdate,
+} from "../../modules/cart/cart.service";
 import { UseGuards } from "@nestjs/common";
 import { AuthenticatedRequest, GqlAuthGuard } from "../auth/gql-auth.guard";
 import {
@@ -79,17 +82,23 @@ export class CartResolver {
     @Args("input") input: UpdateCartItemInput,
     @Context("req") request: AuthenticatedRequest,
   ): Promise<UpdateCartItemPayload> {
+    let update: CartItemUpdate;
+    if (input.quantity !== undefined) {
+      update =
+        input.isSelected === undefined
+          ? { quantity: input.quantity }
+          : { quantity: input.quantity, isSelected: input.isSelected };
+    } else if (input.isSelected !== undefined) {
+      update = { isSelected: input.isSelected };
+    } else {
+      return { errors: [{ code: ErrorCode.CART_ITEM_UPDATE_EMPTY }] };
+    }
+
     const skuId = parseSkuId(input.skuId);
     if (skuId === null) {
       return { errors: [{ code: ErrorCode.CART_ITEM_NOT_FOUND }] };
     }
 
-    const update =
-      input.quantity !== undefined
-        ? input.isSelected !== undefined
-          ? { quantity: input.quantity, isSelected: input.isSelected }
-          : { quantity: input.quantity }
-        : { isSelected: input.isSelected! };
     const result = await this.cartService.updateItem(
       request.auth!.userId,
       skuId,
