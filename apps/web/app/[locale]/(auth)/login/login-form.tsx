@@ -78,9 +78,9 @@ export function LoginForm() {
         return;
       }
 
-      setErrorMessage(errorT("unexpected"));
+      setErrorMessage(errorT("UNEXPECTED"));
     } catch {
-      setErrorMessage(errorT("network"));
+      setErrorMessage(errorT("NETWORK"));
     }
   };
 

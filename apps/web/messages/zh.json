@@ -69,7 +69,7 @@
   "error": {
     "EMAIL_ALREADY_TAKEN": "该邮箱已注册账号。",
     "INVALID_CREDENTIALS": "邮箱或密码错误。",
-    "UNAUTHENTICATED": "请先登录，再将商品加入购物车。",
+    "UNAUTHORIZED": "请先登录后继续。",
     "INVALID_QUANTITY": "请选择有效的数量。",
     "SKU_NOT_FOUND": "该商品选项已不可用。",
     "CART_ITEM_NOT_FOUND": "该商品已不在购物车中。",
@@ -80,8 +80,8 @@
     "DUPLICATE_ORDER_ITEM": "购物车中存在重复商品。",
     "SKU_NOT_AVAILABLE": "购物车中有商品已无法购买。",
     "INSUFFICIENT_STOCK": "购物车中有商品库存不足。",
-    "network": "无法连接服务器，请重试。",
-    "unexpected": "出现错误，请重试。"
+    "NETWORK": "无法连接服务器，请重试。",
+    "UNEXPECTED": "出现错误，请重试。"
   },
   "cart": {
     "title": "购物车",

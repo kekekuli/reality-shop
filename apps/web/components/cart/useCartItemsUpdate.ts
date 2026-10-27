@@ -7,7 +7,6 @@ import { useApolloClient, useMutation } from "@apollo/client/react";
 import { useRef, useState, useEffect, useCallback } from "react";
 import {
   classifyGraphQLRequestError,
-  GraphQLRequestErrorKey,
 } from "@/lib/graphql/errors";
 import { PURCHASE_QUANTITY } from "@reality-shop/shared-types";
 import type {
@@ -66,7 +65,7 @@ type CartItemUpdateFields = {
 type UpdatePatch = AtLeastOne<CartItemUpdateFields>;
 type CartItemError = {
   skuId: string;
-  key: ErrorCode | GraphQLRequestErrorKey;
+  key: ErrorCode;
 };
 
 export default function useCartItemsUpdate() {
@@ -153,7 +152,7 @@ export default function useCartItemsUpdate() {
         setError({ skuId, key: code });
         break;
       default:
-        setError({ skuId, key: "unexpected" });
+        setError({ skuId, key: "UNEXPECTED" });
     }
   }
   function reportRequestError(skuId: string, requestError: unknown) {
@@ -360,7 +359,7 @@ export default function useCartItemsUpdate() {
       if (errorCode === "SKU_NOT_FOUND") {
         setError({ skuId, key: errorCode });
       } else if (errorCode || !payload?.data) {
-        setError({ skuId, key: "unexpected" });
+        setError({ skuId, key: "UNEXPECTED" });
       }
     } catch (error) {
       reportRequestError(skuId, error);

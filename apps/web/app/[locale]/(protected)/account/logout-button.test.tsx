@@ -87,7 +87,7 @@ describe("LogoutButton", () => {
       screen.getByRole("button", { name: messages.account.logout }),
     );
 
-    expect(await screen.findByText(messages.error.unexpected)).toBeVisible();
+    expect(await screen.findByText(messages.error.UNEXPECTED)).toBeVisible();
     expect(clearStore).not.toHaveBeenCalled();
     expect(replace).not.toHaveBeenCalled();
   });
@@ -104,7 +104,7 @@ describe("LogoutButton", () => {
       screen.getByRole("button", { name: messages.account.logout }),
     );
 
-    expect(await screen.findByText(messages.error.network)).toBeVisible();
+    expect(await screen.findByText(messages.error.NETWORK)).toBeVisible();
     expect(
       screen.queryByText("private network detail"),
     ).not.toBeInTheDocument();

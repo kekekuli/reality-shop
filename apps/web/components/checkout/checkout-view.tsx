@@ -74,7 +74,7 @@ export function CheckoutView() {
         setErrorMessage(errorT(code));
         break;
       default:
-        setErrorMessage(errorT("unexpected"));
+        setErrorMessage(errorT("UNEXPECTED"));
     }
   }
 

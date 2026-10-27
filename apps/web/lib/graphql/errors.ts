@@ -1,9 +1,5 @@
 import { CombinedGraphQLErrors } from "@apollo/client/errors";
-
-export type GraphQLRequestErrorKey =
-  | "UNAUTHENTICATED"
-  | "network"
-  | "unexpected";
+import type { ErrorCode } from "./generated/graphql";
 
 export function hasGraphQLErrorCode(error: unknown, code: string): boolean {
   return (
@@ -14,14 +10,12 @@ export function hasGraphQLErrorCode(error: unknown, code: string): boolean {
   );
 }
 
-export function classifyGraphQLRequestError(
-  error: unknown,
-): GraphQLRequestErrorKey {
-  if (!CombinedGraphQLErrors.is(error)) return "network";
+export function classifyGraphQLRequestError(error: unknown): ErrorCode {
+  if (!CombinedGraphQLErrors.is(error)) return "NETWORK";
 
   return hasGraphQLErrorCode(error, "UNAUTHENTICATED")
-    ? "UNAUTHENTICATED"
-    : "unexpected";
+    ? "UNAUTHORIZED"
+    : "UNEXPECTED";
 }
 
 export function requireGraphQLData<T>(data: T | undefined): T {

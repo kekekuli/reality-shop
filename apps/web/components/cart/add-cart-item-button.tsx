@@ -55,13 +55,13 @@ export function AddCartItemButton({ sku }: AddCartItemButtonProps) {
             setErrorMessage(errorT(errorCode));
             break;
           default:
-            setErrorMessage(errorT("unexpected"));
+            setErrorMessage(errorT("UNEXPECTED"));
         }
         return;
       }
 
       if (!payload?.addCartItem.data) {
-        setErrorMessage(errorT("unexpected"));
+        setErrorMessage(errorT("UNEXPECTED"));
         return;
       }
 

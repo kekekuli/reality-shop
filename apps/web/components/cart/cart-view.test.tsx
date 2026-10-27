@@ -322,7 +322,7 @@ describe("CartView", () => {
       await act(async () => Promise.resolve());
 
       expect(screen.getByRole("spinbutton")).toHaveValue(2);
-      expect(screen.getByText(messages.error.network)).toBeVisible();
+      expect(screen.getByText(messages.error.NETWORK)).toBeVisible();
     } finally {
       vi.useRealTimers();
     }
@@ -354,10 +354,10 @@ describe("CartView", () => {
 
       await act(async () => vi.advanceTimersByTimeAsync(250));
       await act(async () => mutations.fail("7"));
-      expect(screen.getByText(messages.error.network)).toBeVisible();
+      expect(screen.getByText(messages.error.NETWORK)).toBeVisible();
 
       await act(async () => mutations.succeed("8"));
-      expect(screen.getByText(messages.error.network)).toBeVisible();
+      expect(screen.getByText(messages.error.NETWORK)).toBeVisible();
     } finally {
       vi.useRealTimers();
     }
@@ -483,7 +483,7 @@ describe("CartView", () => {
     await act(async () => mutation.fail());
 
     expect(await screen.findByText("Reality Phone")).toBeVisible();
-    expect(screen.getByText(messages.error.network)).toBeVisible();
+    expect(screen.getByText(messages.error.NETWORK)).toBeVisible();
   });
 
   it("restores the confirmed quantity when a pending update is cancelled by removal", async () => {

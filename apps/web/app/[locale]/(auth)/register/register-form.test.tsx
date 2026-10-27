@@ -196,7 +196,7 @@ describe("RegisterForm", () => {
 
     await submitAccount(user);
 
-    expect(await screen.findByText(copy.error.network)).toBeVisible();
+    expect(await screen.findByText(copy.error.NETWORK)).toBeVisible();
     expect(
       screen.queryByText("private network detail"),
     ).not.toBeInTheDocument();

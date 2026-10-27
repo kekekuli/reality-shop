@@ -140,7 +140,7 @@ export function AddressForm({ draftKey, initialAddress }: AddressFormProps) {
           errorT(
             errorCode === "ADDRESS_NOT_FOUND"
               ? "ADDRESS_NOT_FOUND"
-              : "unexpected",
+              : "UNEXPECTED",
           ),
         );
         return;

@@ -353,7 +353,7 @@ describe("AddressForm", () => {
       screen.getByRole("button", { name: messages.address.save }),
     );
 
-    expect(await screen.findByText(messages.error.unexpected)).toBeVisible();
+    expect(await screen.findByText(messages.error.UNEXPECTED)).toBeVisible();
     expect(refresh).not.toHaveBeenCalled();
   });
 
@@ -383,9 +383,9 @@ describe("AddressForm", () => {
     );
 
     expect(
-      await screen.findByText(messages.error.UNAUTHENTICATED),
+      await screen.findByText(messages.error.UNAUTHORIZED),
     ).toBeVisible();
-    expect(screen.queryByText(messages.error.network)).not.toBeInTheDocument();
+    expect(screen.queryByText(messages.error.NETWORK)).not.toBeInTheDocument();
   });
 
   it("shows a localized network error", async () => {
@@ -407,7 +407,7 @@ describe("AddressForm", () => {
       screen.getByRole("button", { name: messages.address.save }),
     );
 
-    expect(await screen.findByText(messages.error.network)).toBeVisible();
+    expect(await screen.findByText(messages.error.NETWORK)).toBeVisible();
     expect(
       screen.queryByText("private network detail"),
     ).not.toBeInTheDocument();

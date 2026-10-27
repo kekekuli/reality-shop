@@ -27,12 +27,12 @@ export function LogoutButton() {
     try {
       res = await logout();
     } catch {
-      setErrorMessage(errorT("network"));
+      setErrorMessage(errorT("NETWORK"));
       return;
     }
 
     if (!res.data?.logout.data?.loggedOut) {
-      setErrorMessage(errorT("unexpected"));
+      setErrorMessage(errorT("UNEXPECTED"));
       return;
     }
 
