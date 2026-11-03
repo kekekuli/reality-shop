@@ -83,11 +83,7 @@ export function CheckoutView() {
   }
 
   async function handleCreateOrder() {
-    if (
-      !selectedAddressId ||
-      isCreatingOrder ||
-      selectedItems.length === 0
-    )
+    if (!selectedAddressId || isCreatingOrder || selectedItems.length === 0)
       return;
 
     setErrorMessage(null);
